@@ -3,11 +3,14 @@
  * Currently only greets the user on startup and prints a farewell before terminating;
  * no user interaction is handled yet.
  */
+import java.util.Scanner;
+
 public class Myriad {
     private static final String LINE = "____________________________________________________________";
 
     public static void main(String[] args) {
         greet();
+        echo();
         exit();
     }
 
@@ -38,6 +41,18 @@ public class Myriad {
     private static void exit() {
         String exitMsg = "Bye. Hope to see you again soon!";
         System.out.println(exitMsg);
+        printDivider();
+    }
+
+    /**
+     * Reads a single line of user input from standard input and echoes it
+     * back, framed by divider lines.
+     */
+    private static void echo() {
+        Scanner sc = new Scanner(System.in);
+        String line = sc.nextLine();
+        printDivider();
+        System.out.println(line);
         printDivider();
     }
 
