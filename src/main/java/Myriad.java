@@ -1,16 +1,19 @@
 /**
  * Entry point for the Myriad chatbot.
- * Currently only greets the user on startup and prints a farewell before terminating;
- * no user interaction is handled yet.
+ * Greets the user, echoes each line of input back until the user types the
+ * exit command, then prints a farewell.
  */
 import java.util.Scanner;
 
 public class Myriad {
     private static final String LINE = "____________________________________________________________";
 
+    // Command that ends the input loop; matched case-insensitively.
+    private static final String EXIT_COND = "bye";
+
     public static void main(String[] args) {
         greet();
-        echo();
+        run();
         exit();
     }
 
@@ -34,28 +37,48 @@ public class Myriad {
     }
 
     /**
-     * Prints a farewell message followed by a divider line.
+     * Prints a farewell message, framed by divider lines.
      * Note: does not call {@link System#exit}; the program simply returns from main
      * after this runs.
      */
     private static void exit() {
+        printDivider();
         String exitMsg = "Bye. Hope to see you again soon!";
         System.out.println(exitMsg);
         printDivider();
     }
 
     /**
+     * Reads lines of user input and echoes each one back until the user
+     * enters the exit command (matched case-insensitively, ignoring
+     * leading/trailing whitespace) or the input stream is exhausted, then
+     * returns so the caller can print the farewell.
+     */
+    private static void run() {
+        Scanner sc = new Scanner(System.in);
+
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine();
+            if (line.strip().equalsIgnoreCase(EXIT_COND)) {
+                break;
+            }
+            echo(line);
+        }
+    }
+
+    /**
      * Reads a single line of user input from standard input and echoes it
      * back, framed by divider lines.
      */
-    private static void echo() {
-        Scanner sc = new Scanner(System.in);
-        String line = sc.nextLine();
+    private static void echo(String line) {
         printDivider();
         System.out.println(line);
         printDivider();
     }
 
+    /**
+     * Prints a divider line to visually separate sections of output.
+     */
     private static void printDivider() {
         System.out.println(LINE);
     }
