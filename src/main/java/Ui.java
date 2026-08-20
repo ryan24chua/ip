@@ -88,6 +88,18 @@ public class Ui {
     }
 
     /**
+     * Prints an acknowledgement that task was removed (the task's own
+     * toString, plus the new list size), framed by divider lines.
+     */
+    public void showDeleted(Task task, int totalCount) {
+        showDivider();
+        System.out.println("Noted. I've removed this task:");
+        System.out.println("  " + task);
+        System.out.printf("Now you have %d tasks in the list.%n", totalCount);
+        showDivider();
+    }
+
+    /**
      * Prints a single-line error/status message, framed by divider lines.
      */
     public void showError(String message) {

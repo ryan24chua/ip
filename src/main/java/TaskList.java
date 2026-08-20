@@ -35,6 +35,10 @@ public class TaskList {
         tasks.get(index).setDone(false);
     }
 
+    public Task remove(int index) {
+        return tasks.remove(index);
+    }
+
     public ArrayList<Task> asList() {
         return tasks;
     }

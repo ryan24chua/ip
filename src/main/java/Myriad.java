@@ -19,7 +19,7 @@ public class Myriad {
      * anything.
      */
     enum Command {
-        UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT;
+        UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE;
     }
 
     public static void main(String[] args) {
@@ -36,8 +36,8 @@ public class Myriad {
      * (matched case-insensitively, ignoring leading/trailing whitespace) or
      * the input stream is exhausted, then returns so the caller can print
      * the farewell. Each line is dispatched by parseCommand: list/mark/
-     * unmark/todo/deadline/event run their respective handler, and an
-     * unrecognized line throws MyriadException directly. Every handler may
+     * unmark/todo/deadline/event/delete run their respective handler, and
+     * an unrecognized line throws MyriadException directly. Every handler may
      * throw MyriadException instead of displaying its own error, so this
      * is the single place that catches it and shows it — with the
      * "Error: " prefix added here rather than repeated in every message.
@@ -57,12 +57,13 @@ public class Myriad {
                     case LIST -> ui.showList(taskList.asList());
                     case UNKNOWN -> throw new MyriadException(
                             "I don't recognize that command. Try: todo, deadline, event, "
-                                    + "list, mark, unmark, or bye.");
+                                    + "list, mark, unmark, delete, or bye.");
                     case MARK -> markTask(line, taskList, ui);
                     case UNMARK -> unmarkTask(line, taskList, ui);
                     case TODO -> addToDo(line, taskList, ui);
                     case DEADLINE -> addDeadline(line, taskList, ui);
                     case EVENT -> addEvent(line, taskList, ui);
+                    case DELETE -> deleteTask(line, taskList, ui);
                 }
             } catch (MyriadException e) {
                 ui.showError("Error: " + e.getMessage());
@@ -74,9 +75,10 @@ public class Myriad {
      * Maps a stripped input line to a Command. The first word is matched
      * case-insensitively against the known command keywords. "bye" and
      * "list" take no arguments, so they only match when they are the whole
-     * line. "mark", "unmark", "todo", "deadline", and "event" all match on
-     * keyword alone (their own handlers throw MyriadException if the
-     * required argument text is missing). Anything else maps to UNKNOWN.
+     * line. "mark", "unmark", "todo", "deadline", "event", and "delete" all
+     * match on keyword alone (their own handlers throw MyriadException if
+     * the required argument text is missing). Anything else maps to
+     * UNKNOWN.
      */
     private static Command parseCommand(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
@@ -97,6 +99,8 @@ public class Myriad {
             return Command.DEADLINE;
         } else if (firstWord.equalsIgnoreCase("event")) {
             return Command.EVENT;
+        } else if (firstWord.equalsIgnoreCase("delete")) {
+            return Command.DELETE;
         } else {
             return Command.UNKNOWN;
         }
@@ -174,6 +178,17 @@ public class Myriad {
         int index = resolveTaskIndex(line, taskList);
         taskList.markNotDone(index);
         ui.showUnmarked(taskList.get(index));
+    }
+
+    /**
+     * Removes the task named by the task number in line (e.g. "delete 2")
+     * and shows an acknowledgement. Throws MyriadException instead if the
+     * task number is missing, not a number, or out of range.
+     */
+    private static void deleteTask(String line, TaskList taskList, Ui ui) throws MyriadException {
+        int index = resolveTaskIndex(line, taskList);
+        Task removed = taskList.remove(index);
+        ui.showDeleted(removed, taskList.size());
     }
 
     /**
