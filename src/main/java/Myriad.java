@@ -61,11 +61,11 @@ public class Myriad {
      * Maps a stripped input line to a Command. The first word is matched
      * case-insensitively against the known command keywords. "bye" and
      * "list" take no arguments, so they only match when they are the whole
-     * line; "mark" and "unmark" require a trailing argument (the task
-     * number). "todo", "deadline", and "event" match on keyword alone
-     * (their own handlers report an error if the required argument text is
-     * missing, rather than falling back to ADD). Anything else is treated
-     * as ADD, with the whole line kept as the task description.
+     * line. "mark", "unmark", "todo", "deadline", and "event" all match on
+     * keyword alone (their own handlers report an error if the required
+     * argument text is missing, rather than falling back to ADD). Anything
+     * else is treated as ADD, with the whole line kept as the task
+     * description.
      */
     private static Command parseCommand(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
@@ -76,9 +76,9 @@ public class Myriad {
             return Command.EXIT;
         } else if (firstWord.equalsIgnoreCase("list") && rest.isEmpty()) {
             return Command.LIST;
-        } else if (firstWord.equalsIgnoreCase("mark") && !rest.isEmpty()) {
+        } else if (firstWord.equalsIgnoreCase("mark")) {
             return Command.MARK;
-        } else if (firstWord.equalsIgnoreCase("unmark") && !rest.isEmpty()) {
+        } else if (firstWord.equalsIgnoreCase("unmark")) {
             return Command.UNMARK;
         } else if (firstWord.equalsIgnoreCase("todo")) {
             return Command.TODO;
