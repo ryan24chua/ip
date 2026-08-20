@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Ui {
     private static final String LINE = "____________________________________________________________";
 
-    public void showDivider() {
+    private void showDivider() {
         System.out.println(LINE);
     }
 

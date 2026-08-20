@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 /**
  * Entry point for the Myriad chatbot.
  * Greets the user, then reads lines of input, each treated as a command:
@@ -8,9 +10,6 @@
  * MyriadException, which is caught once per line in run() and shown as
  * an error.
  */
-
-import java.util.Scanner;
-
 public class Myriad {
 
     /**
@@ -134,6 +133,8 @@ public class Myriad {
         int index = taskNumber - 1;
         if (!taskList.isValidIndex(index)) {
             if (taskList.size() == 0) {
+                // Special-cased so the message doesn't say "choose a number
+                // from 1 to 0", which the generic branch below would produce.
                 throw new MyriadException(
                         "Task number " + taskNumber + " doesn't exist — your task list is "
                                 + "empty. Add a task first with todo/deadline/event.");

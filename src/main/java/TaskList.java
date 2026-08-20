@@ -39,6 +39,11 @@ public class TaskList {
         return tasks.remove(index);
     }
 
+    /**
+     * Returns the live, mutable list of tasks — not a defensive copy.
+     * Callers that only need to read/display tasks (e.g. Ui) are fine;
+     * mutating the returned list bypasses TaskList entirely.
+     */
     public ArrayList<Task> asList() {
         return tasks;
     }
