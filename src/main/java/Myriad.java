@@ -1,9 +1,10 @@
 /**
  * Entry point for the Myriad chatbot.
  * Greets the user, then reads lines of input, each treated as a command:
- * add a task ("todo"/"deadline"/"event", or a plain line for a raw task),
- * "list" the stored tasks, "mark"/"unmark" a task done, until the user
- * types the exit command ("bye"), then prints a farewell.
+ * add a task ("todo"/"deadline"/"event"), "list" the stored tasks,
+ * "mark"/"unmark" a task done, until the user types the exit command
+ * ("bye"), then prints a farewell. A line that doesn't match any known
+ * command shows an unknown-command error.
  */
 
 import java.util.Scanner;
@@ -11,11 +12,11 @@ import java.util.Scanner;
 public class Myriad {
 
     /**
-     * Recognized user commands. A line that isn't a recognized keyword is
-     * treated as ADD (i.e. the whole line is a task to store).
+     * Recognized user commands. A line that isn't a recognized keyword
+     * maps to UNKNOWN, which shows an error instead of doing anything.
      */
     enum Command {
-        ADD, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT;
+        UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT;
     }
 
     public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class Myriad {
      * the input stream is exhausted, then returns so the caller can print
      * the farewell. Each line is dispatched by parseCommand: list/mark/
      * unmark/todo/deadline/event run their respective handler, and any
-     * other line is stored and acknowledged as a raw added task.
+     * unrecognized line shows an unknown-command error.
      */
     private static void run(Ui ui, TaskList taskList) {
         Scanner sc = new Scanner(System.in);
@@ -47,7 +48,7 @@ public class Myriad {
                     return;
                 }
                 case LIST -> ui.showList(taskList.asList());
-                case ADD -> addDefault(line, taskList, ui);
+                case UNKNOWN -> showUnknownCommand(ui);
                 case MARK -> markTask(line, taskList, ui);
                 case UNMARK -> unmarkTask(line, taskList, ui);
                 case TODO -> addToDo(line, taskList, ui);
@@ -63,9 +64,7 @@ public class Myriad {
      * "list" take no arguments, so they only match when they are the whole
      * line. "mark", "unmark", "todo", "deadline", and "event" all match on
      * keyword alone (their own handlers report an error if the required
-     * argument text is missing, rather than falling back to ADD). Anything
-     * else is treated as ADD, with the whole line kept as the task
-     * description.
+     * argument text is missing). Anything else maps to UNKNOWN.
      */
     private static Command parseCommand(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
@@ -87,7 +86,7 @@ public class Myriad {
         } else if (firstWord.equalsIgnoreCase("event")) {
             return Command.EVENT;
         } else {
-            return Command.ADD;
+            return Command.UNKNOWN;
         }
     }
 
@@ -137,8 +136,8 @@ public class Myriad {
 
     /**
      * Adds task to taskList and shows the standard added-task
-     * acknowledgement. Shared by every add-command handler (addDefault/
-     * addToDo/addDeadline/addEvent) so the acknowledgement wording stays
+     * acknowledgement. Shared by every add-command handler (addToDo/
+     * addDeadline/addEvent) so the acknowledgement wording stays
      * consistent across task types.
      */
     private static void addAndShow(Task task, TaskList taskList, Ui ui) {
@@ -147,10 +146,11 @@ public class Myriad {
     }
 
     /**
-     * Wraps the whole (unrecognized-keyword) line as a raw Task and adds it.
+     * Shows the standard error for a line that didn't match any known
+     * command.
      */
-    private static void addDefault(String line, TaskList taskList, Ui ui) {
-        addAndShow(new Task(line), taskList, ui);
+    private static void showUnknownCommand(Ui ui) {
+        ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");
     }
 
     /**
