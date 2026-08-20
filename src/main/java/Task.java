@@ -20,8 +20,8 @@ public class Task {
     }
 
     /**
-     * Returns the task's status and description, e.g. {@code [X] read book}
-     * if done, or {@code [ ] read book} if not done.
+     * Returns the task's status and description, e.g. [X] read book
+     * if done, or [ ] read book if not done.
      */
     @Override
     public String toString() {

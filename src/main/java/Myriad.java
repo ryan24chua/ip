@@ -11,11 +11,13 @@ import java.util.Scanner;
 public class Myriad {
     private static final String LINE = "____________________________________________________________";
 
-    // Command that ends the input loop; matched case-insensitively.
-    private static final String EXIT_COND = "bye";
-
-    // Command to display the user text back.
-    private static final String LIST_CMD = "list";
+    /**
+     * Recognized user commands. A line that isn't a recognized keyword is
+     * treated as ADD (i.e. the whole line is a task to store).
+     */
+    enum Command {
+        ADD, LIST, EXIT;
+    }
 
     public static void main(String[] args) {
         greet();
@@ -44,7 +46,7 @@ public class Myriad {
 
     /**
      * Prints a farewell message, framed by divider lines.
-     * Note: does not call {@link System#exit}; the program simply returns from main
+     * Note: does not call System.exit; the program simply returns from main
      * after this runs.
      */
     private static void exit() {
@@ -58,7 +60,7 @@ public class Myriad {
      * Reads lines of user input until the user enters the exit command
      * (matched case-insensitively, ignoring leading/trailing whitespace) or
      * the input stream is exhausted, then returns so the caller can print
-     * the farewell. Each line is either treated as a command ({@code list})
+     * the farewell. Each line is either treated as a command (e.g. list)
      * or stored and acknowledged as an added item.
      */
     private static void run() {
@@ -68,27 +70,39 @@ public class Myriad {
         ArrayList<Task> textList = new ArrayList<>();
 
         while (sc.hasNextLine()) {
-            String line = sc.nextLine();
+            String line = sc.nextLine().strip();
+            Command cmd = parseCommand(line);
 
-            // Exit Condition.
-            if (line.strip().equalsIgnoreCase(EXIT_COND)) {
-                break;
+            switch (cmd) {
+                case EXIT -> {
+                    return;
+                }
+                case LIST -> printList(textList);
+                case ADD -> {
+                    textList.add(new Task(line));
+                    acknowledgeAdd(line);
+                }
             }
-
-            // Print list command.
-            if (line.strip().equalsIgnoreCase(LIST_CMD)) {
-                printList(textList);
-                continue;
-            }
-
-            textList.add(new Task(line));
-            acknowledgeAdd(line);
         }
     }
 
     /**
+     * Maps a stripped input line to a Command. The whole line is matched
+     * case-insensitively against the known command keywords; any line that
+     * doesn't match one exactly is treated as ADD, with the whole line kept
+     * as the task description.
+     */
+    private static Command parseCommand(String strippedLine) {
+        return switch (strippedLine.toLowerCase()) {
+            case "bye" -> Command.EXIT;
+            case "list" -> Command.LIST;
+            default -> Command.ADD;
+        };
+    }
+
+    /**
      * Prints an acknowledgement that the given line was added
-     * (e.g. {@code added: read book}), framed by divider lines.
+     * (e.g. added: read book), framed by divider lines.
      */
     private static void acknowledgeAdd(String line) {
         printDivider();
