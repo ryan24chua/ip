@@ -1,15 +1,20 @@
 /**
  * Entry point for the Myriad chatbot.
- * Greets the user, echoes each line of input back until the user types the
- * exit command, then prints a farewell.
+ * Greets the user, stores each line of input the user enters (acknowledging
+ * each one as it's added) and lists them back on request, until the user
+ * types the exit command, then prints a farewell.
  */
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Myriad {
     private static final String LINE = "____________________________________________________________";
 
     // Command that ends the input loop; matched case-insensitively.
     private static final String EXIT_COND = "bye";
+
+    // Command to display the user text back.
+    private static final String LIST_CMD = "list";
 
     public static void main(String[] args) {
         greet();
@@ -49,30 +54,44 @@ public class Myriad {
     }
 
     /**
-     * Reads lines of user input and echoes each one back until the user
-     * enters the exit command (matched case-insensitively, ignoring
-     * leading/trailing whitespace) or the input stream is exhausted, then
-     * returns so the caller can print the farewell.
+     * Reads lines of user input until the user enters the exit command
+     * (matched case-insensitively, ignoring leading/trailing whitespace) or
+     * the input stream is exhausted, then returns so the caller can print
+     * the farewell. Each line is either treated as a command ({@code list})
+     * or stored and acknowledged as an added item.
      */
     private static void run() {
         Scanner sc = new Scanner(System.in);
 
+        // Store whatever text the user enters.
+        ArrayList<String> textList = new ArrayList<>();
+
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
+
+            // Exit Condition.
             if (line.strip().equalsIgnoreCase(EXIT_COND)) {
                 break;
             }
-            echo(line);
+
+            // Print list command.
+            if (line.strip().equalsIgnoreCase(LIST_CMD)) {
+                printList(textList);
+                continue;
+            }
+
+            textList.add(line);
+            acknowledgeAdd(line);
         }
     }
 
     /**
-     * Reads a single line of user input from standard input and echoes it
-     * back, framed by divider lines.
+     * Prints an acknowledgement that the given line was added
+     * (e.g. {@code added: read book}), framed by divider lines.
      */
-    private static void echo(String line) {
+    private static void acknowledgeAdd(String line) {
         printDivider();
-        System.out.println(line);
+        System.out.println("added: " + line);
         printDivider();
     }
 
@@ -81,5 +100,17 @@ public class Myriad {
      */
     private static void printDivider() {
         System.out.println(LINE);
+    }
+
+    /**
+     * Prints every stored item as a 1-indexed numbered list, framed by
+     * divider lines.
+     */
+    private static void printList(ArrayList<String> lst) {
+        printDivider();
+        for (int i = 0; i < lst.size(); i++) {
+            System.out.printf("%d. %s%n", i + 1, lst.get(i));
+        }
+        printDivider();
     }
 }
