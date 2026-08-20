@@ -126,7 +126,7 @@ public class Myriad {
         if (parts.length < 2) {
             return -1;
         }
-        
+
         try {
             int index = Integer.parseInt(parts[1].strip()) - 1;
             return (index >= 0 && index < taskList.size()) ? index : -1;
