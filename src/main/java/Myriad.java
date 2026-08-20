@@ -283,6 +283,18 @@ public class Myriad {
     }
 
     /**
+     * Splits text on the given marker (e.g. "/by"), matched
+     * case-insensitively with optional surrounding whitespace consumed —
+     * this mirrors the case-insensitive matching used for command keywords
+     * elsewhere (e.g. "deadline" itself). Returns a 1-element array holding
+     * all of the text if the marker isn't found, or a 2-element array of the
+     * text before/after the marker if it is.
+     */
+    private static String[] splitOnMarker(String text, String marker) {
+        return text.split("(?i)\\s*" + marker + "\\s*", 2);
+    }
+
+    /**
      * Parses a "deadline <description> /by <date>" line and, if both parts
      * are present, adds a Deadline task and prints the standard
      * added-task acknowledgement. Prints an error instead if the
@@ -290,33 +302,20 @@ public class Myriad {
      */
     private static void addDeadline(String line, ArrayList<Task> taskList) {
         String[] parts = line.split("\\s+", 2);
+        String argsText = parts.length == 2 ? parts[1] : "";
 
         printDivider();
 
-        String description = null;
-        String date = null;
+        String[] descAndDate = splitOnMarker(argsText, "/by");
+        String description = descAndDate[0];
+        String date = descAndDate.length == 2 ? descAndDate[1] : null;
 
-        if (parts.length == 2) {
-            String text = parts[1];
-            // Split case-insensitively so "/by", "/BY", "/By" etc. all
-            // work, matching the case-insensitive matching used for
-            // command keywords elsewhere (e.g. "deadline" itself).
-            String[] descAndDate = text.split("(?i)\\s*/by\\s*", 2);
-
-            description = descAndDate[0];
-            if (descAndDate.length == 2) {
-                // A match was found, so a date follows "/by".
-                date = descAndDate[1];
-            }
-        }
-
-        if (description == null || description.isBlank()) {
+        if (description.isBlank()) {
             System.out.println("OOPS!!! Please include task description.");
         } else if (date == null || date.isBlank()) {
             System.out.println("OOPS!!! Please include date.");
         } else {
-            Deadline task = new Deadline(description, date);
-            addTask(task, taskList);
+            addTask(new Deadline(description, date), taskList);
         }
 
         printDivider();
@@ -330,40 +329,26 @@ public class Myriad {
      */
     private static void addEvent(String line, ArrayList<Task> taskList) {
         String[] parts = line.split("\\s+", 2);
+        String argsText = parts.length == 2 ? parts[1] : "";
 
         printDivider();
 
-        String description = null;
-        String start = null;
-        String end = null;
+        String[] descAndRest = splitOnMarker(argsText, "/from");
+        String description = descAndRest[0];
+        String rest = descAndRest.length == 2 ? descAndRest[1] : "";
 
-        if (parts.length == 2) {
-            String text = parts[1];
+        String[] startAndEnd = splitOnMarker(rest, "/to");
+        String start = startAndEnd[0];
+        String end = startAndEnd.length == 2 ? startAndEnd[1] : null;
 
-            String[] descAndDate = text.split("(?i)\\s*/from\\s*", 2);
-
-            description = descAndDate[0];
-            if (descAndDate.length == 2) {
-                text = descAndDate[1];
-
-                String[] startAndEnd = text.split("(?i)\\s*/to\\s*", 2);
-
-                start = startAndEnd[0];
-                if (startAndEnd.length == 2) {
-                    end = startAndEnd[1];
-                }
-            }
-        }
-
-        if (description == null || description.isBlank()) {
+        if (description.isBlank()) {
             System.out.println("OOPS!!! Please include task description.");
-        } else if (start == null || start.isBlank()) {
+        } else if (start.isBlank()) {
             System.out.println("OOPS!!! Please include start date.");
         } else if (end == null || end.isBlank()) {
             System.out.println("OOPS!!! Please include end date.");
         } else {
-            Event task = new Event(description, start, end);
-            addTask(task, taskList);
+            addTask(new Event(description, start, end), taskList);
         }
 
         printDivider();
