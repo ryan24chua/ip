@@ -104,11 +104,12 @@ public class Myriad {
     }
 
     /**
-     * Prints every stored item as a 1-indexed numbered list, framed by
-     * divider lines.
+     * Prints a header line followed by every stored item as a 1-indexed
+     * numbered list, framed by divider lines.
      */
     private static void printList(ArrayList<Task> lst) {
         printDivider();
+        System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < lst.size(); i++) {
             System.out.printf("%d. %s%n", i + 1, lst.get(i));
         }
