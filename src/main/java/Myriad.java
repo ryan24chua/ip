@@ -6,11 +6,9 @@
  * types the exit command ("bye"), then prints a farewell.
  */
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Myriad {
-    private static final String LINE = "____________________________________________________________";
 
     /**
      * Recognized user commands. A line that isn't a recognized keyword is
@@ -21,40 +19,12 @@ public class Myriad {
     }
 
     public static void main(String[] args) {
-        greet();
-        run();
-        exit();
-    }
+        Ui ui = new Ui();
+        TaskList taskList = new TaskList();
 
-    /**
-     * Prints the startup banner and welcome message, framed by divider lines.
-     */
-    private static void greet() {
-        String banner = "███╗   ███╗██╗   ██╗██████╗ ██╗ █████╗ ██████╗ \n"
-                + "████╗ ████║╚██╗ ██╔╝██╔══██╗██║██╔══██╗██╔══██╗\n"
-                + "██╔████╔██║ ╚████╔╝ ██████╔╝██║███████║██║  ██║\n"
-                + "██║╚██╔╝██║  ╚██╔╝  ██╔══██╗██║██╔══██║██║  ██║\n"
-                + "██║ ╚═╝ ██║   ██║   ██║  ██║██║██║  ██║██████╔╝\n"
-                + "╚═╝     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ";
-        String greeting = """
-                Hello! I'm Myriad.
-                What can I do for you?""";
-        printDivider();
-        System.out.println(banner);
-        System.out.println(greeting);
-        printDivider();
-    }
-
-    /**
-     * Prints a farewell message, framed by divider lines.
-     * Note: does not call System.exit; the program simply returns from main
-     * after this runs.
-     */
-    private static void exit() {
-        printDivider();
-        String exitMsg = "Bye. Hope to see you again soon!";
-        System.out.println(exitMsg);
-        printDivider();
+        ui.showGreeting();
+        run(ui, taskList);
+        ui.showFarewell();
     }
 
     /**
@@ -65,11 +35,8 @@ public class Myriad {
      * unmark/todo/deadline/event run their respective handler, and any
      * other line is stored and acknowledged as a raw added task.
      */
-    private static void run() {
+    private static void run(Ui ui, TaskList taskList) {
         Scanner sc = new Scanner(System.in);
-
-        // Store whatever text the user enters.
-        ArrayList<Task> taskList = new ArrayList<>();
 
         while (sc.hasNextLine()) {
             String line = sc.nextLine().strip();
@@ -79,13 +46,13 @@ public class Myriad {
                 case EXIT -> {
                     return;
                 }
-                case LIST -> printList(taskList);
-                case ADD -> addDefault(line, taskList);
-                case MARK -> markTask(line, taskList);
-                case UNMARK -> unmarkTask(line, taskList);
-                case TODO -> addToDo(line, taskList);
-                case DEADLINE -> addDeadline(line, taskList);
-                case EVENT -> addEvent(line, taskList);
+                case LIST -> ui.showList(taskList.asList());
+                case ADD -> addDefault(line, taskList, ui);
+                case MARK -> markTask(line, taskList, ui);
+                case UNMARK -> unmarkTask(line, taskList, ui);
+                case TODO -> addToDo(line, taskList, ui);
+                case DEADLINE -> addDeadline(line, taskList, ui);
+                case EVENT -> addEvent(line, taskList, ui);
             }
         }
     }
@@ -130,7 +97,7 @@ public class Myriad {
      * taskList, or -1 if the argument is missing, not a number, or out of
      * range.
      */
-    private static int parseTaskIndex(String line, ArrayList<Task> taskList) {
+    private static int parseTaskIndex(String line, TaskList taskList) {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
@@ -139,7 +106,7 @@ public class Myriad {
 
         try {
             int index = Integer.parseInt(parts[1].strip()) - 1;
-            return (index >= 0 && index < taskList.size()) ? index : -1;
+            return taskList.isValidIndex(index) ? index : -1;
         } catch (NumberFormatException e) {
             return -1;
         }
@@ -150,7 +117,7 @@ public class Myriad {
      * line: the task number argument is missing, not a whole number, or
      * out of range for the current list size.
      */
-    private static String taskIndexErrorMessage(String line, ArrayList<Task> taskList) {
+    private static String taskIndexErrorMessage(String line, TaskList taskList) {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
@@ -169,117 +136,68 @@ public class Myriad {
     }
 
     /**
-     * Wraps the whole (unrecognized-keyword) line as a raw Task, adds it,
-     * and prints the standard added-task acknowledgement, framed by
-     * divider lines.
+     * Adds task to taskList and shows the standard added-task
+     * acknowledgement. Shared by every add-command handler (addDefault/
+     * addToDo/addDeadline/addEvent) so the acknowledgement wording stays
+     * consistent across task types.
      */
-    private static void addDefault(String line, ArrayList<Task> taskList) {
-        Task task = new Task(line);
-
-        printDivider();
-        addTask(task, taskList);
-        printDivider();
+    private static void addAndShow(Task task, TaskList taskList, Ui ui) {
+        taskList.add(task);
+        ui.showAddedTask(task, taskList.size());
     }
 
     /**
-     * Prints a divider line to visually separate sections of output.
+     * Wraps the whole (unrecognized-keyword) line as a raw Task and adds it.
      */
-    private static void printDivider() {
-        System.out.println(LINE);
-    }
-
-    /**
-     * Prints a header line followed by every stored item as a 1-indexed
-     * numbered list, framed by divider lines.
-     */
-    private static void printList(ArrayList<Task> lst) {
-        printDivider();
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < lst.size(); i++) {
-            System.out.printf("%d.%s%n", i + 1, lst.get(i));
-        }
-        printDivider();
+    private static void addDefault(String line, TaskList taskList, Ui ui) {
+        addAndShow(new Task(line), taskList, ui);
     }
 
     /**
      * Marks the task named by the task number in line (e.g. "mark 2") as
-     * done and prints an acknowledgement. Prints an error instead if the
+     * done and shows an acknowledgement. Shows an error instead if the
      * task number is missing, not a number, or out of range.
      */
-    private static void markTask(String line, ArrayList<Task> taskList) {
+    private static void markTask(String line, TaskList taskList, Ui ui) {
         int index = parseTaskIndex(line, taskList);
 
-        printDivider();
-
         if (index == -1) {
-            System.out.println(taskIndexErrorMessage(line, taskList));
+            ui.showError(taskIndexErrorMessage(line, taskList));
         } else {
-            Task task = taskList.get(index);
-            task.setDone(true);
-            System.out.println("Nice! I've marked this task as done:");
-            System.out.println("  " + task);
+            taskList.markDone(index);
+            ui.showMarked(taskList.get(index));
         }
-
-        printDivider();
     }
 
     /**
      * Marks the task named by the task number in line (e.g. "unmark 2") as
-     * not done and prints an acknowledgement. Prints an error instead if
+     * not done and shows an acknowledgement. Shows an error instead if
      * the task number is missing, not a number, or out of range.
      */
-    private static void unmarkTask(String line, ArrayList<Task> taskList) {
+    private static void unmarkTask(String line, TaskList taskList, Ui ui) {
         int index = parseTaskIndex(line, taskList);
 
-        printDivider();
-
         if (index == -1) {
-            System.out.println(taskIndexErrorMessage(line, taskList));
+            ui.showError(taskIndexErrorMessage(line, taskList));
         } else {
-            Task task = taskList.get(index);
-            task.setDone(false);
-            System.out.println("OK, I've marked this task as not done yet:");
-            System.out.println("  " + task);
+            taskList.markNotDone(index);
+            ui.showUnmarked(taskList.get(index));
         }
-
-        printDivider();
-    }
-
-    /**
-     * Appends task to taskList and prints the standard added-task
-     * acknowledgement (task's own toString, plus the new list size). Shared
-     * by every add-command handler (addDefault/addToDo/addDeadline/
-     * addEvent) so the acknowledgement wording stays consistent across
-     * task types. Does not print divider lines; callers frame the call
-     * with printDivider() themselves since they may print an error instead
-     * of calling this at all.
-     */
-    private static void addTask(Task task, ArrayList<Task> taskList) {
-        taskList.add(task);
-
-        System.out.println("Got it. I've added this task:");
-        System.out.println(task);
-        System.out.printf("Now you have %d tasks in the list.%n", taskList.size());
     }
 
     /**
      * Parses a "todo <description>" line and, if a description is present,
-     * adds a ToDo task and prints the standard added-task acknowledgement.
-     * Prints an error instead if the description is missing.
+     * adds a ToDo task and shows the standard added-task acknowledgement.
+     * Shows an error instead if the description is missing.
      */
-    private static void addToDo(String line, ArrayList<Task> taskList) {
+    private static void addToDo(String line, TaskList taskList, Ui ui) {
         String[] parts = line.split("\\s+", 2);
 
-        printDivider();
-
         if (parts.length < 2) {
-            System.out.println("OOPS!!! Please include task description.");
+            ui.showError("OOPS!!! Please include task description.");
         } else {
-            ToDo task = new ToDo(parts[1]);
-            addTask(task, taskList);
+            addAndShow(new ToDo(parts[1]), taskList, ui);
         }
-
-        printDivider();
     }
 
     /**
@@ -296,42 +214,36 @@ public class Myriad {
 
     /**
      * Parses a "deadline <description> /by <date>" line and, if both parts
-     * are present, adds a Deadline task and prints the standard
-     * added-task acknowledgement. Prints an error instead if the
+     * are present, adds a Deadline task and shows the standard
+     * added-task acknowledgement. Shows an error instead if the
      * description or date is missing.
      */
-    private static void addDeadline(String line, ArrayList<Task> taskList) {
+    private static void addDeadline(String line, TaskList taskList, Ui ui) {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
-
-        printDivider();
 
         String[] descAndDate = splitOnMarker(argsText, "/by");
         String description = descAndDate[0];
         String date = descAndDate.length == 2 ? descAndDate[1] : null;
 
         if (description.isBlank()) {
-            System.out.println("OOPS!!! Please include task description.");
+            ui.showError("OOPS!!! Please include task description.");
         } else if (date == null || date.isBlank()) {
-            System.out.println("OOPS!!! Please include date.");
+            ui.showError("OOPS!!! Please include date.");
         } else {
-            addTask(new Deadline(description, date), taskList);
+            addAndShow(new Deadline(description, date), taskList, ui);
         }
-
-        printDivider();
     }
 
     /**
      * Parses an "event <description> /from <start> /to <end>" line and, if
-     * all three parts are present, adds an Event task and prints the
-     * standard added-task acknowledgement. Prints an error instead if the
+     * all three parts are present, adds an Event task and shows the
+     * standard added-task acknowledgement. Shows an error instead if the
      * description, start date, or end date is missing.
      */
-    private static void addEvent(String line, ArrayList<Task> taskList) {
+    private static void addEvent(String line, TaskList taskList, Ui ui) {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
-
-        printDivider();
 
         String[] descAndRest = splitOnMarker(argsText, "/from");
         String description = descAndRest[0];
@@ -342,15 +254,13 @@ public class Myriad {
         String end = startAndEnd.length == 2 ? startAndEnd[1] : null;
 
         if (description.isBlank()) {
-            System.out.println("OOPS!!! Please include task description.");
+            ui.showError("OOPS!!! Please include task description.");
         } else if (start.isBlank()) {
-            System.out.println("OOPS!!! Please include start date.");
+            ui.showError("OOPS!!! Please include start date.");
         } else if (end == null || end.isBlank()) {
-            System.out.println("OOPS!!! Please include end date.");
+            ui.showError("OOPS!!! Please include end date.");
         } else {
-            addTask(new Event(description, start, end), taskList);
+            addAndShow(new Event(description, start, end), taskList, ui);
         }
-
-        printDivider();
     }
 }
