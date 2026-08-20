@@ -4,7 +4,9 @@
  * add a task ("todo"/"deadline"/"event"), "list" the stored tasks,
  * "mark"/"unmark" a task done, until the user types the exit command
  * ("bye"), then prints a farewell. A line that doesn't match any known
- * command shows an unknown-command error.
+ * command, or that's missing a required argument, throws a
+ * MyriadException, which is caught once per line in run() and shown as
+ * an error.
  */
 
 import java.util.Scanner;
@@ -13,7 +15,8 @@ public class Myriad {
 
     /**
      * Recognized user commands. A line that isn't a recognized keyword
-     * maps to UNKNOWN, which shows an error instead of doing anything.
+     * maps to UNKNOWN, which throws a MyriadException instead of doing
+     * anything.
      */
     enum Command {
         UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT;
@@ -33,8 +36,11 @@ public class Myriad {
      * (matched case-insensitively, ignoring leading/trailing whitespace) or
      * the input stream is exhausted, then returns so the caller can print
      * the farewell. Each line is dispatched by parseCommand: list/mark/
-     * unmark/todo/deadline/event run their respective handler, and any
-     * unrecognized line shows an unknown-command error.
+     * unmark/todo/deadline/event run their respective handler, and an
+     * unrecognized line throws MyriadException directly. Every handler may
+     * throw MyriadException instead of displaying its own error, so this
+     * is the single place that catches it and shows it — with the
+     * "Error: " prefix added here rather than repeated in every message.
      */
     private static void run(Ui ui, TaskList taskList) {
         Scanner sc = new Scanner(System.in);
@@ -43,17 +49,23 @@ public class Myriad {
             String line = sc.nextLine().strip();
             Command cmd = parseCommand(line);
 
-            switch (cmd) {
-                case EXIT -> {
-                    return;
+            try {
+                switch (cmd) {
+                    case EXIT -> {
+                        return;
+                    }
+                    case LIST -> ui.showList(taskList.asList());
+                    case UNKNOWN -> throw new MyriadException(
+                            "I don't recognize that command. Try: todo, deadline, event, "
+                                    + "list, mark, unmark, or bye.");
+                    case MARK -> markTask(line, taskList, ui);
+                    case UNMARK -> unmarkTask(line, taskList, ui);
+                    case TODO -> addToDo(line, taskList, ui);
+                    case DEADLINE -> addDeadline(line, taskList, ui);
+                    case EVENT -> addEvent(line, taskList, ui);
                 }
-                case LIST -> ui.showList(taskList.asList());
-                case UNKNOWN -> showUnknownCommand(ui);
-                case MARK -> markTask(line, taskList, ui);
-                case UNMARK -> unmarkTask(line, taskList, ui);
-                case TODO -> addToDo(line, taskList, ui);
-                case DEADLINE -> addDeadline(line, taskList, ui);
-                case EVENT -> addEvent(line, taskList, ui);
+            } catch (MyriadException e) {
+                ui.showError("Error: " + e.getMessage());
             }
         }
     }
@@ -63,8 +75,8 @@ public class Myriad {
      * case-insensitively against the known command keywords. "bye" and
      * "list" take no arguments, so they only match when they are the whole
      * line. "mark", "unmark", "todo", "deadline", and "event" all match on
-     * keyword alone (their own handlers report an error if the required
-     * argument text is missing). Anything else maps to UNKNOWN.
+     * keyword alone (their own handlers throw MyriadException if the
+     * required argument text is missing). Anything else maps to UNKNOWN.
      */
     private static Command parseCommand(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
@@ -92,46 +104,42 @@ public class Myriad {
 
     /**
      * Parses the task number argument that follows a mark/unmark keyword
-     * (e.g. the "2" in "mark 2"), returning its 0-based index into
-     * taskList, or -1 if the argument is missing, not a number, or out of
-     * range.
+     * (e.g. the "2" in "mark 2") and returns its 0-based index into
+     * taskList. Throws MyriadException if the argument is missing, not a
+     * whole number, or out of range for the current list size — with a
+     * message specific to which of those three went wrong.
      */
-    private static int parseTaskIndex(String line, TaskList taskList) {
+    private static int resolveTaskIndex(String line, TaskList taskList) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
-            return -1;
-        }
-
-        try {
-            int index = Integer.parseInt(parts[1].strip()) - 1;
-            return taskList.isValidIndex(index) ? index : -1;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-
-    /**
-     * Explains why parseTaskIndex(line, taskList) returned -1 for this
-     * line: the task number argument is missing, not a whole number, or
-     * out of range for the current list size.
-     */
-    private static String taskIndexErrorMessage(String line, TaskList taskList) {
-        String[] parts = line.split("\\s+", 2);
-
-        if (parts.length < 2) {
-            return "OOPS!!! Please tell me the task number, e.g. \"mark 2\".";
+            throw new MyriadException(
+                    "Please tell me which task number, e.g. \"mark 2\".");
         }
 
         String arg = parts[1].strip();
+        int taskNumber;
         try {
-            int taskNumber = Integer.parseInt(arg);
-            return String.format(
-                    "OOPS!!! Task number %d doesn't exist. You have %d task(s) in the list.",
-                    taskNumber, taskList.size());
+            taskNumber = Integer.parseInt(arg);
         } catch (NumberFormatException e) {
-            return "OOPS!!! \"" + arg + "\" is not a valid task number.";
+            throw new MyriadException(
+                    "\"" + arg + "\" is not a valid task number — it needs to be a whole "
+                            + "number, e.g. \"mark 2\".");
         }
+
+        int index = taskNumber - 1;
+        if (!taskList.isValidIndex(index)) {
+            if (taskList.size() == 0) {
+                throw new MyriadException(
+                        "Task number " + taskNumber + " doesn't exist — your task list is "
+                                + "empty. Add a task first with todo/deadline/event.");
+            }
+            throw new MyriadException(String.format(
+                    "Task number %d doesn't exist. You have %d task(s) in the list, so "
+                            + "please choose a number from 1 to %d.",
+                    taskNumber, taskList.size(), taskList.size()));
+        }
+        return index;
     }
 
     /**
@@ -146,58 +154,41 @@ public class Myriad {
     }
 
     /**
-     * Shows the standard error for a line that didn't match any known
-     * command.
-     */
-    private static void showUnknownCommand(Ui ui) {
-        ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");
-    }
-
-    /**
      * Marks the task named by the task number in line (e.g. "mark 2") as
-     * done and shows an acknowledgement. Shows an error instead if the
-     * task number is missing, not a number, or out of range.
+     * done and shows an acknowledgement. Throws MyriadException instead if
+     * the task number is missing, not a number, or out of range.
      */
-    private static void markTask(String line, TaskList taskList, Ui ui) {
-        int index = parseTaskIndex(line, taskList);
-
-        if (index == -1) {
-            ui.showError(taskIndexErrorMessage(line, taskList));
-        } else {
-            taskList.markDone(index);
-            ui.showMarked(taskList.get(index));
-        }
+    private static void markTask(String line, TaskList taskList, Ui ui) throws MyriadException {
+        int index = resolveTaskIndex(line, taskList);
+        taskList.markDone(index);
+        ui.showMarked(taskList.get(index));
     }
 
     /**
      * Marks the task named by the task number in line (e.g. "unmark 2") as
-     * not done and shows an acknowledgement. Shows an error instead if
-     * the task number is missing, not a number, or out of range.
+     * not done and shows an acknowledgement. Throws MyriadException
+     * instead if the task number is missing, not a number, or out of
+     * range.
      */
-    private static void unmarkTask(String line, TaskList taskList, Ui ui) {
-        int index = parseTaskIndex(line, taskList);
-
-        if (index == -1) {
-            ui.showError(taskIndexErrorMessage(line, taskList));
-        } else {
-            taskList.markNotDone(index);
-            ui.showUnmarked(taskList.get(index));
-        }
+    private static void unmarkTask(String line, TaskList taskList, Ui ui) throws MyriadException {
+        int index = resolveTaskIndex(line, taskList);
+        taskList.markNotDone(index);
+        ui.showUnmarked(taskList.get(index));
     }
 
     /**
      * Parses a "todo <description>" line and, if a description is present,
      * adds a ToDo task and shows the standard added-task acknowledgement.
-     * Shows an error instead if the description is missing.
+     * Throws MyriadException instead if the description is missing.
      */
-    private static void addToDo(String line, TaskList taskList, Ui ui) {
+    private static void addToDo(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
-            ui.showError("OOPS!!! Please include task description.");
-        } else {
-            addAndShow(new ToDo(parts[1]), taskList, ui);
+            throw new MyriadException(
+                    "Please include a task description, e.g. \"todo read book\".");
         }
+        addAndShow(new ToDo(parts[1]), taskList, ui);
     }
 
     /**
@@ -215,10 +206,10 @@ public class Myriad {
     /**
      * Parses a "deadline <description> /by <date>" line and, if both parts
      * are present, adds a Deadline task and shows the standard
-     * added-task acknowledgement. Shows an error instead if the
+     * added-task acknowledgement. Throws MyriadException instead if the
      * description or date is missing.
      */
-    private static void addDeadline(String line, TaskList taskList, Ui ui) {
+    private static void addDeadline(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -226,22 +217,24 @@ public class Myriad {
         String description = descAndDate[0];
         String date = descAndDate.length == 2 ? descAndDate[1] : null;
 
+        String example = "deadline return book /by Sunday";
         if (description.isBlank()) {
-            ui.showError("OOPS!!! Please include task description.");
+            throw new MyriadException(
+                    "Please include a task description, e.g. \"" + example + "\".");
         } else if (date == null || date.isBlank()) {
-            ui.showError("OOPS!!! Please include date.");
-        } else {
-            addAndShow(new Deadline(description, date), taskList, ui);
+            throw new MyriadException(
+                    "Please include a date after /by, e.g. \"" + example + "\".");
         }
+        addAndShow(new Deadline(description, date), taskList, ui);
     }
 
     /**
      * Parses an "event <description> /from <start> /to <end>" line and, if
      * all three parts are present, adds an Event task and shows the
-     * standard added-task acknowledgement. Shows an error instead if the
-     * description, start date, or end date is missing.
+     * standard added-task acknowledgement. Throws MyriadException instead
+     * if the description, start date, or end date is missing.
      */
-    private static void addEvent(String line, TaskList taskList, Ui ui) {
+    private static void addEvent(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -253,14 +246,17 @@ public class Myriad {
         String start = startAndEnd[0];
         String end = startAndEnd.length == 2 ? startAndEnd[1] : null;
 
+        String example = "event project meeting /from Mon 2pm /to 4pm";
         if (description.isBlank()) {
-            ui.showError("OOPS!!! Please include task description.");
+            throw new MyriadException(
+                    "Please include a task description, e.g. \"" + example + "\".");
         } else if (start.isBlank()) {
-            ui.showError("OOPS!!! Please include start date.");
+            throw new MyriadException(
+                    "Please include a start time after /from, e.g. \"" + example + "\".");
         } else if (end == null || end.isBlank()) {
-            ui.showError("OOPS!!! Please include end date.");
-        } else {
-            addAndShow(new Event(description, start, end), taskList, ui);
+            throw new MyriadException(
+                    "Please include an end time after /to, e.g. \"" + example + "\".");
         }
+        addAndShow(new Event(description, start, end), taskList, ui);
     }
 }
