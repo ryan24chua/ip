@@ -79,8 +79,9 @@ public class Myriad {
                 }
                 case LIST -> printList(taskList);
                 case ADD -> {
-                    taskList.add(new Task(line));
-                    acknowledgeAdd(line);
+                    Task task = new Task(line);
+                    taskList.add(task);
+                    acknowledgeAdd(task, taskList.size());
                 }
                 case MARK -> markTask(line, taskList);
                 case UNMARK -> unmarkTask(line, taskList);
@@ -162,9 +163,11 @@ public class Myriad {
      * Prints an acknowledgement that the given line was added
      * (e.g. added: read book), framed by divider lines.
      */
-    private static void acknowledgeAdd(String line) {
+    private static void acknowledgeAdd(Task task, Integer tasksCount) {
         printDivider();
-        System.out.println("added: " + line);
+        System.out.println("Got it. I've added this task:");
+        System.out.println(task);
+        System.out.printf("Now you have %d tasks in the list.%n", tasksCount);
         printDivider();
     }
 
