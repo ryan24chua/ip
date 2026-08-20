@@ -4,8 +4,9 @@
  * each one as it's added) and lists them back on request, until the user
  * types the exit command, then prints a farewell.
  */
-import java.util.Scanner;
+
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Myriad {
     private static final String LINE = "____________________________________________________________";
@@ -64,7 +65,7 @@ public class Myriad {
         Scanner sc = new Scanner(System.in);
 
         // Store whatever text the user enters.
-        ArrayList<String> textList = new ArrayList<>();
+        ArrayList<Task> textList = new ArrayList<>();
 
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
@@ -80,7 +81,7 @@ public class Myriad {
                 continue;
             }
 
-            textList.add(line);
+            textList.add(new Task(line));
             acknowledgeAdd(line);
         }
     }
@@ -106,7 +107,7 @@ public class Myriad {
      * Prints every stored item as a 1-indexed numbered list, framed by
      * divider lines.
      */
-    private static void printList(ArrayList<String> lst) {
+    private static void printList(ArrayList<Task> lst) {
         printDivider();
         for (int i = 0; i < lst.size(); i++) {
             System.out.printf("%d. %s%n", i + 1, lst.get(i));
