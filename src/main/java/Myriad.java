@@ -16,7 +16,7 @@ public class Myriad {
      * treated as ADD (i.e. the whole line is a task to store).
      */
     enum Command {
-        ADD, LIST, EXIT;
+        ADD, LIST, EXIT, MARK, UNMARK;
     }
 
     public static void main(String[] args) {
@@ -67,7 +67,7 @@ public class Myriad {
         Scanner sc = new Scanner(System.in);
 
         // Store whatever text the user enters.
-        ArrayList<Task> textList = new ArrayList<>();
+        ArrayList<Task> taskList = new ArrayList<>();
 
         while (sc.hasNextLine()) {
             String line = sc.nextLine().strip();
@@ -77,27 +77,85 @@ public class Myriad {
                 case EXIT -> {
                     return;
                 }
-                case LIST -> printList(textList);
+                case LIST -> printList(taskList);
                 case ADD -> {
-                    textList.add(new Task(line));
+                    taskList.add(new Task(line));
                     acknowledgeAdd(line);
                 }
+                case MARK -> markTask(line, taskList);
+                case UNMARK -> unmarkTask(line, taskList);
             }
         }
     }
 
     /**
-     * Maps a stripped input line to a Command. The whole line is matched
-     * case-insensitively against the known command keywords; any line that
-     * doesn't match one exactly is treated as ADD, with the whole line kept
-     * as the task description.
+     * Maps a stripped input line to a Command. The first word is matched
+     * case-insensitively against the known command keywords. "bye" and
+     * "list" take no arguments, so they only match when they are the whole
+     * line; "mark" and "unmark" require a trailing argument (the task
+     * number). Anything else is treated as ADD, with the whole line kept as
+     * the task description.
      */
     private static Command parseCommand(String strippedLine) {
-        return switch (strippedLine.toLowerCase()) {
-            case "bye" -> Command.EXIT;
-            case "list" -> Command.LIST;
-            default -> Command.ADD;
-        };
+        String[] parts = strippedLine.split("\\s+", 2);
+        String firstWord = parts[0];
+        String rest = parts.length > 1 ? parts[1] : "";
+
+        if (firstWord.equalsIgnoreCase("bye") && rest.isEmpty()) {
+            return Command.EXIT;
+        } else if (firstWord.equalsIgnoreCase("list") && rest.isEmpty()) {
+            return Command.LIST;
+        } else if (firstWord.equalsIgnoreCase("mark") && !rest.isEmpty()) {
+            return Command.MARK;
+        } else if (firstWord.equalsIgnoreCase("unmark") && !rest.isEmpty()) {
+            return Command.UNMARK;
+        } else {
+            return Command.ADD;
+        }
+    }
+
+    /**
+     * Parses the task number argument that follows a mark/unmark keyword
+     * (e.g. the "2" in "mark 2"), returning its 0-based index into
+     * taskList, or -1 if the argument is missing, not a number, or out of
+     * range.
+     */
+    private static int parseTaskIndex(String line, ArrayList<Task> taskList) {
+        String[] parts = line.split("\\s+", 2);
+
+        if (parts.length < 2) {
+            return -1;
+        }
+        
+        try {
+            int index = Integer.parseInt(parts[1].strip()) - 1;
+            return (index >= 0 && index < taskList.size()) ? index : -1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Explains why parseTaskIndex(line, taskList) returned -1 for this
+     * line: the task number argument is missing, not a whole number, or
+     * out of range for the current list size.
+     */
+    private static String taskIndexErrorMessage(String line, ArrayList<Task> taskList) {
+        String[] parts = line.split("\\s+", 2);
+
+        if (parts.length < 2) {
+            return "OOPS!!! Please tell me the task number, e.g. \"mark 2\".";
+        }
+
+        String arg = parts[1].strip();
+        try {
+            int taskNumber = Integer.parseInt(arg);
+            return String.format(
+                    "OOPS!!! Task number %d doesn't exist. You have %d task(s) in the list.",
+                    taskNumber, taskList.size());
+        } catch (NumberFormatException e) {
+            return "OOPS!!! \"" + arg + "\" is not a valid task number.";
+        }
     }
 
     /**
@@ -125,8 +183,52 @@ public class Myriad {
         printDivider();
         System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < lst.size(); i++) {
-            System.out.printf("%d. %s%n", i + 1, lst.get(i));
+            System.out.printf("%d.%s%n", i + 1, lst.get(i));
         }
+        printDivider();
+    }
+
+    /**
+     * Marks the task named by the task number in line (e.g. "mark 2") as
+     * done and prints an acknowledgement. Prints an error instead if the
+     * task number is missing, not a number, or out of range.
+     */
+    private static void markTask(String line, ArrayList<Task> taskList) {
+        int index = parseTaskIndex(line, taskList);
+
+        printDivider();
+
+        if (index == -1) {
+            System.out.println(taskIndexErrorMessage(line, taskList));
+        } else {
+            Task task = taskList.get(index);
+            task.setDone(true);
+            System.out.println("Nice! I've marked this task as done:");
+            System.out.println("  " + task);
+        }
+
+        printDivider();
+    }
+
+    /**
+     * Marks the task named by the task number in line (e.g. "unmark 2") as
+     * not done and prints an acknowledgement. Prints an error instead if
+     * the task number is missing, not a number, or out of range.
+     */
+    private static void unmarkTask(String line, ArrayList<Task> taskList) {
+        int index = parseTaskIndex(line, taskList);
+
+        printDivider();
+
+        if (index == -1) {
+            System.out.println(taskIndexErrorMessage(line, taskList));
+        } else {
+            Task task = taskList.get(index);
+            task.setDone(false);
+            System.out.println("OK, I've marked this task as not done yet:");
+            System.out.println("  " + task);
+        }
+
         printDivider();
     }
 }
