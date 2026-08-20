@@ -322,10 +322,50 @@ public class Myriad {
         printDivider();
     }
 
-    // TODO: not yet implemented — should parse "event <description>
-    // /from <start> /to <end>" the way addDeadline parses "/by", then add
-    // an Event task via addTask.
+    /**
+     * Parses an "event <description> /from <start> /to <end>" line and, if
+     * all three parts are present, adds an Event task and prints the
+     * standard added-task acknowledgement. Prints an error instead if the
+     * description, start date, or end date is missing.
+     */
     private static void addEvent(String line, ArrayList<Task> taskList) {
+        String[] parts = line.split("\\s+", 2);
 
+        printDivider();
+
+        String description = null;
+        String start = null;
+        String end = null;
+
+        if (parts.length == 2) {
+            String text = parts[1];
+
+            String[] descAndDate = text.split("(?i)\\s*/from\\s*", 2);
+
+            description = descAndDate[0];
+            if (descAndDate.length == 2) {
+                text = descAndDate[1];
+
+                String[] startAndEnd = text.split("(?i)\\s*/to\\s*", 2);
+
+                start = startAndEnd[0];
+                if (startAndEnd.length == 2) {
+                    end = startAndEnd[1];
+                }
+            }
+        }
+
+        if (description == null || description.isBlank()) {
+            System.out.println("OOPS!!! Please include task description.");
+        } else if (start == null || start.isBlank()) {
+            System.out.println("OOPS!!! Please include start date.");
+        } else if (end == null || end.isBlank()) {
+            System.out.println("OOPS!!! Please include end date.");
+        } else {
+            Event task = new Event(description, start, end);
+            addTask(task, taskList);
+        }
+
+        printDivider();
     }
 }
