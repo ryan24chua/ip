@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class DataHandler {
 
     private static final String DATA_DIR = "data";
-    private static final String DATA_FILE = DATA_DIR + "/myriad.txt";
+    private static final String DATA_FILE = new File(DATA_DIR, "myriad.txt").getPath();
 
     /**
      * Overwrites the data file with every task currently in taskList, one
