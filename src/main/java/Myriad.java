@@ -3,7 +3,8 @@ import java.util.Scanner;
 
 /**
  * Entry point for the Myriad chatbot.
- * Greets the user, then reads lines of input, each treated as a command:
+ * Loads any previously saved tasks from disk, greets the user, then reads
+ * lines of input, each treated as a command:
  * add a task ("todo"/"deadline"/"event"), "list" the stored tasks,
  * "mark"/"unmark" a task done, until the user types the exit command
  * ("bye"), then prints a farewell. A line that doesn't match any known
@@ -25,6 +26,7 @@ public class Myriad {
     public static void main(String[] args) throws IOException {
         Ui ui = new Ui();
         TaskList taskList = new TaskList();
+        DataHandler.readData(taskList);
 
         ui.showGreeting();
         run(ui, taskList);
