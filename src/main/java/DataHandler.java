@@ -62,7 +62,7 @@ public class DataHandler {
                     throw new MyriadException(
                             "a Deadline line needs a 4th field (date), found " + p.length + " fields");
                 }
-                yield new Deadline(description, p[3]);
+                yield new Deadline(description, TaskDateTime.parse(p[3]));
             }
             case "E" -> {
                 if (p.length < 5) {
@@ -70,7 +70,7 @@ public class DataHandler {
                             "an Event line needs 5 fields (type, done, description, start, end), "
                                     + "found " + p.length);
                 }
-                yield new Event(description, p[3], p[4]);
+                yield new Event(description, TaskDateTime.parse(p[3]), TaskDateTime.parse(p[4]));
             }
             default -> throw new MyriadException("unknown task type \"" + type + "\"");
         };

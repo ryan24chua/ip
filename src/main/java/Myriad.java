@@ -271,7 +271,7 @@ public class Myriad {
         String description = descAndDate[0];
         String date = descAndDate.length == 2 ? descAndDate[1] : null;
 
-        String example = "deadline return book /by Sunday";
+        String example = "deadline return book /by 2019-12-02";
         if (description.isBlank()) {
             throw new MyriadException(
                     "Please include a task description, e.g. \"" + example + "\".");
@@ -279,7 +279,7 @@ public class Myriad {
             throw new MyriadException(
                     "Please include a date after /by, e.g. \"" + example + "\".");
         }
-        addAndShow(new Deadline(description, date), taskList, ui);
+        addAndShow(new Deadline(description, TaskDateTime.parse(date)), taskList, ui);
     }
 
     /**
@@ -300,7 +300,7 @@ public class Myriad {
         String start = startAndEnd[0];
         String end = startAndEnd.length == 2 ? startAndEnd[1] : null;
 
-        String example = "event project meeting /from Mon 2pm /to 4pm";
+        String example = "event project meeting /from 2019-12-02 1400 /to 2019-12-02 1600";
         if (description.isBlank()) {
             throw new MyriadException(
                     "Please include a task description, e.g. \"" + example + "\".");
@@ -311,6 +311,6 @@ public class Myriad {
             throw new MyriadException(
                     "Please include an end time after /to, e.g. \"" + example + "\".");
         }
-        addAndShow(new Event(description, start, end), taskList, ui);
+        addAndShow(new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end)), taskList, ui);
     }
 }

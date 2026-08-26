@@ -1,8 +1,8 @@
 public class Event extends Task {
-    private String startDate;
-    private String endDate;
+    private TaskDateTime startDate;
+    private TaskDateTime endDate;
 
-    public Event(String description, String startDate, String endDate) {
+    public Event(String description, TaskDateTime startDate, TaskDateTime endDate) {
         super(description);
 
         this.startDate = startDate;
@@ -16,7 +16,7 @@ public class Event extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return String.format("E | %s | %s | %s", super.toSaveFormat(), startDate, endDate);
+        return String.format("E | %s | %s | %s", super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
     }
 
     @Override

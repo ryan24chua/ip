@@ -1,7 +1,7 @@
 public class Deadline extends Task {
-    private String date;
+    private TaskDateTime date;
 
-    public Deadline(String description, String date) {
+    public Deadline(String description, TaskDateTime date) {
         super(description);
 
         this.date = date;
@@ -14,7 +14,7 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return String.format("D | %s | %s", super.toSaveFormat(), date);
+        return String.format("D | %s | %s", super.toSaveFormat(), date.toSaveFormat());
     }
 
     @Override
