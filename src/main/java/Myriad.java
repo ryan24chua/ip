@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -21,7 +22,7 @@ public class Myriad {
         UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Ui ui = new Ui();
         TaskList taskList = new TaskList();
 
@@ -40,8 +41,12 @@ public class Myriad {
      * throw MyriadException instead of displaying its own error, so this
      * is the single place that catches it and shows it — with the
      * "Error: " prefix added here rather than repeated in every message.
+     * The add handlers can also throw IOException when saving a task to
+     * disk fails; that isn't caught here yet (error handling for saving is
+     * a later increment), so it propagates out of run() and crashes the
+     * program with a stack trace.
      */
-    private static void run(Ui ui, TaskList taskList) {
+    private static void run(Ui ui, TaskList taskList) throws IOException {
         Scanner sc = new Scanner(System.in);
 
         while (sc.hasNextLine()) {
@@ -148,13 +153,15 @@ public class Myriad {
     }
 
     /**
-     * Adds task to taskList and shows the standard added-task
-     * acknowledgement. Shared by every add-command handler (addToDo/
-     * addDeadline/addEvent) so the acknowledgement wording stays
-     * consistent across task types.
+     * Adds task to taskList, saves it to disk, and shows the standard
+     * added-task acknowledgement. Shared by every add-command handler
+     * (addToDo/addDeadline/addEvent) so the acknowledgement wording stays
+     * consistent across task types. Declares IOException rather than
+     * catching it, since saving isn't handled beyond the happy path yet.
      */
-    private static void addAndShow(Task task, TaskList taskList, Ui ui) {
+    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws IOException {
         taskList.add(task);
+        DataHandler.writeData(task);
         ui.showAddedTask(task, taskList.size());
     }
 
@@ -197,7 +204,8 @@ public class Myriad {
      * adds a ToDo task and shows the standard added-task acknowledgement.
      * Throws MyriadException instead if the description is missing.
      */
-    private static void addToDo(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private static void addToDo(String line, TaskList taskList, Ui ui)
+            throws MyriadException, IOException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
@@ -225,7 +233,8 @@ public class Myriad {
      * added-task acknowledgement. Throws MyriadException instead if the
      * description or date is missing.
      */
-    private static void addDeadline(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private static void addDeadline(String line, TaskList taskList, Ui ui)
+            throws MyriadException, IOException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -250,7 +259,8 @@ public class Myriad {
      * standard added-task acknowledgement. Throws MyriadException instead
      * if the description, start date, or end date is missing.
      */
-    private static void addEvent(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private static void addEvent(String line, TaskList taskList, Ui ui)
+            throws MyriadException, IOException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
