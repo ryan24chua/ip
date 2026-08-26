@@ -1,4 +1,5 @@
-import myriad.MyriadException;
+package myriad;
+
 import myriad.task.Deadline;
 import myriad.task.Event;
 import myriad.task.Task;

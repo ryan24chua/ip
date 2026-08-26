@@ -1,4 +1,6 @@
-import myriad.MyriadException;
+package myriad;
+
+import myriad.command.Command;
 
 import java.io.File;
 import java.util.List;
