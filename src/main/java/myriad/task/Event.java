@@ -1,3 +1,5 @@
+package myriad.task;
+
 public class Event extends Task {
     private TaskDateTime startDate;
     private TaskDateTime endDate;

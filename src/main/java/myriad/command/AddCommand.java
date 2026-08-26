@@ -1,3 +1,11 @@
+package myriad.command;
+
+import myriad.MyriadException;
+import myriad.Storage;
+import myriad.TaskList;
+import myriad.Ui;
+import myriad.task.Task;
+
 /**
  * Adds a task to the list. One class serves "todo", "deadline" and
  * "event" alike: ToDo, Deadline and Event already differ from each other
