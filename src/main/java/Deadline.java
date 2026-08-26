@@ -21,4 +21,15 @@ public class Deadline extends Task {
     public String toString() {
         return String.format("[D]%s (by: %s)", super.toString(), this.date);
     }
+
+    /**
+     * Matches if query overlaps this deadline's own instant (or, if the
+     * deadline has no time of its own, its whole day) — see
+     * TaskDateTime.rangesOverlap for the general rule.
+     */
+    @Override
+    public boolean occursDuring(TaskDateTime query) {
+        return TaskDateTime.rangesOverlap(
+                date.rangeStart(), date.rangeEnd(), query.rangeStart(), query.rangeEnd());
+    }
 }

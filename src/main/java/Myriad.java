@@ -22,7 +22,7 @@ public class Myriad {
      * anything.
      */
     enum Command {
-        UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE;
+        UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, SHOW;
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -68,13 +68,14 @@ public class Myriad {
                     case LIST -> ui.showList(taskList.asList());
                     case UNKNOWN -> throw new MyriadException(
                             "I don't recognize that command. Try: todo, deadline, event, "
-                                    + "list, mark, unmark, delete, or bye.");
+                                    + "list, mark, unmark, delete, show, or bye.");
                     case MARK -> markTask(line, taskList, ui);
                     case UNMARK -> unmarkTask(line, taskList, ui);
                     case TODO -> addToDo(line, taskList, ui);
                     case DEADLINE -> addDeadline(line, taskList, ui);
                     case EVENT -> addEvent(line, taskList, ui);
                     case DELETE -> deleteTask(line, taskList, ui);
+                    case SHOW -> showTasksOn(line, taskList, ui);
                 }
             } catch (MyriadException e) {
                 ui.showError("Error: " + e.getMessage());
@@ -112,6 +113,8 @@ public class Myriad {
             return Command.EVENT;
         } else if (firstWord.equalsIgnoreCase("delete")) {
             return Command.DELETE;
+        } else if (firstWord.equalsIgnoreCase("show")) {
+            return Command.SHOW;
         } else {
             return Command.UNKNOWN;
         }
@@ -312,5 +315,24 @@ public class Myriad {
                     "Please include an end time after /to, e.g. \"" + example + "\".");
         }
         addAndShow(new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end)), taskList, ui);
+    }
+
+    /**
+     * Parses a "show &lt;date/time&gt;" line and shows every Deadline/Event
+     * that occurs during the given date/time (see TaskList.occurringOn and
+     * Task.occursDuring). Throws MyriadException if the date/time is
+     * missing, or if the date/time doesn't parse.
+     */
+    private static void showTasksOn(String line, TaskList taskList, Ui ui) throws MyriadException {
+        String[] parts = line.split("\\s+", 2);
+        String example = "show 2019-12-02 1800";
+
+        if (parts.length < 2 || parts[1].isBlank()) {
+            throw new MyriadException(
+                    "Please include a date/time to show, e.g. \"" + example + "\".");
+        }
+        TaskDateTime query = TaskDateTime.parse(parts[1].strip());
+        var matches = taskList.occurringOn(query);
+        ui.showTasksOn(matches, query);
     }
 }

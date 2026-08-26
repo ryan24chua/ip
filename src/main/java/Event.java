@@ -23,4 +23,15 @@ public class Event extends Task {
     public String toString() {
         return String.format("[E]%s (from: %s to: %s)", super.toString(), this.startDate, this.endDate);
     }
+
+    /**
+     * Matches if query overlaps this event's span, from startDate's
+     * earliest instant to endDate's latest instant — see
+     * TaskDateTime.rangesOverlap for the general rule.
+     */
+    @Override
+    public boolean occursDuring(TaskDateTime query) {
+        return TaskDateTime.rangesOverlap(
+                startDate.rangeStart(), endDate.rangeEnd(), query.rangeStart(), query.rangeEnd());
+    }
 }

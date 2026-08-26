@@ -95,6 +95,38 @@ public class TaskDateTime {
     }
 
     /**
+     * Returns the earliest instant this value could refer to: the exact
+     * date+time if a time is present, otherwise the very start of date
+     * (00:00). Paired with rangeEnd(), this lets a date-only value stand
+     * in for "any time during that day" when checking overlap with
+     * another TaskDateTime.
+     */
+    public LocalDateTime rangeStart() {
+        return time == null ? LocalDateTime.of(date, LocalTime.MIN) : LocalDateTime.of(date, time);
+    }
+
+    /**
+     * Returns the latest instant this value could refer to: the exact
+     * date+time if a time is present, otherwise the very end of date
+     * (23:59:59.999999999). See rangeStart().
+     */
+    public LocalDateTime rangeEnd() {
+        return time == null ? LocalDateTime.of(date, LocalTime.MAX) : LocalDateTime.of(date, time);
+    }
+
+    /**
+     * Returns whether the closed interval [aStart, aEnd] overlaps the
+     * closed interval [bStart, bEnd]. Shared by Deadline and Event's
+     * occursDuring(TaskDateTime) — each just supplies its own two range
+     * endpoints (a Deadline's range is its own rangeStart()/rangeEnd(); an
+     * Event's spans from its start's rangeStart() to its end's rangeEnd()).
+     */
+    public static boolean rangesOverlap(
+            LocalDateTime aStart, LocalDateTime aEnd, LocalDateTime bStart, LocalDateTime bEnd) {
+        return !aEnd.isBefore(bStart) && !bEnd.isBefore(aStart);
+    }
+
+    /**
      * Returns this value in the user-facing display format: "MMM dd yyyy"
      * for a date-only value, or "MMM dd yyyy HHmm" when a time is present.
      */

@@ -32,6 +32,16 @@ public class Task {
     }
 
     /**
+     * Returns whether this task occurs during query, for the "show task"
+     * command. Tasks with no date of their own (ToDo) never match, hence
+     * the default false here; Deadline and Event override this with their
+     * own date-based check.
+     */
+    public boolean occursDuring(TaskDateTime query) {
+        return false;
+    }
+
+    /**
      * Returns the task's status and description, e.g. [X] read book
      * if done, or [ ] read book if not done.
      */
