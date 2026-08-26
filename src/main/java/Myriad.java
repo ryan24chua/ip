@@ -160,60 +160,74 @@ public class Myriad {
     }
 
     /**
-     * Adds task to taskList, shows the standard added-task
-     * acknowledgement, then saves it to disk. Shared by every add-command
-     * handler (addToDo/addDeadline/addEvent) so the acknowledgement
-     * wording stays consistent across task types. The add and
-     * acknowledgement happen before the save is attempted, so a save
-     * failure (wrapped into MyriadException here, shown by run()'s catch
-     * block like any other error) never undoes the in-memory add — the
-     * task still shows up in list for the rest of the session even if it
-     * couldn't be written to disk.
+     * Saves taskList's current state to disk, wrapping any IOException
+     * (disk full, permission denied, etc.) into a MyriadException so it's
+     * shown by run()'s catch block like any other command error, instead
+     * of crashing the program. Shared by every mutating command
+     * (add/mark/unmark/delete) so there's one place that translates a save
+     * failure into a user-facing message.
      */
-    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws MyriadException {
-        taskList.add(task);
-        ui.showAddedTask(task, taskList.size());
+    private static void save(TaskList taskList) throws MyriadException {
         try {
-            DataHandler.writeData(task);
+            DataHandler.saveAll(taskList);
         } catch (IOException e) {
             throw new MyriadException(
-                    "Couldn't save that task to disk (it's still in your list for this "
-                            + "session, but won't be there next time you start): " + e.getMessage());
+                    "Couldn't save your tasks to disk (the list is still correct for this "
+                            + "session, but changes won't be there next time you start): " + e.getMessage());
         }
     }
 
     /**
+     * Adds task to taskList, shows the standard added-task
+     * acknowledgement, then saves. Shared by every add-command handler
+     * (addToDo/addDeadline/addEvent) so the acknowledgement wording stays
+     * consistent across task types. The add and acknowledgement happen
+     * before the save is attempted, so a save failure never undoes the
+     * in-memory add — the task still shows up in list for the rest of the
+     * session even if it couldn't be written to disk.
+     */
+    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws MyriadException {
+        taskList.add(task);
+        ui.showAddedTask(task, taskList.size());
+        save(taskList);
+    }
+
+    /**
      * Marks the task named by the task number in line (e.g. "mark 2") as
-     * done and shows an acknowledgement. Throws MyriadException instead if
-     * the task number is missing, not a number, or out of range.
+     * done, shows an acknowledgement, then saves. Throws MyriadException
+     * instead if the task number is missing, not a number, or out of
+     * range.
      */
     private static void markTask(String line, TaskList taskList, Ui ui) throws MyriadException {
         int index = resolveTaskIndex(line, taskList);
         taskList.markDone(index);
         ui.showMarked(taskList.get(index));
+        save(taskList);
     }
 
     /**
      * Marks the task named by the task number in line (e.g. "unmark 2") as
-     * not done and shows an acknowledgement. Throws MyriadException
-     * instead if the task number is missing, not a number, or out of
-     * range.
+     * not done, shows an acknowledgement, then saves. Throws
+     * MyriadException instead if the task number is missing, not a
+     * number, or out of range.
      */
     private static void unmarkTask(String line, TaskList taskList, Ui ui) throws MyriadException {
         int index = resolveTaskIndex(line, taskList);
         taskList.markNotDone(index);
         ui.showUnmarked(taskList.get(index));
+        save(taskList);
     }
 
     /**
-     * Removes the task named by the task number in line (e.g. "delete 2")
-     * and shows an acknowledgement. Throws MyriadException instead if the
-     * task number is missing, not a number, or out of range.
+     * Removes the task named by the task number in line (e.g. "delete 2"),
+     * shows an acknowledgement, then saves. Throws MyriadException instead
+     * if the task number is missing, not a number, or out of range.
      */
     private static void deleteTask(String line, TaskList taskList, Ui ui) throws MyriadException {
         int index = resolveTaskIndex(line, taskList);
         Task removed = taskList.remove(index);
         ui.showDeleted(removed, taskList.size());
+        save(taskList);
     }
 
     /**

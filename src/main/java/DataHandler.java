@@ -17,17 +17,22 @@ public class DataHandler {
     private static final String DATA_FILE = DATA_DIR + "/myriad.txt";
 
     /**
-     * Appends the given task's save format to the data file, creating the
-     * data directory first if it doesn't already exist (e.g. on a fresh
-     * checkout). IOException (e.g. disk full, permission denied) is
-     * declared for the caller to translate into a user-facing message —
-     * see Myriad.addAndShow.
+     * Overwrites the data file with every task currently in taskList, one
+     * save-format line each, creating the data directory first if it
+     * doesn't already exist (e.g. on a fresh checkout). Called after every
+     * mutating command (add/mark/unmark/delete) so the file always exactly
+     * mirrors the in-memory list — simpler than tracking per-task deltas,
+     * and cheap at the scale of a personal task list. IOException (e.g.
+     * disk full, permission denied) is declared for the caller to
+     * translate into a user-facing message — see Myriad.save.
      */
-    public static void writeData(Task task) throws IOException {
+    public static void saveAll(TaskList taskList) throws IOException {
         new File(DATA_DIR).mkdirs();
 
-        try (FileWriter writer = new FileWriter(DATA_FILE, true)) {
-            writer.write(task.toSaveFormat() + "\n");
+        try (FileWriter writer = new FileWriter(DATA_FILE, false)) {
+            for (Task task : taskList.asList()) {
+                writer.write(task.toSaveFormat() + "\n");
+            }
         }
     }
 
