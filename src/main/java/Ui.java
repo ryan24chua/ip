@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Owns every line printed to the console, including the divider framing
@@ -105,6 +106,23 @@ public class Ui {
     public void showError(String message) {
         showDivider();
         System.out.println(message);
+        showDivider();
+    }
+
+    /**
+     * Prints a consolidated warning that some lines in the saved data file
+     * could not be loaded and were skipped, framed by divider lines. Each
+     * entry in skippedLines is one already-formatted line description; the
+     * other, valid tasks from the file are unaffected and already in the
+     * task list by the time this is called.
+     */
+    public void showLoadWarning(List<String> skippedLines) {
+        showDivider();
+        System.out.printf("Warning: %d line(s) in your saved data could not be loaded and "
+                + "were skipped:%n", skippedLines.size());
+        for (String skipped : skippedLines) {
+            System.out.println("  - " + skipped);
+        }
         showDivider();
     }
 }

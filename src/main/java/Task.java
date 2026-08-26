@@ -20,6 +20,18 @@ public class Task {
     }
 
     /**
+     * Returns this task's data as a "|"-delimited line for saving to disk,
+     * e.g. "1 | read book" for a done task. Deliberately separate from
+     * toString(): that method's bracket-and-icon format is for display and
+     * may change independently, whereas this format needs to stay stable
+     * and parseable so a saved line can be read back into a Task later.
+     * Subclasses prepend their type letter and any extra fields.
+     */
+    public String toSaveFormat() {
+        return String.format("%d | %s", isDone ? 1 : 0, description);
+    }
+
+    /**
      * Returns the task's status and description, e.g. [X] read book
      * if done, or [ ] read book if not done.
      */
