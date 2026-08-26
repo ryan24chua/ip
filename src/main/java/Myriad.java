@@ -11,8 +11,13 @@ import java.util.Scanner;
  * "mark"/"unmark" a task done, until the user types the exit command
  * ("bye"), then prints a farewell. A line that doesn't match any known
  * command, or that's missing a required argument, throws a
- * MyriadException, which is caught once per line in run() and shown as
- * an error.
+ * MyriadException, which is caught once per line in readCommands() and
+ * shown as an error.
+ *
+ * One chatbot session is one Myriad object: it holds the pieces that
+ * session needs — the Ui it talks through and the TaskList it works on —
+ * as fields, so the command handlers can use them without every one of
+ * them taking both as parameters.
  */
 public class Myriad {
 
@@ -25,17 +30,41 @@ public class Myriad {
         UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, SHOW;
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        Ui ui = new Ui();
-        TaskList taskList = new TaskList();
-        List<String> skippedLines = DataHandler.readData(taskList);
+    private final Ui ui;
+    private final TaskList tasks;
 
+    /**
+     * Descriptions of any saved-data lines that couldn't be loaded. Held
+     * from construction until run() shows them, because the warning has to
+     * appear after the greeting rather than before it.
+     */
+    private final List<String> skippedLines;
+
+    /**
+     * Sets up one chatbot session: creates the Ui and loads whatever tasks
+     * were saved from the last session.
+     */
+    public Myriad() throws FileNotFoundException {
+        this.ui = new Ui();
+        this.tasks = new TaskList();
+        this.skippedLines = DataHandler.readData(this.tasks);
+    }
+
+    /**
+     * Greets the user, warns about any saved lines that couldn't be
+     * loaded, handles commands until the user exits, then says goodbye.
+     */
+    public void run() {
         ui.showGreeting();
         if (!skippedLines.isEmpty()) {
             ui.showLoadWarning(skippedLines);
         }
-        run(ui, taskList);
+        readCommands();
         ui.showFarewell();
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        new Myriad().run();
     }
 
     /**
@@ -53,7 +82,7 @@ public class Myriad {
      * caught and shown the same way as any other command error, instead of
      * crashing the program.
      */
-    private static void run(Ui ui, TaskList taskList) {
+    private void readCommands() {
         Scanner sc = new Scanner(System.in);
 
         while (sc.hasNextLine()) {
@@ -65,17 +94,17 @@ public class Myriad {
                     case EXIT -> {
                         return;
                     }
-                    case LIST -> ui.showList(taskList.asList());
+                    case LIST -> ui.showList(tasks.asList());
                     case UNKNOWN -> throw new MyriadException(
                             "I don't recognize that command. Try: todo, deadline, event, "
                                     + "list, mark, unmark, delete, show, or bye.");
-                    case MARK -> markTask(line, taskList, ui);
-                    case UNMARK -> unmarkTask(line, taskList, ui);
-                    case TODO -> addToDo(line, taskList, ui);
-                    case DEADLINE -> addDeadline(line, taskList, ui);
-                    case EVENT -> addEvent(line, taskList, ui);
-                    case DELETE -> deleteTask(line, taskList, ui);
-                    case SHOW -> showTasksOn(line, taskList, ui);
+                    case MARK -> markTask(line);
+                    case UNMARK -> unmarkTask(line);
+                    case TODO -> addToDo(line);
+                    case DEADLINE -> addDeadline(line);
+                    case EVENT -> addEvent(line);
+                    case DELETE -> deleteTask(line);
+                    case SHOW -> showTasksOn(line);
                 }
             } catch (MyriadException e) {
                 ui.showError("Error: " + e.getMessage());
@@ -127,7 +156,7 @@ public class Myriad {
      * whole number, or out of range for the current list size — with a
      * message specific to which of those three went wrong.
      */
-    private static int resolveTaskIndex(String line, TaskList taskList) throws MyriadException {
+    private int resolveTaskIndex(String line) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
@@ -146,8 +175,8 @@ public class Myriad {
         }
 
         int index = taskNumber - 1;
-        if (!taskList.isValidIndex(index)) {
-            if (taskList.size() == 0) {
+        if (!tasks.isValidIndex(index)) {
+            if (tasks.size() == 0) {
                 // Special-cased so the message doesn't say "choose a number
                 // from 1 to 0", which the generic branch below would produce.
                 throw new MyriadException(
@@ -157,22 +186,22 @@ public class Myriad {
             throw new MyriadException(String.format(
                     "Task number %d doesn't exist. You have %d task(s) in the list, so "
                             + "please choose a number from 1 to %d.",
-                    taskNumber, taskList.size(), taskList.size()));
+                    taskNumber, tasks.size(), tasks.size()));
         }
         return index;
     }
 
     /**
-     * Saves taskList's current state to disk, wrapping any IOException
+     * Saves the task list's current state to disk, wrapping any IOException
      * (disk full, permission denied, etc.) into a MyriadException so it's
-     * shown by run()'s catch block like any other command error, instead
-     * of crashing the program. Shared by every mutating command
+     * shown by readCommands()'s catch block like any other command error,
+     * instead of crashing the program. Shared by every mutating command
      * (add/mark/unmark/delete) so there's one place that translates a save
      * failure into a user-facing message.
      */
-    private static void save(TaskList taskList) throws MyriadException {
+    private void save() throws MyriadException {
         try {
-            DataHandler.saveAll(taskList);
+            DataHandler.saveAll(tasks);
         } catch (IOException e) {
             throw new MyriadException(
                     "Couldn't save your tasks to disk (the list is still correct for this "
@@ -181,7 +210,7 @@ public class Myriad {
     }
 
     /**
-     * Adds task to taskList, shows the standard added-task
+     * Adds task to the task list, shows the standard added-task
      * acknowledgement, then saves. Shared by every add-command handler
      * (addToDo/addDeadline/addEvent) so the acknowledgement wording stays
      * consistent across task types. The add and acknowledgement happen
@@ -189,10 +218,10 @@ public class Myriad {
      * in-memory add — the task still shows up in list for the rest of the
      * session even if it couldn't be written to disk.
      */
-    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws MyriadException {
-        taskList.add(task);
-        ui.showAddedTask(task, taskList.size());
-        save(taskList);
+    private void addAndShow(Task task) throws MyriadException {
+        tasks.add(task);
+        ui.showAddedTask(task, tasks.size());
+        save();
     }
 
     /**
@@ -201,11 +230,11 @@ public class Myriad {
      * instead if the task number is missing, not a number, or out of
      * range.
      */
-    private static void markTask(String line, TaskList taskList, Ui ui) throws MyriadException {
-        int index = resolveTaskIndex(line, taskList);
-        taskList.markDone(index);
-        ui.showMarked(taskList.get(index));
-        save(taskList);
+    private void markTask(String line) throws MyriadException {
+        int index = resolveTaskIndex(line);
+        tasks.markDone(index);
+        ui.showMarked(tasks.get(index));
+        save();
     }
 
     /**
@@ -214,11 +243,11 @@ public class Myriad {
      * MyriadException instead if the task number is missing, not a
      * number, or out of range.
      */
-    private static void unmarkTask(String line, TaskList taskList, Ui ui) throws MyriadException {
-        int index = resolveTaskIndex(line, taskList);
-        taskList.markNotDone(index);
-        ui.showUnmarked(taskList.get(index));
-        save(taskList);
+    private void unmarkTask(String line) throws MyriadException {
+        int index = resolveTaskIndex(line);
+        tasks.markNotDone(index);
+        ui.showUnmarked(tasks.get(index));
+        save();
     }
 
     /**
@@ -226,11 +255,11 @@ public class Myriad {
      * shows an acknowledgement, then saves. Throws MyriadException instead
      * if the task number is missing, not a number, or out of range.
      */
-    private static void deleteTask(String line, TaskList taskList, Ui ui) throws MyriadException {
-        int index = resolveTaskIndex(line, taskList);
-        Task removed = taskList.remove(index);
-        ui.showDeleted(removed, taskList.size());
-        save(taskList);
+    private void deleteTask(String line) throws MyriadException {
+        int index = resolveTaskIndex(line);
+        Task removed = tasks.remove(index);
+        ui.showDeleted(removed, tasks.size());
+        save();
     }
 
     /**
@@ -238,14 +267,14 @@ public class Myriad {
      * adds a ToDo task and shows the standard added-task acknowledgement.
      * Throws MyriadException instead if the description is missing.
      */
-    private static void addToDo(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private void addToDo(String line) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
             throw new MyriadException(
                     "Please include a task description, e.g. \"todo read book\".");
         }
-        addAndShow(new ToDo(parts[1]), taskList, ui);
+        addAndShow(new ToDo(parts[1]));
     }
 
     /**
@@ -266,7 +295,7 @@ public class Myriad {
      * added-task acknowledgement. Throws MyriadException instead if the
      * description or date is missing.
      */
-    private static void addDeadline(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private void addDeadline(String line) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -282,7 +311,7 @@ public class Myriad {
             throw new MyriadException(
                     "Please include a date after /by, e.g. \"" + example + "\".");
         }
-        addAndShow(new Deadline(description, TaskDateTime.parse(date)), taskList, ui);
+        addAndShow(new Deadline(description, TaskDateTime.parse(date)));
     }
 
     /**
@@ -291,7 +320,7 @@ public class Myriad {
      * standard added-task acknowledgement. Throws MyriadException instead
      * if the description, start date, or end date is missing.
      */
-    private static void addEvent(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private void addEvent(String line) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -314,7 +343,7 @@ public class Myriad {
             throw new MyriadException(
                     "Please include an end time after /to, e.g. \"" + example + "\".");
         }
-        addAndShow(new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end)), taskList, ui);
+        addAndShow(new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end)));
     }
 
     /**
@@ -323,7 +352,7 @@ public class Myriad {
      * Task.occursDuring). Throws MyriadException if the date/time is
      * missing, or if the date/time doesn't parse.
      */
-    private static void showTasksOn(String line, TaskList taskList, Ui ui) throws MyriadException {
+    private void showTasksOn(String line) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String example = "show 2019-12-02 1800";
 
@@ -332,7 +361,7 @@ public class Myriad {
                     "Please include a date/time to show, e.g. \"" + example + "\".");
         }
         TaskDateTime query = TaskDateTime.parse(parts[1].strip());
-        var matches = taskList.occurringOn(query);
+        var matches = tasks.occurringOn(query);
         ui.showTasksOn(matches, query);
     }
 }
