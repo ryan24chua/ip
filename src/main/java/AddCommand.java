@@ -1,3 +1,6 @@
+import myriad.MyriadException;
+import myriad.task.Task;
+
 /**
  * Adds a task to the list. One class serves "todo", "deadline" and
  * "event" alike: ToDo, Deadline and Event already differ from each other

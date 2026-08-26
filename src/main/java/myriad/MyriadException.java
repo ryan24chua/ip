@@ -1,3 +1,5 @@
+package myriad;
+
 /**
  * Signals that a line of text couldn't be turned into a valid command or
  * task — either typed by the user (e.g. a missing task number, or a

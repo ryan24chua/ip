@@ -1,3 +1,5 @@
+import myriad.MyriadException;
+
 /**
  * Shared behaviour of the commands that name an existing task by its
  * number: mark, unmark and delete. All three take the same argument and

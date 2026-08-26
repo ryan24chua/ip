@@ -1,3 +1,6 @@
+import myriad.MyriadException;
+import myriad.task.Task;
+
 /**
  * Removes the task with the given number from the list.
  */
