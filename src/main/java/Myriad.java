@@ -1,4 +1,6 @@
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -23,12 +25,15 @@ public class Myriad {
         UNKNOWN, LIST, EXIT, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws FileNotFoundException {
         Ui ui = new Ui();
         TaskList taskList = new TaskList();
-        DataHandler.readData(taskList);
+        List<String> skippedLines = DataHandler.readData(taskList);
 
         ui.showGreeting();
+        if (!skippedLines.isEmpty()) {
+            ui.showLoadWarning(skippedLines);
+        }
         run(ui, taskList);
         ui.showFarewell();
     }
@@ -43,12 +48,12 @@ public class Myriad {
      * throw MyriadException instead of displaying its own error, so this
      * is the single place that catches it and shows it — with the
      * "Error: " prefix added here rather than repeated in every message.
-     * The add handlers can also throw IOException when saving a task to
-     * disk fails; that isn't caught here yet (error handling for saving is
-     * a later increment), so it propagates out of run() and crashes the
-     * program with a stack trace.
+     * The add handlers also raise MyriadException (rather than a checked
+     * IOException) when saving a task to disk fails, so a save failure is
+     * caught and shown the same way as any other command error, instead of
+     * crashing the program.
      */
-    private static void run(Ui ui, TaskList taskList) throws IOException {
+    private static void run(Ui ui, TaskList taskList) {
         Scanner sc = new Scanner(System.in);
 
         while (sc.hasNextLine()) {
@@ -155,16 +160,26 @@ public class Myriad {
     }
 
     /**
-     * Adds task to taskList, saves it to disk, and shows the standard
-     * added-task acknowledgement. Shared by every add-command handler
-     * (addToDo/addDeadline/addEvent) so the acknowledgement wording stays
-     * consistent across task types. Declares IOException rather than
-     * catching it, since saving isn't handled beyond the happy path yet.
+     * Adds task to taskList, shows the standard added-task
+     * acknowledgement, then saves it to disk. Shared by every add-command
+     * handler (addToDo/addDeadline/addEvent) so the acknowledgement
+     * wording stays consistent across task types. The add and
+     * acknowledgement happen before the save is attempted, so a save
+     * failure (wrapped into MyriadException here, shown by run()'s catch
+     * block like any other error) never undoes the in-memory add — the
+     * task still shows up in list for the rest of the session even if it
+     * couldn't be written to disk.
      */
-    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws IOException {
+    private static void addAndShow(Task task, TaskList taskList, Ui ui) throws MyriadException {
         taskList.add(task);
-        DataHandler.writeData(task);
         ui.showAddedTask(task, taskList.size());
+        try {
+            DataHandler.writeData(task);
+        } catch (IOException e) {
+            throw new MyriadException(
+                    "Couldn't save that task to disk (it's still in your list for this "
+                            + "session, but won't be there next time you start): " + e.getMessage());
+        }
     }
 
     /**
@@ -206,8 +221,7 @@ public class Myriad {
      * adds a ToDo task and shows the standard added-task acknowledgement.
      * Throws MyriadException instead if the description is missing.
      */
-    private static void addToDo(String line, TaskList taskList, Ui ui)
-            throws MyriadException, IOException {
+    private static void addToDo(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
 
         if (parts.length < 2) {
@@ -235,8 +249,7 @@ public class Myriad {
      * added-task acknowledgement. Throws MyriadException instead if the
      * description or date is missing.
      */
-    private static void addDeadline(String line, TaskList taskList, Ui ui)
-            throws MyriadException, IOException {
+    private static void addDeadline(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
@@ -261,8 +274,7 @@ public class Myriad {
      * standard added-task acknowledgement. Throws MyriadException instead
      * if the description, start date, or end date is missing.
      */
-    private static void addEvent(String line, TaskList taskList, Ui ui)
-            throws MyriadException, IOException {
+    private static void addEvent(String line, TaskList taskList, Ui ui) throws MyriadException {
         String[] parts = line.split("\\s+", 2);
         String argsText = parts.length == 2 ? parts[1] : "";
 
