@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds the user's tasks and the operations that mutate them (add,
@@ -6,7 +7,25 @@ import java.util.ArrayList;
  * responsible for displaying anything about a TaskList's contents.
  */
 public class TaskList {
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private final ArrayList<Task> tasks;
+
+    /**
+     * Creates an empty task list, for a first run with nothing saved yet.
+     */
+    public TaskList() {
+        this.tasks = new ArrayList<>();
+    }
+
+    /**
+     * Creates a task list holding the given tasks, e.g. the ones just
+     * loaded from disk. The tasks are copied into a list of this object's
+     * own rather than kept as an alias of initialTasks, so a later change
+     * to the caller's list can't quietly change this TaskList behind the
+     * back of its own add/remove methods.
+     */
+    public TaskList(List<Task> initialTasks) {
+        this.tasks = new ArrayList<>(initialTasks);
+    }
 
     public void add(Task task) {
         tasks.add(task);
