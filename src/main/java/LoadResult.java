@@ -1,0 +1,12 @@
+import java.util.List;
+
+/**
+ * The outcome of one Storage.load() call: the tasks that were read
+ * successfully, and a description of each line that had to be skipped.
+ * Storage has to report both, and a small record is the simplest way to
+ * return two values — the alternative, keeping the skipped lines in a
+ * Storage field for the caller to fetch afterwards, would give Storage
+ * state that lasts beyond the call and only makes sense right after one.
+ */
+public record LoadResult(List<Task> tasks, List<String> skippedLines) {
+}

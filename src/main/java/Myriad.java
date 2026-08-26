@@ -1,4 +1,4 @@
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
@@ -15,9 +15,9 @@ import java.util.Scanner;
  * shown as an error.
  *
  * One chatbot session is one Myriad object: it holds the pieces that
- * session needs — the Ui it talks through and the TaskList it works on —
- * as fields, so the command handlers can use them without every one of
- * them taking both as parameters.
+ * session needs — the Ui it talks through, the Storage it saves to, and
+ * the TaskList it works on — as fields, so the command handlers can use
+ * them without every one of them taking all three as parameters.
  */
 public class Myriad {
 
@@ -31,31 +31,56 @@ public class Myriad {
     }
 
     private final Ui ui;
+    private final Storage storage;
     private final TaskList tasks;
 
     /**
-     * Descriptions of any saved-data lines that couldn't be loaded. Held
-     * from construction until run() shows them, because the warning has to
-     * appear after the greeting rather than before it.
+     * Descriptions of any saved-data lines that couldn't be loaded, or null
+     * if the whole file couldn't be read. Both are held from construction
+     * until run() shows them, because a load problem has to be reported
+     * after the greeting rather than before it.
      */
     private final List<String> skippedLines;
+    private final String loadErrorMessage;
 
     /**
-     * Sets up one chatbot session: creates the Ui and loads whatever tasks
-     * were saved from the last session.
+     * Sets up one chatbot session: creates the Ui, points Storage at
+     * filePath, and loads whatever tasks were saved there last session. A
+     * file that can't be read at all isn't fatal — the session starts from
+     * an empty list and run() warns about it — so that a single unreadable
+     * file doesn't stop the user from using the chatbot at all.
      */
-    public Myriad() throws FileNotFoundException {
+    public Myriad(String filePath) {
         this.ui = new Ui();
-        this.tasks = new TaskList();
-        this.skippedLines = DataHandler.readData(this.tasks);
+        this.storage = new Storage(filePath);
+
+        TaskList loadedTasks;
+        List<String> loadedSkippedLines;
+        String errorMessage;
+        try {
+            LoadResult loaded = storage.load();
+            loadedTasks = new TaskList(loaded.tasks());
+            loadedSkippedLines = loaded.skippedLines();
+            errorMessage = null;
+        } catch (MyriadException e) {
+            loadedTasks = new TaskList();
+            loadedSkippedLines = List.of();
+            errorMessage = e.getMessage();
+        }
+        this.tasks = loadedTasks;
+        this.skippedLines = loadedSkippedLines;
+        this.loadErrorMessage = errorMessage;
     }
 
     /**
-     * Greets the user, warns about any saved lines that couldn't be
-     * loaded, handles commands until the user exits, then says goodbye.
+     * Greets the user, warns about anything that couldn't be loaded,
+     * handles commands until the user exits, then says goodbye.
      */
     public void run() {
         ui.showGreeting();
+        if (loadErrorMessage != null) {
+            ui.showLoadingError(loadErrorMessage);
+        }
         if (!skippedLines.isEmpty()) {
             ui.showLoadWarning(skippedLines);
         }
@@ -63,8 +88,10 @@ public class Myriad {
         ui.showFarewell();
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        new Myriad().run();
+    public static void main(String[] args) {
+        // Built with File rather than a "data/myriad.txt" literal so the
+        // separator is right on every OS.
+        new Myriad(new File("data", "myriad.txt").getPath()).run();
     }
 
     /**
@@ -201,7 +228,7 @@ public class Myriad {
      */
     private void save() throws MyriadException {
         try {
-            DataHandler.saveAll(tasks);
+            storage.save(tasks);
         } catch (IOException e) {
             throw new MyriadException(
                     "Couldn't save your tasks to disk (the list is still correct for this "
