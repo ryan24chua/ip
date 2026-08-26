@@ -1,15 +1,40 @@
 import java.util.List;
+import java.util.Scanner;
 
 /**
- * Owns every line printed to the console, including the divider framing
- * that used to be repeated at the top and bottom of nearly every handler
- * in Myriad. One show* method per user-facing interaction.
+ * Owns both halves of talking to the user: every line printed to the
+ * console, including the divider framing that used to be repeated at the
+ * top and bottom of nearly every handler in Myriad, and the reading of
+ * what the user types back. One show* method per user-facing
+ * interaction.
  */
 public class Ui {
     private static final String LINE = "____________________________________________________________";
 
+    private final Scanner scanner = new Scanner(System.in);
+
     private void showDivider() {
         System.out.println(LINE);
+    }
+
+    /**
+     * Returns whether the user has typed anything more. False once the
+     * input runs out, which happens when input is piped in from a file
+     * rather than typed — the caller stops then, exactly as it would on
+     * an explicit exit command, instead of failing on a missing line.
+     */
+    public boolean hasNextCommand() {
+        return scanner.hasNextLine();
+    }
+
+    /**
+     * Reads the next line the user typed, with leading and trailing
+     * whitespace removed. The stripping happens here, as part of taking
+     * the input in, so that everything downstream — the Parser especially
+     * — can assume a tidy line.
+     */
+    public String readCommand() {
+        return scanner.nextLine().strip();
     }
 
     /**

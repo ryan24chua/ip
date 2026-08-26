@@ -1,6 +1,5 @@
 import java.io.File;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Entry point for the Myriad chatbot.
@@ -87,10 +86,10 @@ public class Myriad {
     }
 
     /**
-     * Reads lines of user input until the user enters the exit command
+     * Takes lines from the Ui until the user enters the exit command
      * (matched case-insensitively, ignoring leading/trailing whitespace) or
-     * the input stream is exhausted, then returns so the caller can print
-     * the farewell. Each line is handed to the Parser, which returns the
+     * the input runs out, then returns so the caller can print the
+     * farewell. Each line is handed to the Parser, which returns the
      * Command it asks for; carrying that command out is the command's own
      * business, so this loop doesn't need to know which commands exist.
      * Both parsing and executing may throw MyriadException instead of
@@ -102,13 +101,9 @@ public class Myriad {
      * any other command error, instead of crashing the program.
      */
     private void readCommands() {
-        Scanner sc = new Scanner(System.in);
-
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine().strip();
-
+        while (ui.hasNextCommand()) {
             try {
-                Command command = Parser.parse(line);
+                Command command = Parser.parse(ui.readCommand());
                 command.execute(tasks, ui, storage);
                 if (command.isExit()) {
                     return;
