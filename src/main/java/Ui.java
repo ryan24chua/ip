@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,7 +56,7 @@ public class Ui {
      * Prints a header line followed by every task as a 1-indexed numbered
      * list, framed by divider lines.
      */
-    public void showList(ArrayList<Task> tasks) {
+    public void showList(List<Task> tasks) {
         showDivider();
         System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
@@ -71,7 +70,7 @@ public class Ui {
      * command), 1-indexed like showList, or a "none found" message if
      * matches is empty. Framed by divider lines.
      */
-    public void showTasksOn(ArrayList<Task> matches, TaskDateTime query) {
+    public void showTasksOn(List<Task> matches, TaskDateTime query) {
         showDivider();
         if (matches.isEmpty()) {
             System.out.printf("No deadlines or events found on %s.%n", query);
@@ -141,6 +140,23 @@ public class Ui {
         for (String skipped : skippedLines) {
             System.out.println("  - " + skipped);
         }
+        showDivider();
+    }
+
+    /**
+     * Prints a warning that the saved data file couldn't be read at all
+     * (e.g. permission denied), framed by divider lines. Deliberately
+     * separate from showLoadWarning: that one reports individual bad lines
+     * within a file that did load, whereas this one means no task was
+     * recovered and the session starts from an empty list — so the wording
+     * has to warn that saving later will overwrite whatever is still in
+     * that file.
+     */
+    public void showLoadingError(String message) {
+        showDivider();
+        System.out.println("Warning: couldn't read your saved tasks, so I'm starting with an "
+                + "empty list (saving a task later will overwrite the existing data file): "
+                + message);
         showDivider();
     }
 }
