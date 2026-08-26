@@ -67,6 +67,24 @@ public class Ui {
     }
 
     /**
+     * Prints the tasks occurring during query (from the "show task"
+     * command), 1-indexed like showList, or a "none found" message if
+     * matches is empty. Framed by divider lines.
+     */
+    public void showTasksOn(ArrayList<Task> matches, TaskDateTime query) {
+        showDivider();
+        if (matches.isEmpty()) {
+            System.out.printf("No deadlines or events found on %s.%n", query);
+        } else {
+            System.out.printf("Here are the tasks occurring on %s:%n", query);
+            for (int i = 0; i < matches.size(); i++) {
+                System.out.printf("%d.%s%n", i + 1, matches.get(i));
+            }
+        }
+        showDivider();
+    }
+
+    /**
      * Prints an acknowledgement that task was marked done, framed by
      * divider lines.
      */

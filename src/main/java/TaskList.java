@@ -47,4 +47,20 @@ public class TaskList {
     public ArrayList<Task> asList() {
         return tasks;
     }
+
+    /**
+     * Returns a new list of every task whose occursDuring(query) is true,
+     * for the "show task" command. Unlike asList(), this is always a fresh
+     * list — safe to hand to a caller without exposing the underlying
+     * tasks list.
+     */
+    public ArrayList<Task> occurringOn(TaskDateTime query) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.occursDuring(query)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
 }

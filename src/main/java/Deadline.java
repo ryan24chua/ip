@@ -1,7 +1,7 @@
 public class Deadline extends Task {
-    private String date;
+    private TaskDateTime date;
 
-    public Deadline(String description, String date) {
+    public Deadline(String description, TaskDateTime date) {
         super(description);
 
         this.date = date;
@@ -14,11 +14,22 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return String.format("D | %s | %s", super.toSaveFormat(), date);
+        return String.format("D | %s | %s", super.toSaveFormat(), date.toSaveFormat());
     }
 
     @Override
     public String toString() {
         return String.format("[D]%s (by: %s)", super.toString(), this.date);
+    }
+
+    /**
+     * Matches if query overlaps this deadline's own instant (or, if the
+     * deadline has no time of its own, its whole day) — see
+     * TaskDateTime.rangesOverlap for the general rule.
+     */
+    @Override
+    public boolean occursDuring(TaskDateTime query) {
+        return TaskDateTime.rangesOverlap(
+                date.rangeStart(), date.rangeEnd(), query.rangeStart(), query.rangeEnd());
     }
 }
