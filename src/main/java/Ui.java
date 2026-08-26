@@ -1,16 +1,40 @@
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
- * Owns every line printed to the console, including the divider framing
- * that used to be repeated at the top and bottom of nearly every handler
- * in Myriad. One show* method per user-facing interaction.
+ * Owns both halves of talking to the user: every line printed to the
+ * console, including the divider framing that used to be repeated at the
+ * top and bottom of nearly every handler in Myriad, and the reading of
+ * what the user types back. One show* method per user-facing
+ * interaction.
  */
 public class Ui {
     private static final String LINE = "____________________________________________________________";
 
+    private final Scanner scanner = new Scanner(System.in);
+
     private void showDivider() {
         System.out.println(LINE);
+    }
+
+    /**
+     * Returns whether the user has typed anything more. False once the
+     * input runs out, which happens when input is piped in from a file
+     * rather than typed — the caller stops then, exactly as it would on
+     * an explicit exit command, instead of failing on a missing line.
+     */
+    public boolean hasNextCommand() {
+        return scanner.hasNextLine();
+    }
+
+    /**
+     * Reads the next line the user typed, with leading and trailing
+     * whitespace removed. The stripping happens here, as part of taking
+     * the input in, so that everything downstream — the Parser especially
+     * — can assume a tidy line.
+     */
+    public String readCommand() {
+        return scanner.nextLine().strip();
     }
 
     /**
@@ -57,7 +81,7 @@ public class Ui {
      * Prints a header line followed by every task as a 1-indexed numbered
      * list, framed by divider lines.
      */
-    public void showList(ArrayList<Task> tasks) {
+    public void showList(List<Task> tasks) {
         showDivider();
         System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
@@ -71,7 +95,7 @@ public class Ui {
      * command), 1-indexed like showList, or a "none found" message if
      * matches is empty. Framed by divider lines.
      */
-    public void showTasksOn(ArrayList<Task> matches, TaskDateTime query) {
+    public void showTasksOn(List<Task> matches, TaskDateTime query) {
         showDivider();
         if (matches.isEmpty()) {
             System.out.printf("No deadlines or events found on %s.%n", query);
@@ -141,6 +165,23 @@ public class Ui {
         for (String skipped : skippedLines) {
             System.out.println("  - " + skipped);
         }
+        showDivider();
+    }
+
+    /**
+     * Prints a warning that the saved data file couldn't be read at all
+     * (e.g. permission denied), framed by divider lines. Deliberately
+     * separate from showLoadWarning: that one reports individual bad lines
+     * within a file that did load, whereas this one means no task was
+     * recovered and the session starts from an empty list — so the wording
+     * has to warn that saving later will overwrite whatever is still in
+     * that file.
+     */
+    public void showLoadingError(String message) {
+        showDivider();
+        System.out.println("Warning: couldn't read your saved tasks, so I'm starting with an "
+                + "empty list (saving a task later will overwrite the existing data file): "
+                + message);
         showDivider();
     }
 }
