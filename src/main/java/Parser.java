@@ -1,10 +1,9 @@
 /**
- * Makes sense of what the user typed: which command a line names, and
- * what its arguments mean. This is the one place that knows the command
- * language — the keywords, the "/by", "/from" and "/to" markers, and
- * which arguments each command requires — so Myriad's handlers can work
- * with a Task or a task number instead of re-splitting the raw line
- * themselves.
+ * Makes sense of what the user typed, turning a line of input into the
+ * Command that carries it out. This is the one place that knows the
+ * command language — the keywords, the "/by", "/from" and "/to" markers,
+ * and which arguments each command requires — so nothing else has to
+ * look at the raw line at all.
  *
  * The methods are static because parsing a line depends only on that
  * line: there's nothing to remember between calls, so a Parser object
@@ -13,39 +12,40 @@
 public class Parser {
 
     /**
-     * Maps a stripped input line to a CommandType. The first word is
-     * matched case-insensitively against the known command keywords.
-     * "bye" and "list" take no arguments, so they only match when they
-     * are the whole line. "mark", "unmark", "todo", "deadline", "event",
-     * "delete" and "show" all match on keyword alone — whether their
-     * arguments are actually usable is decided by the parse* method for
-     * that command, which can explain what's missing. Anything else maps
-     * to UNKNOWN.
+     * Builds the Command a stripped input line asks for, with that line's
+     * arguments already interpreted. The first word is matched
+     * case-insensitively against the known command keywords. "bye" and
+     * "list" take no arguments, so they only match when they are the
+     * whole line. Throws MyriadException if the line names no known
+     * command, or if its arguments can't be made sense of — so a command
+     * object only ever exists if it can actually be attempted.
      */
-    public static CommandType parseCommandType(String strippedLine) {
+    public static Command parse(String strippedLine) throws MyriadException {
         String firstWord = strippedLine.split("\\s+", 2)[0];
-        String rest = extractArguments(strippedLine);
+        String args = extractArguments(strippedLine);
 
-        if (firstWord.equalsIgnoreCase("bye") && rest.isEmpty()) {
-            return CommandType.EXIT;
-        } else if (firstWord.equalsIgnoreCase("list") && rest.isEmpty()) {
-            return CommandType.LIST;
+        if (firstWord.equalsIgnoreCase("bye") && args.isEmpty()) {
+            return new ExitCommand();
+        } else if (firstWord.equalsIgnoreCase("list") && args.isEmpty()) {
+            return new ListCommand();
         } else if (firstWord.equalsIgnoreCase("mark")) {
-            return CommandType.MARK;
+            return new MarkCommand(parseTaskNumber(args));
         } else if (firstWord.equalsIgnoreCase("unmark")) {
-            return CommandType.UNMARK;
+            return new UnmarkCommand(parseTaskNumber(args));
         } else if (firstWord.equalsIgnoreCase("todo")) {
-            return CommandType.TODO;
+            return new AddCommand(parseToDo(args));
         } else if (firstWord.equalsIgnoreCase("deadline")) {
-            return CommandType.DEADLINE;
+            return new AddCommand(parseDeadline(args));
         } else if (firstWord.equalsIgnoreCase("event")) {
-            return CommandType.EVENT;
+            return new AddCommand(parseEvent(args));
         } else if (firstWord.equalsIgnoreCase("delete")) {
-            return CommandType.DELETE;
+            return new DeleteCommand(parseTaskNumber(args));
         } else if (firstWord.equalsIgnoreCase("show")) {
-            return CommandType.SHOW;
+            return new ShowCommand(parseShowQuery(args));
         } else {
-            return CommandType.UNKNOWN;
+            throw new MyriadException(
+                    "I don't recognize that command. Try: todo, deadline, event, "
+                            + "list, mark, unmark, delete, show, or bye.");
         }
     }
 
@@ -54,10 +54,9 @@ public class Parser {
      * (e.g. "read book" from "todo read book"), or an empty string if the
      * line is the keyword alone. Every parse* method below takes this
      * argument text rather than the whole line, so the keyword is split
-     * off exactly once per line instead of once here and again in each
-     * handler.
+     * off exactly once per line.
      */
-    public static String extractArguments(String strippedLine) {
+    private static String extractArguments(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
         return parts.length == 2 ? parts[1] : "";
     }
@@ -70,9 +69,10 @@ public class Parser {
      * Deliberately stops there: whether that number actually exists
      * depends on how many tasks there are right now, which is the task
      * list's business, not the command language's — so the range check
-     * stays with the caller (see Myriad.resolveTaskIndex).
+     * happens later, when the command runs (see
+     * TaskNumberCommand.resolveIndex).
      */
-    public static int parseTaskNumber(String args) throws MyriadException {
+    private static int parseTaskNumber(String args) throws MyriadException {
         if (args.isEmpty()) {
             throw new MyriadException(
                     "Please tell me which task number, e.g. \"mark 2\".");
@@ -92,7 +92,7 @@ public class Parser {
      * Builds the ToDo described by a "todo" command's arguments. Throws
      * MyriadException if the description is missing.
      */
-    public static Task parseToDo(String args) throws MyriadException {
+    private static Task parseToDo(String args) throws MyriadException {
         if (args.isEmpty()) {
             throw new MyriadException(
                     "Please include a task description, e.g. \"todo read book\".");
@@ -117,7 +117,7 @@ public class Parser {
      * &lt;date&gt;" command's arguments. Throws MyriadException if the
      * description or the date is missing, or if the date doesn't parse.
      */
-    public static Task parseDeadline(String args) throws MyriadException {
+    private static Task parseDeadline(String args) throws MyriadException {
         String[] descAndDate = splitOnMarker(args, "/by");
         String description = descAndDate[0];
         String date = descAndDate.length == 2 ? descAndDate[1] : null;
@@ -139,7 +139,7 @@ public class Parser {
      * MyriadException if the description, start or end is missing, or if
      * either date doesn't parse.
      */
-    public static Task parseEvent(String args) throws MyriadException {
+    private static Task parseEvent(String args) throws MyriadException {
         String[] descAndRest = splitOnMarker(args, "/from");
         String description = descAndRest[0];
         String rest = descAndRest.length == 2 ? descAndRest[1] : "";
@@ -166,7 +166,7 @@ public class Parser {
      * Parses the date/time a "show" command asks about. Throws
      * MyriadException if it is missing or doesn't parse.
      */
-    public static TaskDateTime parseShowQuery(String args) throws MyriadException {
+    private static TaskDateTime parseShowQuery(String args) throws MyriadException {
         String example = "show 2019-12-02 1800";
 
         if (args.isBlank()) {
