@@ -50,6 +50,9 @@ Note that `junit-jupiter-params` is not on the classpath, so `@ParameterizedTest
 
 ## Git
 
+**All commits and branch names in this repository must follow the SE-EDU Git conventions: <https://se-education.org/guides/conventions/git.html>.** The rules are written out in the project skill `.claude/skills/seedu-git-standard/SKILL.md`; invoke that skill before proposing or writing any commit message or branch name here.
+
+This is not advisory. Every commit message must have an imperative, capitalised subject of at most 50 characters (72 hard limit) with no trailing period, and — for anything non-trivial — a body separated by a blank line, wrapped at 72 characters, explaining what and why rather than how. Branch names are kebab-case keywords, prefixed with the issue number when the branch addresses an issue (`1234-ui-freeze-error`).
+
 Use lightweight tags unless the user requests an annotated tag.
-When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
