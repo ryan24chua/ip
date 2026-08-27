@@ -1,9 +1,9 @@
 package myriad;
 
-import myriad.command.Command;
-
 import java.io.File;
 import java.util.List;
+
+import myriad.command.Command;
 
 /**
  * Entry point for the Myriad chatbot.

@@ -7,7 +7,7 @@ import myriad.task.TaskDateTime;
 
 /**
  * Shows every Deadline/Event occurring during a given date/time (see
- * TaskList.occurringOn and Task.occursDuring). Reads the list without
+ * TaskList.getTasksOccurringOn and Task.occursDuring). Reads the list without
  * changing it, so it never saves.
  */
 public class ShowCommand extends Command {
@@ -20,6 +20,6 @@ public class ShowCommand extends Command {
 
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showTasksOn(tasks.occurringOn(query), query);
+        ui.showTasksOn(tasks.getTasksOccurringOn(query), query);
     }
 }

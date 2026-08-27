@@ -1,11 +1,5 @@
 package myriad;
 
-import myriad.task.Deadline;
-import myriad.task.Event;
-import myriad.task.Task;
-import myriad.task.TaskDateTime;
-import myriad.task.ToDo;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -13,6 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import myriad.task.Deadline;
+import myriad.task.Event;
+import myriad.task.Task;
+import myriad.task.TaskDateTime;
+import myriad.task.ToDo;
 
 /**
  * Handles saving and loading task data on disk. Tasks are stored one per
@@ -69,31 +69,31 @@ public class Storage {
      * stored, not of the command language the user types.
      */
     private static Task parseLine(String line) throws MyriadException {
-        String[] p = line.split("\\s*\\|\\s*");
-        if (p.length < 3) {
+        String[] fields = line.split("\\s*\\|\\s*");
+        if (fields.length < 3) {
             throw new MyriadException(
-                    "expected at least 3 fields (type | done | description), found " + p.length);
+                    "expected at least 3 fields (type | done | description), found " + fields.length);
         }
-        String type = p[0];
-        boolean isDone = p[1].equals("1");
-        String description = p[2];
+        String type = fields[0];
+        boolean isDone = fields[1].equals("1");
+        String description = fields[2];
 
         Task task = switch (type) {
             case "T" -> new ToDo(description);
             case "D" -> {
-                if (p.length < 4) {
+                if (fields.length < 4) {
                     throw new MyriadException(
-                            "a Deadline line needs a 4th field (date), found " + p.length + " fields");
+                            "a Deadline line needs a 4th field (date), found " + fields.length + " fields");
                 }
-                yield new Deadline(description, TaskDateTime.parse(p[3]));
+                yield new Deadline(description, TaskDateTime.parse(fields[3]));
             }
             case "E" -> {
-                if (p.length < 5) {
+                if (fields.length < 5) {
                     throw new MyriadException(
                             "an Event line needs 5 fields (type, done, description, start, end), "
-                                    + "found " + p.length);
+                                    + "found " + fields.length);
                 }
-                yield new Event(description, TaskDateTime.parse(p[3]), TaskDateTime.parse(p[4]));
+                yield new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
             }
             default -> throw new MyriadException("unknown task type \"" + type + "\"");
         };

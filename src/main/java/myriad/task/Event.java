@@ -18,7 +18,8 @@ public class Event extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return String.format("E | %s | %s | %s", super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
+        return String.format("E | %s | %s | %s",
+                super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
     }
 
     @Override

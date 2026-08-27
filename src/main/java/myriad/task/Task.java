@@ -15,10 +15,13 @@ public class Task {
     }
 
     /**
-     * Sets whether this task is done.
+     * Sets whether this task is done. Used both by the mark/unmark
+     * commands and by Storage when restoring a task's saved status.
+     *
+     * @param isDone true to mark done, false to mark not done yet.
      */
-    public void setDone(boolean done) {
-        this.isDone = done;
+    public void setDone(boolean isDone) {
+        this.isDone = isDone;
     }
 
     /**

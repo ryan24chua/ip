@@ -280,140 +280,140 @@ public class TaskListTest {
     }
 
     // ---------------------------------------------------------------
-    // occurringOn -- the filtering behind "show"
+    // getTasksOccurringOn -- the filtering behind "show"
     // ---------------------------------------------------------------
 
     @Test
-    public void occurringOn_toDoInList_neverMatches() {
+    public void getTasksOccurringOn_toDoInList_neverMatches() {
         // A ToDo has no date at all, so it can never occur on a given day.
         TaskList tasks = new TaskList();
         tasks.add(new ToDo("read book"));
-        assertEquals(0, tasks.occurringOn(at("2019-12-02")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-02")).size());
     }
 
     @Test
-    public void occurringOn_dateOnlyQuery_matchesTimedDeadlineSameDay() {
+    public void getTasksOccurringOn_dateOnlyQuery_matchesTimedDeadlineSameDay() {
         // A date-only query spans the whole day, so it catches a deadline at
         // any time on that day.
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02 1800")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02")).size());
     }
 
     @Test
-    public void occurringOn_dateOnlyQuery_doesNotMatchAdjacentDay() {
+    public void getTasksOccurringOn_dateOnlyQuery_doesNotMatchAdjacentDay() {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02 1800")));
-        assertEquals(0, tasks.occurringOn(at("2019-12-01")).size());
-        assertEquals(0, tasks.occurringOn(at("2019-12-03")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-01")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-03")).size());
     }
 
     @Test
-    public void occurringOn_timedQuery_matchesDateOnlyDeadlineSameDay() {
+    public void getTasksOccurringOn_timedQuery_matchesDateOnlyDeadlineSameDay() {
         // The reverse pairing: a deadline with no time spans the whole day,
         // so any time on that day falls inside it.
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02 0900")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02 0900")).size());
     }
 
     @Test
-    public void occurringOn_timedQuery_matchesDeadlineAtExactSameInstant() {
+    public void getTasksOccurringOn_timedQuery_matchesDeadlineAtExactSameInstant() {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02 1800")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02 1800")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02 1800")).size());
     }
 
     @Test
-    public void occurringOn_timedQuery_doesNotMatchDeadlineAtDifferentTime() {
+    public void getTasksOccurringOn_timedQuery_doesNotMatchDeadlineAtDifferentTime() {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02 1800")));
-        assertEquals(0, tasks.occurringOn(at("2019-12-02 1759")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-02 1759")).size());
     }
 
     @Test
-    public void occurringOn_queryAtEventStart_matches() {
+    public void getTasksOccurringOn_queryAtEventStart_matches() {
         // The event span is a closed interval, so both endpoints count.
         TaskList tasks = new TaskList();
         tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02 1400")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02 1400")).size());
     }
 
     @Test
-    public void occurringOn_queryAtEventEnd_matches() {
+    public void getTasksOccurringOn_queryAtEventEnd_matches() {
         TaskList tasks = new TaskList();
         tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02 1600")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02 1600")).size());
     }
 
     @Test
-    public void occurringOn_queryInsideEvent_matches() {
+    public void getTasksOccurringOn_queryInsideEvent_matches() {
         TaskList tasks = new TaskList();
         tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-02 1500")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-02 1500")).size());
     }
 
     @Test
-    public void occurringOn_queryJustBeforeEventStart_doesNotMatch() {
+    public void getTasksOccurringOn_queryJustBeforeEventStart_doesNotMatch() {
         TaskList tasks = new TaskList();
         tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
-        assertEquals(0, tasks.occurringOn(at("2019-12-02 1359")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-02 1359")).size());
     }
 
     @Test
-    public void occurringOn_queryJustAfterEventEnd_doesNotMatch() {
+    public void getTasksOccurringOn_queryJustAfterEventEnd_doesNotMatch() {
         TaskList tasks = new TaskList();
         tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
-        assertEquals(0, tasks.occurringOn(at("2019-12-02 1601")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-02 1601")).size());
     }
 
     @Test
-    public void occurringOn_queryOnMiddleDayOfMultiDayEvent_matches() {
+    public void getTasksOccurringOn_queryOnMiddleDayOfMultiDayEvent_matches() {
         TaskList tasks = new TaskList();
         tasks.add(new Event("conference", at("2019-12-01"), at("2019-12-05")));
-        assertEquals(1, tasks.occurringOn(at("2019-12-03")).size());
+        assertEquals(1, tasks.getTasksOccurringOn(at("2019-12-03")).size());
     }
 
     @Test
-    public void occurringOn_eventEndingBeforeItStarts_neverMatches() {
+    public void getTasksOccurringOn_eventEndingBeforeItStarts_neverMatches() {
         // Known limitation: nothing rejects an inverted event when it is
         // built, and the overlap check then fails for every query -- so the
         // task exists in the list but "show" can never find it, on any date.
         TaskList tasks = new TaskList();
         tasks.add(new Event("impossible", at("2019-12-05"), at("2019-12-01")));
-        assertEquals(0, tasks.occurringOn(at("2019-12-01")).size());
-        assertEquals(0, tasks.occurringOn(at("2019-12-03")).size());
-        assertEquals(0, tasks.occurringOn(at("2019-12-05")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-01")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-03")).size());
+        assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-05")).size());
     }
 
     @Test
-    public void occurringOn_mixedList_returnsOnlyMatchesInOriginalOrder() {
+    public void getTasksOccurringOn_mixedList_returnsOnlyMatchesInOriginalOrder() {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("early homework", at("2019-12-02 0900")));
         tasks.add(new ToDo("read book"));
         tasks.add(new Event("party", at("2019-12-05 1400"), at("2019-12-05 1600")));
         tasks.add(new Deadline("late homework", at("2019-12-02 1800")));
 
-        List<Task> matches = tasks.occurringOn(at("2019-12-02"));
+        List<Task> matches = tasks.getTasksOccurringOn(at("2019-12-02"));
         assertEquals(2, matches.size());
         assertEquals("early homework", describe(matches.get(0)));
         assertEquals("late homework", describe(matches.get(1)));
     }
 
     @Test
-    public void occurringOn_noMatches_emptyListReturned() {
+    public void getTasksOccurringOn_noMatches_emptyListReturned() {
         TaskList tasks = threeToDos();
-        assertTrue(tasks.occurringOn(at("2019-12-02")).isEmpty());
+        assertTrue(tasks.getTasksOccurringOn(at("2019-12-02")).isEmpty());
     }
 
     @Test
-    public void occurringOn_returnedListMutated_taskListUnaffected() {
+    public void getTasksOccurringOn_returnedListMutated_taskListUnaffected() {
         // Unlike asList(), this is always a fresh list, so the caller can do
         // as it likes with it.
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02")));
 
-        tasks.occurringOn(at("2019-12-02")).clear();
+        tasks.getTasksOccurringOn(at("2019-12-02")).clear();
 
         assertEquals(1, tasks.size());
     }
