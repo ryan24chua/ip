@@ -11,6 +11,11 @@ import java.util.List;
  * return two values — the alternative, keeping the skipped lines in a
  * Storage field for the caller to fetch afterwards, would give Storage
  * state that lasts beyond the call and only makes sense right after one.
+ *
+ * @param tasks        the tasks read successfully, in file order.
+ * @param skippedLines one already-formatted description per unreadable
+ *                     line ("line 3: unknown task type ..."), empty if
+ *                     every line loaded.
  */
 public record LoadResult(List<Task> tasks, List<String> skippedLines) {
 }

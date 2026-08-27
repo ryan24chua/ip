@@ -11,11 +11,21 @@ import myriad.Ui;
  */
 public class ExitCommand extends Command {
 
+    /** Creates the command "bye" asks for; it takes no arguments. */
+    public ExitCommand() {
+    }
+
+    /**
+     * Does nothing: this command's whole effect is the isExit() below.
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         // Nothing to do: isExit() below is what stops the command loop.
     }
 
+    /**
+     * Returns true, which is what stops Myriad's command loop.
+     */
     @Override
     public boolean isExit() {
         return true;

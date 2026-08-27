@@ -18,6 +18,14 @@ public class Ui {
 
     private final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Creates a Ui that reads from standard input and writes to standard
+     * output — the console the chatbot runs in.
+     */
+    public Ui() {
+    }
+
+    /** Prints the horizontal rule that frames every message below. */
     private void showDivider() {
         System.out.println(LINE);
     }
@@ -27,6 +35,8 @@ public class Ui {
      * input runs out, which happens when input is piped in from a file
      * rather than typed — the caller stops then, exactly as it would on
      * an explicit exit command, instead of failing on a missing line.
+     *
+     * @return true if another line of input is available.
      */
     public boolean hasNextCommand() {
         return scanner.hasNextLine();
@@ -37,6 +47,8 @@ public class Ui {
      * whitespace removed. The stripping happens here, as part of taking
      * the input in, so that everything downstream — the Parser especially
      * — can assume a tidy line.
+     *
+     * @return the stripped line.
      */
     public String readCommand() {
         return scanner.nextLine().strip();
@@ -73,6 +85,9 @@ public class Ui {
     /**
      * Prints the standard added-task acknowledgement (the task's own
      * toString, plus the new list size), framed by divider lines.
+     *
+     * @param task       the task just added.
+     * @param totalCount how many tasks the list now holds.
      */
     public void showAddedTask(Task task, int totalCount) {
         showDivider();
@@ -85,6 +100,8 @@ public class Ui {
     /**
      * Prints a header line followed by every task as a 1-indexed numbered
      * list, framed by divider lines.
+     *
+     * @param tasks the tasks to print, in task-number order.
      */
     public void showList(List<Task> tasks) {
         showDivider();
@@ -99,6 +116,9 @@ public class Ui {
      * Prints the tasks occurring during query (from the "show task"
      * command), 1-indexed like showList, or a "none found" message if
      * matches is empty. Framed by divider lines.
+     *
+     * @param matches the tasks that occur during query.
+     * @param query   the date/time the user asked about, shown in the header.
      */
     public void showTasksOn(List<Task> matches, TaskDateTime query) {
         showDivider();
@@ -116,6 +136,8 @@ public class Ui {
     /**
      * Prints an acknowledgement that task was marked done, framed by
      * divider lines.
+     *
+     * @param task the task in its new, done state.
      */
     public void showMarked(Task task) {
         showDivider();
@@ -127,6 +149,8 @@ public class Ui {
     /**
      * Prints an acknowledgement that task was marked not done, framed by
      * divider lines.
+     *
+     * @param task the task in its new, not-done state.
      */
     public void showUnmarked(Task task) {
         showDivider();
@@ -138,6 +162,9 @@ public class Ui {
     /**
      * Prints an acknowledgement that task was removed (the task's own
      * toString, plus the new list size), framed by divider lines.
+     *
+     * @param task       the task just removed.
+     * @param totalCount how many tasks the list now holds.
      */
     public void showDeleted(Task task, int totalCount) {
         showDivider();
@@ -149,6 +176,8 @@ public class Ui {
 
     /**
      * Prints a single-line error/status message, framed by divider lines.
+     *
+     * @param message the message to print, prefix included.
      */
     public void showError(String message) {
         showDivider();
@@ -162,6 +191,9 @@ public class Ui {
      * entry in skippedLines is one already-formatted line description; the
      * other, valid tasks from the file are unaffected and already in the
      * task list by the time this is called.
+     *
+     * @param skippedLines one description per skipped line, already formatted
+     *                     with its line number.
      */
     public void showLoadWarning(List<String> skippedLines) {
         showDivider();
@@ -181,6 +213,8 @@ public class Ui {
      * recovered and the session starts from an empty list — so the wording
      * has to warn that saving later will overwrite whatever is still in
      * that file.
+     *
+     * @param message why the file couldn't be read.
      */
     public void showLoadingError(String message) {
         showDivider();

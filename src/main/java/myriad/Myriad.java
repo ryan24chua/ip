@@ -44,6 +44,9 @@ public class Myriad {
      * file that can't be read at all isn't fatal — the session starts from
      * an empty list and run() warns about it — so that a single unreadable
      * file doesn't stop the user from using the chatbot at all.
+     *
+     * @param filePath path to the data file this session loads from and
+     *                 saves to.
      */
     public Myriad(String filePath) {
         this.ui = new Ui();
@@ -108,6 +111,12 @@ public class Myriad {
         ui.showFarewell();
     }
 
+    /**
+     * Starts one chatbot session reading and writing data/myriad.txt.
+     *
+     * @param args ignored; the data file location is fixed here rather than
+     *             taken from the command line.
+     */
     public static void main(String[] args) {
         // Built with File rather than a "data/myriad.txt" literal so the
         // separator is right on every OS.

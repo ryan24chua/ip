@@ -1,8 +1,20 @@
 package myriad.task;
 
+/**
+ * A task that has to be done by one date, optionally with a time of day.
+ * The due date is kept as a TaskDateTime rather than raw text, so that
+ * "show" can compare it against a queried date/time instead of matching
+ * strings.
+ */
 public class Deadline extends Task {
     private TaskDateTime date;
 
+    /**
+     * Creates a not-done Deadline.
+     *
+     * @param description what the task is.
+     * @param date        when it is due, already parsed.
+     */
     public Deadline(String description, TaskDateTime date) {
         super(description);
 
@@ -19,6 +31,10 @@ public class Deadline extends Task {
         return String.format("D | %s | %s", super.toSaveFormat(), date.toSaveFormat());
     }
 
+    /**
+     * Returns the display form, e.g. [D][ ] return book (by: Dec 02 2019) —
+     * the date shown in TaskDateTime's display format, not the save format.
+     */
     @Override
     public String toString() {
         return String.format("[D]%s (by: %s)", super.toString(), this.date);

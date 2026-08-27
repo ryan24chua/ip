@@ -4,18 +4,26 @@ package myriad.task;
  * Represents a task with a description and a done/not-done status.
  */
 public class Task {
+    /** Whether the user has marked this task done. Starts false. */
     protected boolean isDone = false;
+
+    /** What the task is, exactly as the user typed it. */
     protected String description;
 
     /**
      * Creates a task with the given description. The task starts not done.
+     *
+     * @param description what the task is.
      */
     public Task(String description) {
         this.description = description;
     }
 
     /**
-     * Sets whether this task is done.
+     * Sets whether this task is done. Used both by the mark/unmark
+     * commands and by Storage when restoring a task's saved status.
+     *
+     * @param done true to mark done, false to mark not done yet.
      */
     public void setDone(boolean done) {
         this.isDone = done;
@@ -28,6 +36,8 @@ public class Task {
      * may change independently, whereas this format needs to stay stable
      * and parseable so a saved line can be read back into a Task later.
      * Subclasses prepend their type letter and any extra fields.
+     *
+     * @return one line of save format, without a trailing newline.
      */
     public String toSaveFormat() {
         return String.format("%d | %s", isDone ? 1 : 0, description);
@@ -38,6 +48,9 @@ public class Task {
      * command. Tasks with no date of their own (ToDo) never match, hence
      * the default false here; Deadline and Event override this with their
      * own date-based check.
+     *
+     * @param query the date, or date and time, being asked about.
+     * @return whether this task overlaps query; always false for a plain Task.
      */
     public boolean occursDuring(TaskDateTime query) {
         return false;

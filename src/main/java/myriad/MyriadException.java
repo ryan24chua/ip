@@ -11,6 +11,11 @@ package myriad;
  * that prefix.
  */
 public class MyriadException extends Exception {
+    /**
+     * Creates an exception carrying the specific reason something failed.
+     *
+     * @param message the reason alone, without an "Error: " prefix.
+     */
     public MyriadException(String message) {
         super(message);
     }
