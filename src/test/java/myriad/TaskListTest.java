@@ -1,0 +1,430 @@
+package myriad;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import myriad.task.Deadline;
+import myriad.task.Event;
+import myriad.task.Task;
+import myriad.task.TaskDateTime;
+import myriad.task.ToDo;
+
+/**
+ * Tests for {@link TaskList}: the index bookkeeping every mark, unmark and
+ * delete depends on, and the date filtering behind the "show" command.
+ */
+public class TaskListTest {
+
+    /** Builds a TaskDateTime, unwrapping the checked exception for brevity. */
+    private static TaskDateTime at(String raw) {
+        try {
+            return TaskDateTime.parse(raw);
+        } catch (MyriadException e) {
+            throw new AssertionError("test fixture should parse: " + raw, e);
+        }
+    }
+
+    /** A list of three distinct ToDos, for the index-shuffling tests. */
+    private static TaskList threeToDos() {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("first"));
+        tasks.add(new ToDo("second"));
+        tasks.add(new ToDo("third"));
+        return tasks;
+    }
+
+    // ---------------------------------------------------------------
+    // Construction
+    // ---------------------------------------------------------------
+
+    @Test
+    public void constructor_noArguments_emptyList() {
+        assertEquals(0, new TaskList().size());
+    }
+
+    @Test
+    public void constructor_initialTasks_holdsThoseTasks() {
+        Task task = new ToDo("read book");
+        TaskList tasks = new TaskList(List.of(task));
+        assertEquals(1, tasks.size());
+        assertSame(task, tasks.get(0));
+    }
+
+    @Test
+    public void constructor_sourceListMutatedAfterwards_taskListUnaffected() {
+        // The constructor copies, so the caller's list -- for example the one
+        // Storage.load built -- can be changed later without silently
+        // changing this TaskList behind its own add/remove methods.
+        ArrayList<Task> source = new ArrayList<>();
+        source.add(new ToDo("first"));
+        TaskList tasks = new TaskList(source);
+
+        source.add(new ToDo("added after construction"));
+        source.clear();
+
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void constructor_emptyInitialList_emptyTaskList() {
+        assertEquals(0, new TaskList(List.of()).size());
+    }
+
+    // ---------------------------------------------------------------
+    // add / get / size
+    // ---------------------------------------------------------------
+
+    @Test
+    public void add_severalTasks_appendedInOrder() {
+        TaskList tasks = threeToDos();
+        assertEquals(3, tasks.size());
+        assertEquals("first", describe(tasks.get(0)));
+        assertEquals("third", describe(tasks.get(2)));
+    }
+
+    @Test
+    public void get_negativeIndex_exceptionThrown() {
+        // get() does not bounds-check itself; the underlying ArrayList does.
+        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().get(-1));
+    }
+
+    @Test
+    public void get_indexEqualToSize_exceptionThrown() {
+        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().get(3));
+    }
+
+    // ---------------------------------------------------------------
+    // isValidIndex -- the boundary check every task-number command uses
+    // ---------------------------------------------------------------
+
+    @Test
+    public void isValidIndex_emptyList_alwaysFalse() {
+        TaskList tasks = new TaskList();
+        assertFalse(tasks.isValidIndex(0));
+        assertFalse(tasks.isValidIndex(-1));
+        assertFalse(tasks.isValidIndex(1));
+    }
+
+    @Test
+    public void isValidIndex_firstAndLastIndex_true() {
+        TaskList tasks = threeToDos();
+        assertTrue(tasks.isValidIndex(0));
+        assertTrue(tasks.isValidIndex(tasks.size() - 1));
+    }
+
+    @Test
+    public void isValidIndex_indexEqualToSize_false() {
+        // The off-by-one that a 1-based task number would cause if it were
+        // used as an index without subtracting 1.
+        TaskList tasks = threeToDos();
+        assertFalse(tasks.isValidIndex(tasks.size()));
+    }
+
+    @Test
+    public void isValidIndex_negativeIndex_false() {
+        assertFalse(threeToDos().isValidIndex(-1));
+    }
+
+    @Test
+    public void isValidIndex_extremeValues_false() {
+        TaskList tasks = threeToDos();
+        assertFalse(tasks.isValidIndex(Integer.MIN_VALUE));
+        assertFalse(tasks.isValidIndex(Integer.MAX_VALUE));
+    }
+
+    // ---------------------------------------------------------------
+    // markDone / markNotDone
+    // ---------------------------------------------------------------
+
+    @Test
+    public void markDone_validIndex_taskShownAsDone() {
+        TaskList tasks = threeToDos();
+        tasks.markDone(1);
+        assertTrue(tasks.get(1).toString().startsWith("[T][X]"));
+    }
+
+    @Test
+    public void markDone_onlyNamedTaskAffected() {
+        TaskList tasks = threeToDos();
+        tasks.markDone(1);
+        assertTrue(tasks.get(0).toString().startsWith("[T][ ]"));
+        assertTrue(tasks.get(2).toString().startsWith("[T][ ]"));
+    }
+
+    @Test
+    public void markDone_alreadyDone_stillDone() {
+        // Marking twice is not an error; the second mark is a no-op.
+        TaskList tasks = threeToDos();
+        tasks.markDone(0);
+        tasks.markDone(0);
+        assertTrue(tasks.get(0).toString().startsWith("[T][X]"));
+    }
+
+    @Test
+    public void markNotDone_previouslyDone_taskShownAsNotDone() {
+        TaskList tasks = threeToDos();
+        tasks.markDone(0);
+        tasks.markNotDone(0);
+        assertTrue(tasks.get(0).toString().startsWith("[T][ ]"));
+    }
+
+    @Test
+    public void markNotDone_alreadyNotDone_stillNotDone() {
+        TaskList tasks = threeToDos();
+        tasks.markNotDone(0);
+        assertTrue(tasks.get(0).toString().startsWith("[T][ ]"));
+    }
+
+    @Test
+    public void markDone_outOfRangeIndex_exceptionThrown() {
+        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().markDone(3));
+    }
+
+    @Test
+    public void markNotDone_outOfRangeIndex_exceptionThrown() {
+        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().markNotDone(-1));
+    }
+
+    // ---------------------------------------------------------------
+    // remove
+    // ---------------------------------------------------------------
+
+    @Test
+    public void remove_validIndex_removedTaskReturned() {
+        TaskList tasks = threeToDos();
+        assertEquals("second", describe(tasks.remove(1)));
+    }
+
+    @Test
+    public void remove_validIndex_sizeDecreases() {
+        TaskList tasks = threeToDos();
+        tasks.remove(1);
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void remove_firstTask_laterTasksShiftDown() {
+        // The shift is what makes a stale task number refer to the wrong
+        // task, so it is worth stating explicitly.
+        TaskList tasks = threeToDos();
+        tasks.remove(0);
+        assertEquals("second", describe(tasks.get(0)));
+        assertEquals("third", describe(tasks.get(1)));
+    }
+
+    @Test
+    public void remove_lastTask_remainingTasksUnchanged() {
+        TaskList tasks = threeToDos();
+        tasks.remove(2);
+        assertEquals("first", describe(tasks.get(0)));
+        assertEquals("second", describe(tasks.get(1)));
+    }
+
+    @Test
+    public void remove_everyTask_listBecomesEmpty() {
+        TaskList tasks = threeToDos();
+        tasks.remove(0);
+        tasks.remove(0);
+        tasks.remove(0);
+        assertEquals(0, tasks.size());
+        assertFalse(tasks.isValidIndex(0));
+    }
+
+    @Test
+    public void remove_outOfRangeIndex_exceptionThrown() {
+        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().remove(3));
+    }
+
+    @Test
+    public void remove_outOfRangeIndex_listUnchanged() {
+        TaskList tasks = threeToDos();
+        assertThrows(IndexOutOfBoundsException.class, () -> tasks.remove(3));
+        assertEquals(3, tasks.size());
+    }
+
+    // ---------------------------------------------------------------
+    // asList
+    // ---------------------------------------------------------------
+
+    @Test
+    public void asList_returnsEveryTaskInOrder() {
+        TaskList tasks = threeToDos();
+        List<Task> listed = tasks.asList();
+        assertEquals(3, listed.size());
+        assertSame(tasks.get(0), listed.get(0));
+    }
+
+    @Test
+    public void asList_returnedListMutated_taskListAlsoChanges() {
+        // Known limitation: asList() hands back the live internal list rather
+        // than a copy, so a caller can add or remove tasks without going
+        // through TaskList at all. Only Ui calls it today, and only to read,
+        // but the aliasing is real -- recorded here so a future caller that
+        // mutates it is a deliberate choice rather than a surprise.
+        TaskList tasks = threeToDos();
+        tasks.asList().clear();
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void asList_emptyList_emptyResult() {
+        assertTrue(new TaskList().asList().isEmpty());
+    }
+
+    // ---------------------------------------------------------------
+    // occurringOn -- the filtering behind "show"
+    // ---------------------------------------------------------------
+
+    @Test
+    public void occurringOn_toDoInList_neverMatches() {
+        // A ToDo has no date at all, so it can never occur on a given day.
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+        assertEquals(0, tasks.occurringOn(at("2019-12-02")).size());
+    }
+
+    @Test
+    public void occurringOn_dateOnlyQuery_matchesTimedDeadlineSameDay() {
+        // A date-only query spans the whole day, so it catches a deadline at
+        // any time on that day.
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02 1800")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02")).size());
+    }
+
+    @Test
+    public void occurringOn_dateOnlyQuery_doesNotMatchAdjacentDay() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02 1800")));
+        assertEquals(0, tasks.occurringOn(at("2019-12-01")).size());
+        assertEquals(0, tasks.occurringOn(at("2019-12-03")).size());
+    }
+
+    @Test
+    public void occurringOn_timedQuery_matchesDateOnlyDeadlineSameDay() {
+        // The reverse pairing: a deadline with no time spans the whole day,
+        // so any time on that day falls inside it.
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02 0900")).size());
+    }
+
+    @Test
+    public void occurringOn_timedQuery_matchesDeadlineAtExactSameInstant() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02 1800")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02 1800")).size());
+    }
+
+    @Test
+    public void occurringOn_timedQuery_doesNotMatchDeadlineAtDifferentTime() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02 1800")));
+        assertEquals(0, tasks.occurringOn(at("2019-12-02 1759")).size());
+    }
+
+    @Test
+    public void occurringOn_queryAtEventStart_matches() {
+        // The event span is a closed interval, so both endpoints count.
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02 1400")).size());
+    }
+
+    @Test
+    public void occurringOn_queryAtEventEnd_matches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02 1600")).size());
+    }
+
+    @Test
+    public void occurringOn_queryInsideEvent_matches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-02 1500")).size());
+    }
+
+    @Test
+    public void occurringOn_queryJustBeforeEventStart_doesNotMatch() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
+        assertEquals(0, tasks.occurringOn(at("2019-12-02 1359")).size());
+    }
+
+    @Test
+    public void occurringOn_queryJustAfterEventEnd_doesNotMatch() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("party", at("2019-12-02 1400"), at("2019-12-02 1600")));
+        assertEquals(0, tasks.occurringOn(at("2019-12-02 1601")).size());
+    }
+
+    @Test
+    public void occurringOn_queryOnMiddleDayOfMultiDayEvent_matches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("conference", at("2019-12-01"), at("2019-12-05")));
+        assertEquals(1, tasks.occurringOn(at("2019-12-03")).size());
+    }
+
+    @Test
+    public void occurringOn_eventEndingBeforeItStarts_neverMatches() {
+        // Known limitation: nothing rejects an inverted event when it is
+        // built, and the overlap check then fails for every query -- so the
+        // task exists in the list but "show" can never find it, on any date.
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("impossible", at("2019-12-05"), at("2019-12-01")));
+        assertEquals(0, tasks.occurringOn(at("2019-12-01")).size());
+        assertEquals(0, tasks.occurringOn(at("2019-12-03")).size());
+        assertEquals(0, tasks.occurringOn(at("2019-12-05")).size());
+    }
+
+    @Test
+    public void occurringOn_mixedList_returnsOnlyMatchesInOriginalOrder() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("early homework", at("2019-12-02 0900")));
+        tasks.add(new ToDo("read book"));
+        tasks.add(new Event("party", at("2019-12-05 1400"), at("2019-12-05 1600")));
+        tasks.add(new Deadline("late homework", at("2019-12-02 1800")));
+
+        List<Task> matches = tasks.occurringOn(at("2019-12-02"));
+        assertEquals(2, matches.size());
+        assertEquals("early homework", describe(matches.get(0)));
+        assertEquals("late homework", describe(matches.get(1)));
+    }
+
+    @Test
+    public void occurringOn_noMatches_emptyListReturned() {
+        TaskList tasks = threeToDos();
+        assertTrue(tasks.occurringOn(at("2019-12-02")).isEmpty());
+    }
+
+    @Test
+    public void occurringOn_returnedListMutated_taskListUnaffected() {
+        // Unlike asList(), this is always a fresh list, so the caller can do
+        // as it likes with it.
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-02")));
+
+        tasks.occurringOn(at("2019-12-02")).clear();
+
+        assertEquals(1, tasks.size());
+    }
+
+    /**
+     * Returns a task's description, recovered from its save format. The Task
+     * classes expose no getter, and the save format's last field is the
+     * description for the types used here.
+     */
+    private static String describe(Task task) {
+        String[] fields = task.toSaveFormat().split("\\s*\\|\\s*");
+        return fields[2];
+    }
+}
