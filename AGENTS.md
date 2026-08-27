@@ -28,6 +28,20 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## Testing
+
+JUnit 5 tests live under `src/test/java/`, mirroring the main source package structure. A test class is named `<ClassName>Test` (e.g. `myriad.Parser` is tested by `src/test/java/myriad/ParserTest.java`). Run the suite with `./gradlew test`; the HTML report lands at `build/reports/tests/test/index.html`.
+
+Name test methods `featureUnderTest_testScenario_expectedBehavior()`, e.g. `resolveIndex_emptyList_exceptionThrown()`.
+
+**Coverage target: the top ~50% highest-value methods** — those carrying complex, core, or business-critical logic. Console formatting (`Ui`) and thin I/O wrappers are deliberately out of scope; their behaviour is covered by the scripted transcript checker in `claude-test/`.
+
+**JUnit tests must be updated in the same change as any code change, so the suite stays at that target.** Adding a branch means adding a case for it; changing an error message, a date format, or the save format means updating the assertions that pin it down. A change that leaves the suite passing only because nothing tests the new code has not met the target.
+
+Where a test documents a known defect rather than intended behaviour, assert what the code currently does and mark it with a `// Known limitation:` comment explaining the cause — so the test is not later "fixed" by loosening it.
+
+Note that `junit-jupiter-params` is not on the classpath, so `@ParameterizedTest` is unavailable; use a plain `@Test` with a loop over an array of cases instead.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
