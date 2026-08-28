@@ -1,10 +1,10 @@
 package myriad;
 
-import myriad.task.Task;
-import myriad.task.TaskDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import myriad.task.Task;
+import myriad.task.TaskDateTime;
 
 /**
  * Holds the user's tasks and the operations that mutate them (add,
@@ -127,7 +127,7 @@ public class TaskList {
      * @param query the date, or date and time, being asked about.
      * @return a fresh list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> occurringOn(TaskDateTime query) {
+    public ArrayList<Task> getTasksOccurringOn(TaskDateTime query) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (task.occursDuring(query)) {

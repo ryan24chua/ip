@@ -1,13 +1,13 @@
 package myriad.task;
 
-import myriad.MyriadException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+
+import myriad.MyriadException;
 
 /**
  * An immutable date, optionally paired with a time, parsed from user- or
@@ -161,6 +161,8 @@ public class TaskDateTime {
      */
     @Override
     public String toString() {
-        return time == null ? date.format(DISPLAY_DATE_ONLY) : LocalDateTime.of(date, time).format(DISPLAY_DATE_TIME);
+        return time == null
+                ? date.format(DISPLAY_DATE_ONLY)
+                : LocalDateTime.of(date, time).format(DISPLAY_DATE_TIME);
     }
 }

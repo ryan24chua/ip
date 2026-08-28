@@ -1,8 +1,8 @@
 package myriad;
 
-import myriad.task.Task;
-
 import java.util.List;
+
+import myriad.task.Task;
 
 /**
  * The outcome of one Storage.load() call: the tasks that were read

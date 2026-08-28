@@ -1,10 +1,10 @@
 package myriad;
 
-import myriad.task.Task;
-import myriad.task.TaskDateTime;
-
 import java.util.List;
 import java.util.Scanner;
+
+import myriad.task.Task;
+import myriad.task.TaskDateTime;
 
 /**
  * Owns both halves of talking to the user: every line printed to the

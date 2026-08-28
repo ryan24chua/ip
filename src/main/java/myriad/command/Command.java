@@ -43,7 +43,7 @@ public abstract class Command {
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MyriadException;
 
     /**
-     * Whether the session should end after this command. False for every
+     * Returns whether the session should end after this command. False for every
      * command except ExitCommand, which is why the default is here rather
      * than repeated in each subclass.
      *
