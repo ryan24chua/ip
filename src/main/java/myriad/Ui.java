@@ -114,6 +114,27 @@ public class Ui {
     }
 
     /**
+     * Prints the tasks whose descriptions match keyword (from the "find"
+     * command), 1-indexed like showList, or a "none found" message if
+     * matches is empty. Framed by divider lines.
+     *
+     * @param matches the tasks whose descriptions contain keyword.
+     * @param keyword the keyword the user searched for, shown when nothing matches.
+     */
+    public void showMatchingTasks(List<Task> matches, String keyword) {
+        showDivider();
+        if (matches.isEmpty()) {
+            System.out.printf("No matching tasks found for \"%s\".%n", keyword);
+        } else {
+            System.out.println("Here are the matching tasks in your list:");
+            for (int i = 0; i < matches.size(); i++) {
+                System.out.printf("%d.%s%n", i + 1, matches.get(i));
+            }
+        }
+        showDivider();
+    }
+
+    /**
      * Prints an acknowledgement that task was marked done, framed by
      * divider lines.
      */

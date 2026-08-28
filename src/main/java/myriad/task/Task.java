@@ -44,6 +44,19 @@ public class Task {
     }
 
     /**
+     * Returns whether this task's description contains keyword, ignoring
+     * case, for the "find" command. Only the description is searched, not
+     * the type marker or any dates, so "find 2019" won't match a deadline
+     * merely because it falls in that year.
+     *
+     * @param keyword the text to look for within the description.
+     * @return whether the description contains keyword, ignoring case.
+     */
+    public boolean descriptionContains(String keyword) {
+        return description.toLowerCase().contains(keyword.toLowerCase());
+    }
+
+    /**
      * Returns the task's status and description, e.g. [X] read book
      * if done, or [ ] read book if not done.
      */
