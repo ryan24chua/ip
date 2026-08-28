@@ -22,11 +22,23 @@ import java.io.IOException;
 public abstract class Command {
 
     /**
+     * Creates a command. Nothing to set up here — each subclass holds its
+     * own arguments, if it has any.
+     */
+    protected Command() {
+    }
+
+    /**
      * Carries out this command against the given task list, reporting
      * whatever the user should see through ui and persisting any change
      * through storage. Throws MyriadException if the command can't be
      * carried out (e.g. it names a task that doesn't exist); readCommands()
      * catches that and shows it as an error.
+     *
+     * @param tasks   the session's task list, read and possibly changed.
+     * @param ui      what to report the outcome through.
+     * @param storage where to persist the list if this command changes it.
+     * @throws MyriadException if the command can't be carried out.
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MyriadException;
 
@@ -34,6 +46,8 @@ public abstract class Command {
      * Whether the session should end after this command. False for every
      * command except ExitCommand, which is why the default is here rather
      * than repeated in each subclass.
+     *
+     * @return true only if the command loop should stop after this command.
      */
     public boolean isExit() {
         return false;
@@ -46,6 +60,11 @@ public abstract class Command {
      * Provided here, rather than in each subclass, so every mutating
      * command (add/mark/unmark/delete) translates a save failure into the
      * same user-facing message.
+     *
+     * @param tasks   the list to write out in full.
+     * @param storage where to write it.
+     * @throws MyriadException if the write fails, wrapping the IOException's
+     *                         message.
      */
     protected void save(TaskList tasks, Storage storage) throws MyriadException {
         try {

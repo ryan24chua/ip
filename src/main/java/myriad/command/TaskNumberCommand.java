@@ -14,6 +14,12 @@ public abstract class TaskNumberCommand extends Command {
     /** The task number as the user typed it: 1-based, not yet checked. */
     private final int taskNumber;
 
+    /**
+     * Records the task number this command was given.
+     *
+     * @param taskNumber the task number as typed, 1-based and not yet
+     *                   range-checked.
+     */
     protected TaskNumberCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
@@ -24,6 +30,10 @@ public abstract class TaskNumberCommand extends Command {
      * at execute time, rather than when the Parser built this command,
      * because whether a number is in range depends on how many tasks there
      * are at the moment the command runs.
+     *
+     * @param tasks the list the number has to be valid for.
+     * @return the matching 0-based index into tasks.
+     * @throws MyriadException if no task currently has that number.
      */
     protected int resolveIndex(TaskList tasks) throws MyriadException {
         int index = taskNumber - 1;

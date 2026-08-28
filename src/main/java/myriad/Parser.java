@@ -27,6 +27,10 @@ import myriad.task.ToDo;
  */
 public class Parser {
 
+    /** Not meant to be instantiated: every method here is static. */
+    private Parser() {
+    }
+
     /**
      * Builds the Command a stripped input line asks for, with that line's
      * arguments already interpreted. The first word is matched
@@ -35,6 +39,12 @@ public class Parser {
      * whole line. Throws MyriadException if the line names no known
      * command, or if its arguments can't be made sense of — so a command
      * object only ever exists if it can actually be attempted.
+     *
+     * @param strippedLine one line of user input, already whitespace-stripped
+     *                     by Ui.readCommand.
+     * @return the Command that line asks for.
+     * @throws MyriadException if the line names no known command, or its
+     *                         arguments are missing or unparseable.
      */
     public static Command parse(String strippedLine) throws MyriadException {
         String firstWord = strippedLine.split("\\s+", 2)[0];
@@ -71,6 +81,9 @@ public class Parser {
      * line is the keyword alone. Every parse* method below takes this
      * argument text rather than the whole line, so the keyword is split
      * off exactly once per line.
+     *
+     * @param strippedLine one whole line of input.
+     * @return the argument text, possibly empty, never null.
      */
     private static String extractArguments(String strippedLine) {
         String[] parts = strippedLine.split("\\s+", 2);
@@ -87,6 +100,10 @@ public class Parser {
      * list's business, not the command language's — so the range check
      * happens later, when the command runs (see
      * TaskNumberCommand.resolveIndex).
+     *
+     * @param args the argument text after the keyword.
+     * @return the number as typed, 1-based.
+     * @throws MyriadException if args is empty or isn't a whole number.
      */
     private static int parseTaskNumber(String args) throws MyriadException {
         if (args.isEmpty()) {
@@ -107,6 +124,10 @@ public class Parser {
     /**
      * Builds the ToDo described by a "todo" command's arguments. Throws
      * MyriadException if the description is missing.
+     *
+     * @param args the argument text after "todo".
+     * @return the new ToDo.
+     * @throws MyriadException if the description is missing.
      */
     private static Task parseToDo(String args) throws MyriadException {
         if (args.isEmpty()) {
@@ -123,6 +144,10 @@ public class Parser {
      * elsewhere (e.g. "deadline" itself). Returns a 1-element array holding
      * all of the text if the marker isn't found, or a 2-element array of the
      * text before/after the marker if it is.
+     *
+     * @param text   the text to split.
+     * @param marker the marker to split on, e.g. "/by".
+     * @return a 1- or 2-element array, as described above.
      */
     private static String[] splitOnMarker(String text, String marker) {
         return text.split("(?i)\\s*" + marker + "\\s*", 2);
@@ -132,6 +157,11 @@ public class Parser {
      * Builds the Deadline described by a "deadline &lt;description&gt; /by
      * &lt;date&gt;" command's arguments. Throws MyriadException if the
      * description or the date is missing, or if the date doesn't parse.
+     *
+     * @param args the argument text after "deadline".
+     * @return the new Deadline.
+     * @throws MyriadException if the description or date is missing or
+     *                         unparseable.
      */
     private static Task parseDeadline(String args) throws MyriadException {
         String[] descAndDate = splitOnMarker(args, "/by");
@@ -154,6 +184,11 @@ public class Parser {
      * &lt;start&gt; /to &lt;end&gt;" command's arguments. Throws
      * MyriadException if the description, start or end is missing, or if
      * either date doesn't parse.
+     *
+     * @param args the argument text after "event".
+     * @return the new Event.
+     * @throws MyriadException if the description, start or end is missing or
+     *                         unparseable.
      */
     private static Task parseEvent(String args) throws MyriadException {
         String[] descAndRest = splitOnMarker(args, "/from");
@@ -181,6 +216,10 @@ public class Parser {
     /**
      * Parses the date/time a "show" command asks about. Throws
      * MyriadException if it is missing or doesn't parse.
+     *
+     * @param args the argument text after "show".
+     * @return the date/time to search for.
+     * @throws MyriadException if it is missing or unparseable.
      */
     private static TaskDateTime parseShowQuery(String args) throws MyriadException {
         String example = "show 2019-12-02 1800";

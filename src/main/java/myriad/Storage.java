@@ -28,6 +28,13 @@ public class Storage {
 
     private final String filePath;
 
+    /**
+     * Creates a Storage that reads and writes the given file. The file need
+     * not exist yet: load() treats a missing file as an empty task list, and
+     * save() creates it (and its parent directory) on first write.
+     *
+     * @param filePath path to the data file, e.g. "data/myriad.txt".
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
@@ -41,6 +48,9 @@ public class Storage {
      * and cheap at the scale of a personal task list. IOException (e.g.
      * disk full, permission denied) is declared for the caller to
      * translate into a user-facing message — see Myriad.save.
+     *
+     * @param taskList the list to write out in full.
+     * @throws IOException if the file or its directory can't be written.
      */
     public void save(TaskList taskList) throws IOException {
         File parentDir = new File(filePath).getParentFile();
@@ -67,6 +77,11 @@ public class Storage {
      * This stays here rather than moving to Parser: it reads the save
      * format this class itself writes, which is a detail of how tasks are
      * stored, not of the command language the user types.
+     *
+     * @param line one line of the data file.
+     * @return the Task that line describes, with its done status restored.
+     * @throws MyriadException if the line has too few fields or an unknown
+     *                         type letter.
      */
     private static Task parseLine(String line) throws MyriadException {
         String[] p = line.split("\\s*\\|\\s*");
@@ -116,6 +131,9 @@ public class Storage {
      * one). Throws MyriadException if the file exists but can't be opened at
      * all — permission denied, or the path is a directory — which is a real
      * failure worth reporting, unlike the file simply not being there yet.
+     *
+     * @return the tasks loaded, plus a description of each skipped line.
+     * @throws MyriadException if the file exists but can't be opened at all.
      */
     public LoadResult load() throws MyriadException {
         List<Task> tasks = new ArrayList<>();

@@ -17,6 +17,12 @@ public class AddCommand extends Command {
 
     private final Task task;
 
+    /**
+     * Creates a command that adds the already-built task. The Parser has
+     * decided by now which Task subclass it is, so this only has to carry it.
+     *
+     * @param task the task to add when this command is executed.
+     */
     public AddCommand(Task task) {
         this.task = task;
     }
