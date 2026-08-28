@@ -4,6 +4,7 @@ import myriad.command.AddCommand;
 import myriad.command.Command;
 import myriad.command.DeleteCommand;
 import myriad.command.ExitCommand;
+import myriad.command.FindCommand;
 import myriad.command.ListCommand;
 import myriad.command.MarkCommand;
 import myriad.command.ShowCommand;
@@ -68,10 +69,12 @@ public class Parser {
             return new DeleteCommand(parseTaskNumber(args));
         } else if (firstWord.equalsIgnoreCase("show")) {
             return new ShowCommand(parseShowQuery(args));
+        } else if (firstWord.equalsIgnoreCase("find")) {
+            return new FindCommand(parseFindKeyword(args));
         } else {
             throw new MyriadException(
                     "I don't recognize that command. Try: todo, deadline, event, "
-                            + "list, mark, unmark, delete, show, or bye.");
+                            + "list, mark, unmark, delete, show, find, or bye.");
         }
     }
 
@@ -229,5 +232,21 @@ public class Parser {
                     "Please include a date/time to show, e.g. \"" + example + "\".");
         }
         return TaskDateTime.parse(args.strip());
+    }
+
+    /**
+     * Parses the keyword a "find" command searches for. Throws
+     * MyriadException if it is missing.
+     *
+     * @param args the argument text after "find".
+     * @return the keyword to search for, stripped of surrounding whitespace.
+     * @throws MyriadException if the keyword is missing or blank.
+     */
+    private static String parseFindKeyword(String args) throws MyriadException {
+        if (args.isBlank()) {
+            throw new MyriadException(
+                    "Please include a keyword to find, e.g. \"find book\".");
+        }
+        return args.strip();
     }
 }

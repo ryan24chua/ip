@@ -11,6 +11,7 @@ import myriad.command.AddCommand;
 import myriad.command.Command;
 import myriad.command.DeleteCommand;
 import myriad.command.ExitCommand;
+import myriad.command.FindCommand;
 import myriad.command.ListCommand;
 import myriad.command.MarkCommand;
 import myriad.command.ShowCommand;
@@ -96,6 +97,22 @@ public class ParserTest {
         assertInstanceOf(ShowCommand.class, Parser.parse("show 2019-12-02"));
     }
 
+    @Test
+    public void parse_find_findCommandReturned() throws MyriadException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find book"));
+    }
+
+    @Test
+    public void parse_findMultiWordKeyword_findCommandReturned() throws MyriadException {
+        // The whole argument text is the keyword, spaces included.
+        assertInstanceOf(FindCommand.class, Parser.parse("find read book"));
+    }
+
+    @Test
+    public void parse_findKeywordWithSurroundingSpace_findCommandReturned() throws MyriadException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find    book   "));
+    }
+
     // ---------------------------------------------------------------
     // Keyword matching
     // ---------------------------------------------------------------
@@ -124,7 +141,7 @@ public class ParserTest {
         // not updated alongside it.
         String message = parseExpectingFailure("blah").getMessage();
         for (String keyword : new String[] {
-            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "bye",
+            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "find", "bye",
         }) {
             assertTrue(message.contains(keyword), "help message omits \"" + keyword + "\"");
         }
@@ -407,5 +424,22 @@ public class ParserTest {
     @Test
     public void parse_showWithSlashFormatDate_accepted() throws MyriadException {
         assertInstanceOf(ShowCommand.class, Parser.parse("show 2/12/2019"));
+    }
+
+    // ---------------------------------------------------------------
+    // find
+    // ---------------------------------------------------------------
+
+    @Test
+    public void parse_findWithoutKeyword_exceptionThrown() {
+        assertMessageContains("Please include a keyword to find", parseExpectingFailure("find"));
+    }
+
+    @Test
+    public void parse_findWithBlankKeyword_exceptionThrown() {
+        // Ui.readCommand strips the line, so a blank argument can only reach
+        // the Parser from a caller that did not strip; reject it either way.
+        assertMessageContains("Please include a keyword to find",
+                parseExpectingFailure("find    "));
     }
 }

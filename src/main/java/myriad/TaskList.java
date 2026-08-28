@@ -136,4 +136,22 @@ public class TaskList {
         }
         return matches;
     }
+
+    /**
+     * Returns a new list of every task whose description contains keyword,
+     * ignoring case, for the "find" command. Like getTasksOccurringOn, this
+     * is always a fresh list rather than the backing one.
+     *
+     * @param keyword the text to look for in task descriptions.
+     * @return a fresh list of the matching tasks, in their original order.
+     */
+    public ArrayList<Task> getTasksMatching(String keyword) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.descriptionContains(keyword)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
 }

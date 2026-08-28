@@ -19,7 +19,8 @@ import myriad.task.ToDo;
 
 /**
  * Tests for {@link TaskList}: the index bookkeeping every mark, unmark and
- * delete depends on, and the date filtering behind the "show" command.
+ * delete depends on, the date filtering behind the "show" command, and the
+ * keyword filtering behind the "find" command.
  */
 public class TaskListTest {
 
@@ -416,6 +417,103 @@ public class TaskListTest {
         tasks.getTasksOccurringOn(at("2019-12-02")).clear();
 
         assertEquals(1, tasks.size());
+    }
+
+    // ---------------------------------------------------------------
+    // getTasksMatching (the "find" command)
+    // ---------------------------------------------------------------
+
+    @Test
+    public void getTasksMatching_keywordInsideDescription_matches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        assertEquals(1, tasks.getTasksMatching("book").size());
+    }
+
+    @Test
+    public void getTasksMatching_keywordInDifferentCase_matches() {
+        // Matching ignores case in both directions, so neither the typed
+        // keyword nor the stored description has to be lower case.
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("Read Book"));
+
+        assertEquals(1, tasks.getTasksMatching("book").size());
+        assertEquals(1, tasks.getTasksMatching("BOOK").size());
+    }
+
+    @Test
+    public void getTasksMatching_partialWord_matches() {
+        // Plain substring matching, not whole-word matching.
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("bookkeeping"));
+
+        assertEquals(1, tasks.getTasksMatching("ook").size());
+    }
+
+    @Test
+    public void getTasksMatching_mixedList_returnsOnlyMatchesInOriginalOrder() {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+        tasks.add(new ToDo("join sports club"));
+        tasks.add(new Deadline("return book", at("2019-06-06")));
+
+        List<Task> matches = tasks.getTasksMatching("book");
+        assertEquals(2, matches.size());
+        assertEquals("read book", describe(matches.get(0)));
+        assertEquals("return book", describe(matches.get(1)));
+    }
+
+    @Test
+    public void getTasksMatching_keywordAppearsOnlyInDate_doesNotMatch() {
+        // Only the description is searched, so a deadline is not found by the
+        // year or month text that appears in its displayed date.
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("return book", at("2019-06-06")));
+
+        assertTrue(tasks.getTasksMatching("2019").isEmpty());
+        assertTrue(tasks.getTasksMatching("Jun").isEmpty());
+    }
+
+    @Test
+    public void getTasksMatching_keywordIsTypeMarker_doesNotMatch() {
+        // "[T]" and "[X]" belong to the display format, not the description.
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        assertTrue(tasks.getTasksMatching("[T]").isEmpty());
+    }
+
+    @Test
+    public void getTasksMatching_noMatches_emptyListReturned() {
+        TaskList tasks = threeToDos();
+        assertTrue(tasks.getTasksMatching("book").isEmpty());
+    }
+
+    @Test
+    public void getTasksMatching_emptyList_emptyListReturned() {
+        assertTrue(new TaskList().getTasksMatching("book").isEmpty());
+    }
+
+    @Test
+    public void getTasksMatching_returnedListMutated_taskListUnaffected() {
+        // Like getTasksOccurringOn, this hands back a fresh list rather than
+        // the backing one.
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        tasks.getTasksMatching("book").clear();
+
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void getTasksMatching_matchedTask_isTheSameTaskObject() {
+        TaskList tasks = new TaskList();
+        Task task = new ToDo("read book");
+        tasks.add(task);
+
+        assertSame(task, tasks.getTasksMatching("book").get(0));
     }
 
     /**
