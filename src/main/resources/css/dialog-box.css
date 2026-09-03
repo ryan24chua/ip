@@ -1,0 +1,32 @@
+/*
+ * One message bubble. This stylesheet is attached to the dialog box itself
+ * rather than to the whole scene, so the bare .label selector below reaches
+ * only the text inside a dialog box and not every Label in the application.
+ *
+ * .label is a message from the user; .reply-label is added in DialogBox.flip()
+ * for Myriad's replies and overrides only what differs between the two. Both
+ * selectors are one class deep, so it is the order here that decides which
+ * wins — .reply-label has to stay second.
+ */
+.label {
+    -fx-background-color: #4285f4;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 12px 8px 12px;
+    /* The blunt corner faces the speaker's own picture, on the right. */
+    -fx-background-radius: 12px 12px 2px 12px;
+}
+
+.reply-label {
+    -fx-background-color: white;
+    -fx-text-fill: #22262b;
+    -fx-border-color: #dfe3e8;
+    -fx-border-width: 1px;
+    /* Mirrored, because Myriad's picture is on the left. */
+    -fx-background-radius: 12px 12px 12px 2px;
+    -fx-border-radius: 12px 12px 12px 2px;
+}
+
+#displayPicture {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 8, 0.3, 0, 2);
+}

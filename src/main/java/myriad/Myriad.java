@@ -39,6 +39,14 @@ public class Myriad {
     private final String loadErrorMessage;
 
     /**
+     * Whether a command has asked for the session to end. Only a GUI needs
+     * this: the console loop learns the same thing from Command.isExit(),
+     * but a GUI only ever sees the reply text, so the request is recorded
+     * here for it to act on.
+     */
+    private boolean isExitRequested = false;
+
+    /**
      * Sets up one chatbot session: creates the Ui, points Storage at
      * filePath, and loads whatever tasks were saved there last session. A
      * file that can't be read at all isn't fatal — the session starts from
@@ -49,7 +57,20 @@ public class Myriad {
      *                 saves to.
      */
     public Myriad(String filePath) {
-        this.ui = new Ui();
+        this(filePath, true);
+    }
+
+    /**
+     * Sets up one chatbot session, as the single-argument constructor does,
+     * but lets the caller say whether messages are printed to the console.
+     * A GUI session passes false: it shows the reply in a dialog box instead.
+     *
+     * @param filePath           path to the data file this session loads from
+     *                           and saves to.
+     * @param isEchoingToConsole whether messages are also printed to standard output.
+     */
+    public Myriad(String filePath, boolean isEchoingToConsole) {
+        this.ui = new Ui(isEchoingToConsole);
         this.storage = new Storage(filePath);
 
         TaskList loadedTasks;
@@ -100,6 +121,9 @@ public class Myriad {
 
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
+            // Each line is a reply of its own, so the recorded text is cleared
+            // rather than left to grow for the whole session.
+            ui.startResponse();
             try {
                 Command command = Parser.parse(ui.readCommand());
                 command.execute(tasks, ui, storage);
@@ -109,6 +133,64 @@ public class Myriad {
             }
         }
         ui.showFarewell();
+    }
+
+    /**
+     * Returns the opening message of a GUI session: the greeting, followed by
+     * any warning about saved data that could not be read. This is what run()
+     * shows before its loop, packaged as text because a GUI has no loop to
+     * hang it off.
+     *
+     * @return the greeting and any load warnings.
+     */
+    public String getGreeting() {
+        ui.startResponse();
+        ui.showGreeting();
+        if (loadErrorMessage != null) {
+            ui.showLoadingError(loadErrorMessage);
+        }
+        if (!skippedLines.isEmpty()) {
+            ui.showLoadWarning(skippedLines);
+        }
+        return ui.getResponse();
+    }
+
+    /**
+     * Runs one line of user input and returns what the chatbot says back.
+     * Mirrors one iteration of run(), including the single catch that turns a
+     * MyriadException into an error message, so that the GUI and the console
+     * answer any given line the same way.
+     *
+     * @param input the raw line the user typed, whitespace included.
+     * @return the chatbot's reply.
+     */
+    public String getResponse(String input) {
+        ui.startResponse();
+        try {
+            // Stripped here because readCommand() does it for the console, and
+            // Parser expects a tidy line from either front end.
+            Command command = Parser.parse(input.strip());
+            command.execute(tasks, ui, storage);
+            if (command.isExit()) {
+                // run() says goodbye after its loop, since ExitCommand.execute
+                // is empty; with no loop, the farewell belongs in the reply.
+                ui.showFarewell();
+                isExitRequested = true;
+            }
+        } catch (MyriadException e) {
+            ui.showError("Error: " + e.getMessage());
+        }
+        return ui.getResponse();
+    }
+
+    /**
+     * Returns whether a command has ended the session, so that a GUI knows to
+     * close its window.
+     *
+     * @return true once an exit command has been run.
+     */
+    public boolean isExitRequested() {
+        return isExitRequested;
     }
 
     /**

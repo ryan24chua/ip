@@ -1,0 +1,92 @@
+/*
+ * Window chrome: the ground the conversation sits on, the input row along the
+ * bottom, and the scroll bar. The accent colours are taken from the Myriad
+ * avatar, so the window and the picture in it read as one thing.
+ *
+ * The four names below are "looked-up colours": custom properties declared on
+ * .root that every rule underneath can refer to by name, so a colour is
+ * written once here rather than repeated at each place it is used.
+ */
+.root {
+    myriad-blue: #4285f4;
+    myriad-blue-dark: #2b6cd4;
+    myriad-blue-darker: #1f4fa8;
+    myriad-ground: #f6f7f9;
+    myriad-line: #dfe3e8;
+    myriad-muted: #9aa1a9;
+
+    -fx-background-color: myriad-ground;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/*
+ * The text field keeps the height set in MainWindow.fxml: the scroll pane above
+ * it is anchored 41px from the bottom to clear it, so a taller input row would
+ * overlap the transcript.
+ */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: myriad-line;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused {
+    -fx-border-color: myriad-blue;
+}
+
+.button {
+    -fx-background-color: myriad-blue;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: myriad-blue-dark;
+}
+
+.button:pressed {
+    -fx-background-color: myriad-blue-darker;
+}
+
+/* Both controls are disabled for a moment after "bye", so this state is seen. */
+.button:disabled {
+    -fx-background-color: myriad-line;
+    -fx-text-fill: myriad-muted;
+}
+
+/* Let the window's own background show through the transcript. */
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10px;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #c7cdd4;
+    -fx-background-radius: 1em;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #aab2bb;
+}
+
+/* Hides the arrow buttons at each end of the scroll bar. */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
