@@ -31,8 +31,16 @@ public class DialogBox extends HBox {
     /** Width and height the picture is drawn at, matching DialogBox.fxml. */
     private static final double PICTURE_SIZE = 80.0;
 
+    /**
+     * Room the text cannot use: the padding and spacing set in DialogBox.fxml,
+     * plus the bubble's own padding and border from dialog-box.css. The CSS
+     * insets are counted here because the binding below works from the box's
+     * own width, which does not know about them.
+     */
+    private static final double BOX_CHROME_WIDTH = 56.0;
+
     /** Room left for the picture, the spacing and the padding around them. */
-    private static final double NON_TEXT_WIDTH = PICTURE_SIZE + 32.0;
+    private static final double NON_TEXT_WIDTH = PICTURE_SIZE + BOX_CHROME_WIDTH;
 
     @FXML
     private Label dialog;
@@ -96,13 +104,16 @@ public class DialogBox extends HBox {
 
     /**
      * Mirrors this dialog box, so that the picture is on the left of the text
-     * rather than the right.
+     * rather than the right, and restyles the bubble to match. This is the one
+     * place the two speakers differ, so it is where the style class that tells
+     * them apart is added.
      */
     private void flip() {
         ObservableList<Node> nodes = FXCollections.observableArrayList(getChildren());
         Collections.reverse(nodes);
         getChildren().setAll(nodes);
         setAlignment(Pos.TOP_LEFT);
+        dialog.getStyleClass().add("reply-label");
     }
 
     /**
