@@ -9,11 +9,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
 
 /**
  * Represents one message in the conversation: the speaker's picture beside
@@ -26,8 +28,11 @@ import javafx.scene.layout.HBox;
  */
 public class DialogBox extends HBox {
 
+    /** Width and height the picture is drawn at, matching DialogBox.fxml. */
+    private static final double PICTURE_SIZE = 80.0;
+
     /** Room left for the picture, the spacing and the padding around them. */
-    private static final double NON_TEXT_WIDTH = 80.0 + 32.0;
+    private static final double NON_TEXT_WIDTH = PICTURE_SIZE + 32.0;
 
     @FXML
     private Label dialog;
@@ -55,12 +60,38 @@ public class DialogBox extends HBox {
 
         dialog.setText(message);
         displayPicture.setImage(picture);
+        roundDisplayPicture(picture);
 
         // A Label reports the width of its longest line as the width it needs,
         // and that demand travels up to the window, which grows to meet it.
         // Capping the width at whatever room this box has forces the text to
         // wrap instead, so a long reply never widens the window.
         dialog.maxWidthProperty().bind(widthProperty().subtract(NON_TEXT_WIDTH));
+    }
+
+    /**
+     * Crops the picture to a centred square and clips it to a circle, so that
+     * pictures of any shape are shown as discs of the same size. Cropping the
+     * source first matters: the view keeps the picture's proportions, so a wide
+     * picture would otherwise be drawn shorter than the circle and be cut off
+     * along the top and bottom.
+     *
+     * @param picture the image behind the view, or null when there is none.
+     */
+    private void roundDisplayPicture(Image picture) {
+        if (picture == null) {
+            return;
+        }
+
+        double side = Math.min(picture.getWidth(), picture.getHeight());
+        displayPicture.setViewport(new Rectangle2D(
+                (picture.getWidth() - side) / 2,
+                (picture.getHeight() - side) / 2,
+                side,
+                side));
+
+        double radius = PICTURE_SIZE / 2;
+        displayPicture.setClip(new Circle(radius, radius, radius));
     }
 
     /**
