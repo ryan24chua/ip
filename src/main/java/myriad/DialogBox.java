@@ -22,6 +22,9 @@ public class DialogBox extends HBox {
 
     private static final double PICTURE_SIZE = 80.0;
 
+    /** Room left for the picture, the spacing and the padding around them. */
+    private static final double NON_TEXT_WIDTH = PICTURE_SIZE + 32.0;
+
     private final Label text;
     private final ImageView displayPicture;
 
@@ -37,6 +40,13 @@ public class DialogBox extends HBox {
         displayPicture = new ImageView(picture);
 
         text.setWrapText(true);
+        // A Label reports the width of its longest line as the width it needs,
+        // and that demand travels up to the window, which grows to meet it.
+        // Capping the width at whatever room this box has forces the text to
+        // wrap instead, so a long reply never widens the window.
+        text.maxWidthProperty().bind(widthProperty().subtract(NON_TEXT_WIDTH));
+        text.setMinWidth(0.0);
+
         displayPicture.setFitWidth(PICTURE_SIZE);
         displayPicture.setFitHeight(PICTURE_SIZE);
         displayPicture.setPreserveRatio(true);

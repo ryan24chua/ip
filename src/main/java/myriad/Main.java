@@ -58,6 +58,8 @@ public class Main extends Application {
         stage.show();
 
         showMyriadMessage(myriad.getGreeting());
+        // Requested after the window is up, so the user can type straight away.
+        userInput.requestFocus();
     }
 
     /**
@@ -82,6 +84,16 @@ public class Main extends Application {
         scrollPane.setFitToWidth(true);
         dialogContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
 
+        // The transcript may hold more than fits; that is what the scroll bar is
+        // for, so the pane is told it may shrink instead of passing the content's
+        // size demand up to the window.
+        scrollPane.setMinWidth(0.0);
+        scrollPane.setMinHeight(0.0);
+
+        // The transcript is read, not edited, so it is kept out of the focus
+        // order; otherwise it takes the focus on startup and typing goes nowhere.
+        scrollPane.setFocusTraversable(false);
+
         // Keeps the newest message in view: the scroll position is tied to the
         // height of the transcript, which grows every time a box is added.
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
@@ -97,6 +109,7 @@ public class Main extends Application {
 
         AnchorPane mainLayout = new AnchorPane(scrollPane, userInput, sendButton);
         mainLayout.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        mainLayout.setMinSize(0.0, 0.0);
 
         AnchorPane.setTopAnchor(scrollPane, 1.0);
         AnchorPane.setBottomAnchor(scrollPane, INPUT_HEIGHT + 1.0);
