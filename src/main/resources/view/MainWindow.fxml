@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    The chat window: a scrolling transcript filling the space above, and a text
+    field with a Send button along the bottom. Every child is anchored rather
+    than merely positioned, so the layout follows the edges when the window is
+    resized. The scroll pane is given a minimum size of zero so that a long
+    transcript is scrolled rather than allowed to push the window wider.
+-->
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="400.0"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="myriad.MainWindow">
+    <children>
+        <ScrollPane fx:id="scrollPane"
+                    fitToWidth="true"
+                    focusTraversable="false"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="ALWAYS"
+                    minHeight="0.0"
+                    minWidth="0.0"
+                    prefHeight="558.0"
+                    prefWidth="400.0"
+                    AnchorPane.bottomAnchor="41.0"
+                    AnchorPane.leftAnchor="1.0"
+                    AnchorPane.rightAnchor="1.0"
+                    AnchorPane.topAnchor="1.0">
+            <content>
+                <VBox fx:id="dialogContainer" minWidth="0.0" />
+            </content>
+        </ScrollPane>
+        <TextField fx:id="userInput"
+                   onAction="#handleUserInput"
+                   promptText="Type a command..."
+                   prefHeight="40.0"
+                   prefWidth="324.0"
+                   AnchorPane.bottomAnchor="1.0"
+                   AnchorPane.leftAnchor="1.0"
+                   AnchorPane.rightAnchor="76.0" />
+        <Button fx:id="sendButton"
+                mnemonicParsing="false"
+                onAction="#handleUserInput"
+                prefHeight="40.0"
+                prefWidth="76.0"
+                text="Send"
+                AnchorPane.bottomAnchor="1.0"
+                AnchorPane.rightAnchor="1.0" />
+    </children>
+</AnchorPane>

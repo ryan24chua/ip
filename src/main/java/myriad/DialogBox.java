@@ -1,11 +1,13 @@
 package myriad;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -17,16 +19,20 @@ import javafx.scene.layout.HBox;
  * Represents one message in the conversation: the speaker's picture beside
  * the text they said. The user's messages sit on the right and Myriad's on
  * the left, so that a glance down the window shows who said what.
+ *
+ * The layout comes from view/DialogBox.fxml, which is an fx:root file: each
+ * instance makes itself both the root and the controller of that file, so
+ * that many dialog boxes can be built from one layout description.
  */
 public class DialogBox extends HBox {
 
-    private static final double PICTURE_SIZE = 80.0;
-
     /** Room left for the picture, the spacing and the padding around them. */
-    private static final double NON_TEXT_WIDTH = PICTURE_SIZE + 32.0;
+    private static final double NON_TEXT_WIDTH = 80.0 + 32.0;
 
-    private final Label text;
-    private final ImageView displayPicture;
+    @FXML
+    private Label dialog;
+    @FXML
+    private ImageView displayPicture;
 
     /**
      * Creates a dialog box showing message next to picture, laid out with the
@@ -36,25 +42,25 @@ public class DialogBox extends HBox {
      * @param picture the speaker's display picture, or null if none is available.
      */
     private DialogBox(String message, Image picture) {
-        text = new Label(message);
-        displayPicture = new ImageView(picture);
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(DialogBox.class.getResource("/view/DialogBox.fxml"));
+            fxmlLoader.setRoot(this);
+            fxmlLoader.setController(this);
+            fxmlLoader.load();
+        } catch (IOException e) {
+            // The layout file ships inside the application, so a failure here
+            // means a broken build rather than anything the user can act on.
+            e.printStackTrace();
+        }
 
-        text.setWrapText(true);
+        dialog.setText(message);
+        displayPicture.setImage(picture);
+
         // A Label reports the width of its longest line as the width it needs,
         // and that demand travels up to the window, which grows to meet it.
         // Capping the width at whatever room this box has forces the text to
         // wrap instead, so a long reply never widens the window.
-        text.maxWidthProperty().bind(widthProperty().subtract(NON_TEXT_WIDTH));
-        text.setMinWidth(0.0);
-
-        displayPicture.setFitWidth(PICTURE_SIZE);
-        displayPicture.setFitHeight(PICTURE_SIZE);
-        displayPicture.setPreserveRatio(true);
-
-        setAlignment(Pos.TOP_RIGHT);
-        setSpacing(8.0);
-        setPadding(new Insets(8.0));
-        getChildren().addAll(text, displayPicture);
+        dialog.maxWidthProperty().bind(widthProperty().subtract(NON_TEXT_WIDTH));
     }
 
     /**
