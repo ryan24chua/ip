@@ -81,9 +81,14 @@ public class Ui {
      */
     private void emit(String consoleOnlyText, String message) {
         if (responseBuffer.length() > 0) {
-            responseBuffer.append(System.lineSeparator());
+            responseBuffer.append('\n');
         }
-        responseBuffer.append(message);
+        // Console messages are built with the platform line separator, but the
+        // greeting's text block carries a bare newline, so a recorded reply
+        // would otherwise mix the two. Normalising here keeps the recorded text
+        // uniform — and keeps stray carriage returns out of a JavaFX Label —
+        // without touching a single byte of what is printed below.
+        responseBuffer.append(message.replace("\r\n", "\n"));
 
         if (isEchoingToConsole) {
             System.out.println(LINE);
@@ -130,7 +135,8 @@ public class Ui {
 
     /**
      * Returns every message shown since the last startResponse call, as one
-     * block of text with no divider lines.
+     * block of text with no divider lines and "\n" between every line,
+     * whatever the platform's own line separator is.
      *
      * @return the recorded reply.
      */
