@@ -92,11 +92,10 @@ public class DialogBox extends HBox {
         }
 
         double side = Math.min(picture.getWidth(), picture.getHeight());
-        displayPicture.setViewport(new Rectangle2D(
-                (picture.getWidth() - side) / 2,
-                (picture.getHeight() - side) / 2,
-                side,
-                side));
+        // Centre the square viewport by trimming half the excess off each side.
+        double offsetX = (picture.getWidth() - side) / 2;
+        double offsetY = (picture.getHeight() - side) / 2;
+        displayPicture.setViewport(new Rectangle2D(offsetX, offsetY, side, side));
 
         double radius = PICTURE_SIZE / 2;
         displayPicture.setClip(new Circle(radius, radius, radius));
