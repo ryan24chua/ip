@@ -33,13 +33,18 @@ public class TaskListTest {
         }
     }
 
+    /** Builds a list of ToDos with the given descriptions, in the order given. */
+    private static TaskList taskListOf(String... descriptions) {
+        TaskList tasks = new TaskList();
+        for (String description : descriptions) {
+            tasks.add(new ToDo(description));
+        }
+        return tasks;
+    }
+
     /** A list of three distinct ToDos, for the index-shuffling tests. */
     private static TaskList threeToDos() {
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("first"));
-        tasks.add(new ToDo("second"));
-        tasks.add(new ToDo("third"));
-        return tasks;
+        return taskListOf("first", "second", "third");
     }
 
     // ---------------------------------------------------------------
@@ -287,8 +292,7 @@ public class TaskListTest {
     @Test
     public void getTasksOccurringOn_toDoInList_neverMatches() {
         // A ToDo has no date at all, so it can never occur on a given day.
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("read book"));
+        TaskList tasks = taskListOf("read book");
         assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-02")).size());
     }
 
@@ -425,8 +429,7 @@ public class TaskListTest {
 
     @Test
     public void getTasksMatching_keywordInsideDescription_matches() {
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("read book"));
+        TaskList tasks = taskListOf("read book");
 
         assertEquals(1, tasks.getTasksMatching("book").size());
     }
@@ -435,8 +438,7 @@ public class TaskListTest {
     public void getTasksMatching_keywordInDifferentCase_matches() {
         // Matching ignores case in both directions, so neither the typed
         // keyword nor the stored description has to be lower case.
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("Read Book"));
+        TaskList tasks = taskListOf("Read Book");
 
         assertEquals(1, tasks.getTasksMatching("book").size());
         assertEquals(1, tasks.getTasksMatching("BOOK").size());
@@ -445,8 +447,7 @@ public class TaskListTest {
     @Test
     public void getTasksMatching_partialWord_matches() {
         // Plain substring matching, not whole-word matching.
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("bookkeeping"));
+        TaskList tasks = taskListOf("bookkeeping");
 
         assertEquals(1, tasks.getTasksMatching("ook").size());
     }
@@ -478,8 +479,7 @@ public class TaskListTest {
     @Test
     public void getTasksMatching_keywordIsTypeMarker_doesNotMatch() {
         // "[T]" and "[X]" belong to the display format, not the description.
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("read book"));
+        TaskList tasks = taskListOf("read book");
 
         assertTrue(tasks.getTasksMatching("[T]").isEmpty());
     }
@@ -499,8 +499,7 @@ public class TaskListTest {
     public void getTasksMatching_returnedListMutated_taskListUnaffected() {
         // Like getTasksOccurringOn, this hands back a fresh list rather than
         // the backing one.
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("read book"));
+        TaskList tasks = taskListOf("read book");
 
         tasks.getTasksMatching("book").clear();
 

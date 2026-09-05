@@ -44,6 +44,18 @@ public class TaskDateTimeTest {
         Locale.setDefault(originalLocale);
     }
 
+    /**
+     * Fails the test unless saving each input and re-parsing what was saved
+     * yields the same text again — the invariant Storage relies on.
+     */
+    private static void assertRoundTripsUnchanged(String... inputs) throws MyriadException {
+        for (String input : inputs) {
+            String saved = TaskDateTime.parse(input).toSaveFormat();
+            String resaved = TaskDateTime.parse(saved).toSaveFormat();
+            assertEquals(saved, resaved, "round-trip changed the value for input: " + input);
+        }
+    }
+
     // ---------------------------------------------------------------
     // parse: accepted formats
     // ---------------------------------------------------------------
@@ -219,22 +231,16 @@ public class TaskDateTimeTest {
         // Storage writes toSaveFormat() and reads it back with parse() on the
         // next launch, so this must hold for every form a user can type --
         // otherwise tasks would change or vanish across restarts.
-        String[] inputs = {
-            "2019-12-02T18:00",
-            "2019-12-02 1800",
-            "2019-12-02 18:00",
-            "2/12/2019 1800",
-            "2/12/2019 18:00",
-            "2019-12-02T18:00:30",
-            "2019-12-02 0000",
-            "2019-12-02",
-            "2/12/2019",
-        };
-        for (String input : inputs) {
-            String saved = TaskDateTime.parse(input).toSaveFormat();
-            String resaved = TaskDateTime.parse(saved).toSaveFormat();
-            assertEquals(saved, resaved, "round-trip changed the value for input: " + input);
-        }
+        assertRoundTripsUnchanged(
+                "2019-12-02T18:00",
+                "2019-12-02 1800",
+                "2019-12-02 18:00",
+                "2/12/2019 1800",
+                "2/12/2019 18:00",
+                "2019-12-02T18:00:30",
+                "2019-12-02 0000",
+                "2019-12-02",
+                "2/12/2019");
     }
 
     // ---------------------------------------------------------------

@@ -79,7 +79,7 @@ public class Ui {
      *                        is none.
      * @param message         the message text, without divider lines.
      */
-    private void emit(String consoleOnlyText, String message) {
+    private void emitWithBanner(String consoleOnlyText, String message) {
         if (responseBuffer.length() > 0) {
             responseBuffer.append('\n');
         }
@@ -101,12 +101,23 @@ public class Ui {
     }
 
     /**
-     * Records one message that is shown the same way on the console and in a GUI.
+     * Records one message, shown the same way on the console and in a GUI,
+     * made of the given lines joined by the platform's line separator.
      *
-     * @param message the message text, without divider lines.
+     * Varargs so that a multi-line message reads as one argument per line at
+     * the call site, instead of a chain of concatenated separators that is
+     * easy to get wrong when a line is later added or removed. A one-line
+     * message is simply a call with a single argument.
+     *
+     * Note the deliberately distinct name from emitWithBanner: had that
+     * method also been called emit, its fixed two-argument form would win
+     * overload resolution over this varargs one, so a two-line emit(a, b)
+     * would silently print a as a console-only banner instead.
+     *
+     * @param lines the lines of the message, in order, without divider lines.
      */
-    private void emit(String message) {
-        emit(null, message);
+    private void emit(String... lines) {
+        emitWithBanner(null, String.join(System.lineSeparator(), lines));
     }
 
     /**
@@ -177,7 +188,7 @@ public class Ui {
         String greeting = """
                 Hello! I'm Myriad.
                 What can I do for you?""";
-        emit(BANNER, greeting);
+        emitWithBanner(BANNER, greeting);
     }
 
     /**
@@ -195,9 +206,9 @@ public class Ui {
      * @param totalCount how many tasks the list now holds.
      */
     public void showAddedTask(Task task, int totalCount) {
-        emit("Got it. I've added this task:" + System.lineSeparator()
-                + task + System.lineSeparator()
-                + String.format("Now you have %d tasks in the list.", totalCount));
+        emit("Got it. I've added this task:",
+                task.toString(),
+                String.format("Now you have %d tasks in the list.", totalCount));
     }
 
     /**
@@ -246,7 +257,7 @@ public class Ui {
      * @param task the task in its new, done state.
      */
     public void showMarked(Task task) {
-        emit("Nice! I've marked this task as done:" + System.lineSeparator() + "  " + task);
+        emit("Nice! I've marked this task as done:", "  " + task);
     }
 
     /**
@@ -255,7 +266,7 @@ public class Ui {
      * @param task the task in its new, not-done state.
      */
     public void showUnmarked(Task task) {
-        emit("OK, I've marked this task as not done yet:" + System.lineSeparator() + "  " + task);
+        emit("OK, I've marked this task as not done yet:", "  " + task);
     }
 
     /**
@@ -266,9 +277,9 @@ public class Ui {
      * @param totalCount how many tasks the list now holds.
      */
     public void showDeleted(Task task, int totalCount) {
-        emit("Noted. I've removed this task:" + System.lineSeparator()
-                + "  " + task + System.lineSeparator()
-                + String.format("Now you have %d tasks in the list.", totalCount));
+        emit("Noted. I've removed this task:",
+                "  " + task,
+                String.format("Now you have %d tasks in the list.", totalCount));
     }
 
     /**

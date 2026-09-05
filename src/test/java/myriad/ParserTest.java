@@ -38,6 +38,13 @@ public class ParserTest {
                         + actual.getMessage());
     }
 
+    /** Fails the test unless the message mentions every one of the given keywords. */
+    private static void assertMessageListsAll(String message, String... keywords) {
+        for (String keyword : keywords) {
+            assertTrue(message.contains(keyword), "help message omits \"" + keyword + "\"");
+        }
+    }
+
     /** Parses a line that is expected to fail, returning the exception. */
     private static MyriadException parseExpectingFailure(String line) {
         return assertThrows(MyriadException.class, () -> Parser.parse(line));
@@ -140,11 +147,8 @@ public class ParserTest {
         // If a command is ever added, this catches a help message that was
         // not updated alongside it.
         String message = parseExpectingFailure("blah").getMessage();
-        for (String keyword : new String[] {
-            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "find", "bye",
-        }) {
-            assertTrue(message.contains(keyword), "help message omits \"" + keyword + "\"");
-        }
+        assertMessageListsAll(message,
+                "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "find", "bye");
     }
 
     @Test

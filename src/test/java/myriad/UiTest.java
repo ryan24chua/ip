@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ public class UiTest {
 
     /** Builds a list of not-done ToDos with the given descriptions. */
     private static List<Task> toDos(String... descriptions) {
-        return List.of(descriptions).stream().map(description -> (Task) new ToDo(description)).toList();
+        return Arrays.stream(descriptions).map(description -> (Task) new ToDo(description)).toList();
     }
 
     /**

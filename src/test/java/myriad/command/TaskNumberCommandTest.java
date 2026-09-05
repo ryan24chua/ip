@@ -25,13 +25,18 @@ import myriad.task.ToDo;
  */
 public class TaskNumberCommandTest {
 
+    /** Builds a list of ToDos with the given descriptions, in the order given. */
+    private static TaskList taskListOf(String... descriptions) {
+        TaskList tasks = new TaskList();
+        for (String description : descriptions) {
+            tasks.add(new ToDo(description));
+        }
+        return tasks;
+    }
+
     /** A list of three tasks, so valid numbers are 1 to 3. */
     private static TaskList threeTasks() {
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("first"));
-        tasks.add(new ToDo("second"));
-        tasks.add(new ToDo("third"));
-        return tasks;
+        return taskListOf("first", "second", "third");
     }
 
     /** Resolves the given task number against the given list. */
@@ -42,6 +47,18 @@ public class TaskNumberCommandTest {
     /** Resolves a number expected to be rejected, returning the exception. */
     private static MyriadException resolveExpectingFailure(int taskNumber, TaskList tasks) {
         return assertThrows(MyriadException.class, () -> resolve(taskNumber, tasks));
+    }
+
+    /**
+     * Fails the test unless every one of the given task numbers is rejected
+     * against an empty list with the empty-list message.
+     */
+    private static void assertAllRejectedAsEmptyList(int... taskNumbers) {
+        for (int taskNumber : taskNumbers) {
+            MyriadException e = resolveExpectingFailure(taskNumber, new TaskList());
+            assertTrue(e.getMessage().contains("your task list is empty"),
+                    "task number " + taskNumber + " gave: " + e.getMessage());
+        }
     }
 
     // ---------------------------------------------------------------
@@ -67,9 +84,7 @@ public class TaskNumberCommandTest {
 
     @Test
     public void resolveIndex_onlyTaskInSingleTaskList_zeroReturned() throws MyriadException {
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("only"));
-        assertEquals(0, resolve(1, tasks));
+        assertEquals(0, resolve(1, taskListOf("only")));
     }
 
     // ---------------------------------------------------------------
@@ -112,9 +127,7 @@ public class TaskNumberCommandTest {
 
     @Test
     public void resolveIndex_outOfRange_messageReportsCurrentTaskCount() {
-        TaskList tasks = new TaskList();
-        tasks.add(new ToDo("only"));
-        MyriadException e = resolveExpectingFailure(2, tasks);
+        MyriadException e = resolveExpectingFailure(2, taskListOf("only"));
         assertTrue(e.getMessage().contains("1 task(s)"),
                 "message should state how many tasks exist: " + e.getMessage());
     }
@@ -150,11 +163,7 @@ public class TaskNumberCommandTest {
     public void resolveIndex_emptyListWithAnyNumber_sameEmptyMessage() {
         // No number can be valid against an empty list, so they all get the
         // empty-list message rather than the range one.
-        for (int taskNumber : new int[] {-1, 0, 1, 99}) {
-            MyriadException e = resolveExpectingFailure(taskNumber, new TaskList());
-            assertTrue(e.getMessage().contains("your task list is empty"),
-                    "task number " + taskNumber + " gave: " + e.getMessage());
-        }
+        assertAllRejectedAsEmptyList(-1, 0, 1, 99);
     }
 
     // ---------------------------------------------------------------
