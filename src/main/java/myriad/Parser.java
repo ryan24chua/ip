@@ -48,8 +48,11 @@ public class Parser {
      *                         arguments are missing or unparseable.
      */
     public static Command parse(String strippedLine) throws MyriadException {
-        String firstWord = strippedLine.split("\\s+", 2)[0];
-        String args = extractArguments(strippedLine);
+        // Split off the keyword once; every parse* method below then works on
+        // the argument text alone (empty if the line is just the keyword).
+        String[] keywordAndArgs = strippedLine.split("\\s+", 2);
+        String firstWord = keywordAndArgs[0];
+        String args = keywordAndArgs.length == 2 ? keywordAndArgs[1] : "";
 
         if (firstWord.equalsIgnoreCase("bye") && args.isEmpty()) {
             return new ExitCommand();
@@ -76,21 +79,6 @@ public class Parser {
                     "I don't recognize that command. Try: todo, deadline, event, "
                             + "list, mark, unmark, delete, show, find, or bye.");
         }
-    }
-
-    /**
-     * Returns everything after the command keyword in a stripped line
-     * (e.g. "read book" from "todo read book"), or an empty string if the
-     * line is the keyword alone. Every parse* method below takes this
-     * argument text rather than the whole line, so the keyword is split
-     * off exactly once per line.
-     *
-     * @param strippedLine one whole line of input.
-     * @return the argument text, possibly empty, never null.
-     */
-    private static String extractArguments(String strippedLine) {
-        String[] parts = strippedLine.split("\\s+", 2);
-        return parts.length == 2 ? parts[1] : "";
     }
 
     /**
