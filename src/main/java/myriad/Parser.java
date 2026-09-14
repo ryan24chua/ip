@@ -102,12 +102,12 @@ public class Parser {
                     "Please tell me which task number, e.g. \"mark 2\".");
         }
 
-        String arg = args.strip();
+        String numberText = args.strip();
         try {
-            return Integer.parseInt(arg);
+            return Integer.parseInt(numberText);
         } catch (NumberFormatException e) {
             throw new MyriadException(
-                    "\"" + arg + "\" is not a valid task number — it needs to be a whole "
+                    "\"" + numberText + "\" is not a valid task number — it needs to be a whole "
                             + "number, e.g. \"mark 2\".");
         }
     }
