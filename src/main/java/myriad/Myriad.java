@@ -95,20 +95,9 @@ public class Myriad {
      * Runs one chatbot session: greets the user, warns about anything
      * that couldn't be loaded, then takes lines from the Ui until a
      * command says the session is over or the input runs out, and finally
-     * says goodbye.
-     *
-     * Each line is handed to the Parser, which returns the Command it
-     * asks for; carrying that command out is the command's own business,
-     * so this loop doesn't need to know which commands exist, and whether
-     * to stop is the command's answer (isExit) rather than a keyword this
-     * method checks for. Both parsing and executing may throw
-     * MyriadException instead of displaying an error themselves, so this
-     * is the single place that catches it and shows it — with the
-     * "Error: " prefix added here rather than repeated in every message.
-     * Commands also raise MyriadException (rather than a checked
-     * IOException) when saving to disk fails, so a save failure is caught
-     * and shown the same way as any other command error, instead of
-     * crashing the program.
+     * says goodbye. Each line is carried out by executeLine, the same
+     * method the GUI goes through, so whether to stop is the command's
+     * answer rather than a keyword this loop checks for.
      */
     public void run() {
         showStartupMessages();
@@ -118,13 +107,7 @@ public class Myriad {
             // Each line is a reply of its own, so the recorded text is cleared
             // rather than left to grow for the whole session.
             ui.startResponse();
-            try {
-                Command command = Parser.parse(ui.readCommand());
-                command.execute(tasks, ui, storage);
-                isExit = command.isExit();
-            } catch (MyriadException e) {
-                ui.showError("Error: " + e.getMessage());
-            }
+            isExit = executeLine(ui.readCommand());
         }
         ui.showFarewell();
     }
@@ -160,30 +143,51 @@ public class Myriad {
 
     /**
      * Runs one line of user input and returns what the chatbot says back.
-     * Mirrors one iteration of run(), including the single catch that turns a
-     * MyriadException into an error message, so that the GUI and the console
-     * answer any given line the same way.
+     * Goes through executeLine, as each iteration of run() does, so that the
+     * GUI and the console answer any given line the same way.
      *
      * @param input the raw line the user typed, whitespace included.
      * @return the chatbot's reply.
      */
     public String getResponse(String input) {
         ui.startResponse();
-        try {
-            // Stripped here because readCommand() does it for the console, and
-            // Parser expects a tidy line from either front end.
-            Command command = Parser.parse(input.strip());
-            command.execute(tasks, ui, storage);
-            if (command.isExit()) {
-                // run() says goodbye after its loop, since ExitCommand.execute
-                // is empty; with no loop, the farewell belongs in the reply.
-                ui.showFarewell();
-                isExitRequested = true;
-            }
-        } catch (MyriadException e) {
-            ui.showError("Error: " + e.getMessage());
+        // Stripped here because readCommand() does it for the console, and
+        // Parser expects a tidy line from either front end.
+        boolean isExit = executeLine(input.strip());
+        if (isExit) {
+            // run() says goodbye after its loop, since ExitCommand.execute
+            // is empty; with no loop, the farewell belongs in the reply.
+            ui.showFarewell();
+            isExitRequested = true;
         }
         return ui.getResponse();
+    }
+
+    /**
+     * Parses and carries out one stripped line of input, showing any error
+     * through the Ui, and returns whether the command asked to end the
+     * session.
+     *
+     * Both parsing and executing throw MyriadException instead of showing
+     * an error themselves, so this is the single place that catches it and
+     * shows it, with the "Error: " prefix added here rather than repeated
+     * in every message. Save failures arrive as MyriadException too, so
+     * they are reported like any other command error instead of crashing
+     * the program.
+     *
+     * @param strippedLine one line of input, already whitespace-stripped.
+     * @return true if the command was an exit command; false otherwise,
+     *         including when the line was rejected with an error.
+     */
+    private boolean executeLine(String strippedLine) {
+        try {
+            Command command = Parser.parse(strippedLine);
+            command.execute(tasks, ui, storage);
+            return command.isExit();
+        } catch (MyriadException e) {
+            ui.showError("Error: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
