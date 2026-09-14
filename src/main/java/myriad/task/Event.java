@@ -6,6 +6,10 @@ package myriad.task;
  * endpoints — which is what occursDuring below compares against.
  */
 public class Event extends Task {
+
+    /** Leading field of an Event's save-format line; Storage reads it back. */
+    public static final String TYPE_CODE = "E";
+
     private TaskDateTime startDate;
     private TaskDateTime endDate;
 
@@ -28,14 +32,14 @@ public class Event extends Task {
     }
 
     /**
-     * Returns this task's save-format line prefixed with "E" and suffixed
-     * with the raw start and end times, so the type and both times can be
-     * recovered when the data file is read back in.
+     * Returns this task's save-format line prefixed with TYPE_CODE and
+     * suffixed with the raw start and end times, so the type and both times
+     * can be recovered when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
-        return String.format("E | %s | %s | %s",
-                super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
+        return String.format("%s | %s | %s | %s",
+                TYPE_CODE, super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
     }
 
     /**

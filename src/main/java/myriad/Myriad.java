@@ -13,7 +13,7 @@ import myriad.command.Command;
  * "mark"/"unmark" a task done, until the user types the exit command
  * ("bye"), then prints a farewell. A line that doesn't match any known
  * command, or that's missing a required argument, throws a
- * MyriadException, which is caught once per line in readCommands() and
+ * MyriadException, which is caught once per line in executeLine() and
  * shown as an error.
  *
  * One chatbot session is one Myriad object: it holds the pieces that
@@ -24,6 +24,13 @@ import myriad.command.Command;
  * up, then feed lines through them.
  */
 public class Myriad {
+
+    /**
+     * Path of the data file both front ends load from and save to, so the
+     * console and the GUI share one saved task list. Built with File rather
+     * than a "data/myriad.txt" literal so the separator is right on every OS.
+     */
+    public static final String DEFAULT_DATA_FILE = new File("data", "myriad.txt").getPath();
 
     private final Ui ui;
     private final Storage storage;
@@ -99,42 +106,19 @@ public class Myriad {
      * Runs one chatbot session: greets the user, warns about anything
      * that couldn't be loaded, then takes lines from the Ui until a
      * command says the session is over or the input runs out, and finally
-     * says goodbye.
-     *
-     * Each line is handed to the Parser, which returns the Command it
-     * asks for; carrying that command out is the command's own business,
-     * so this loop doesn't need to know which commands exist, and whether
-     * to stop is the command's answer (isExit) rather than a keyword this
-     * method checks for. Both parsing and executing may throw
-     * MyriadException instead of displaying an error themselves, so this
-     * is the single place that catches it and shows it — with the
-     * "Error: " prefix added here rather than repeated in every message.
-     * Commands also raise MyriadException (rather than a checked
-     * IOException) when saving to disk fails, so a save failure is caught
-     * and shown the same way as any other command error, instead of
-     * crashing the program.
+     * says goodbye. Each line is carried out by executeLine, the same
+     * method the GUI goes through, so whether to stop is the command's
+     * answer rather than a keyword this loop checks for.
      */
     public void run() {
-        ui.showGreeting();
-        if (loadErrorMessage != null) {
-            ui.showLoadingError(loadErrorMessage);
-        }
-        if (!skippedLines.isEmpty()) {
-            ui.showLoadWarning(skippedLines);
-        }
+        showStartupMessages();
 
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
             // Each line is a reply of its own, so the recorded text is cleared
             // rather than left to grow for the whole session.
             ui.startResponse();
-            try {
-                Command command = Parser.parse(ui.readCommand());
-                command.execute(tasks, ui, storage);
-                isExit = command.isExit();
-            } catch (MyriadException e) {
-                ui.showError("Error: " + e.getMessage());
-            }
+            isExit = executeLine(ui.readCommand());
         }
         ui.showFarewell();
     }
@@ -149,6 +133,16 @@ public class Myriad {
      */
     public String getGreeting() {
         ui.startResponse();
+        showStartupMessages();
+        return ui.getResponse();
+    }
+
+    /**
+     * Shows the greeting, then any warning about saved data that could not
+     * be loaded. Shared by run() and getGreeting() so the console and the
+     * GUI always open a session with the same messages.
+     */
+    private void showStartupMessages() {
         ui.showGreeting();
         if (loadErrorMessage != null) {
             ui.showLoadingError(loadErrorMessage);
@@ -156,14 +150,12 @@ public class Myriad {
         if (!skippedLines.isEmpty()) {
             ui.showLoadWarning(skippedLines);
         }
-        return ui.getResponse();
     }
 
     /**
      * Runs one line of user input and returns what the chatbot says back.
-     * Mirrors one iteration of run(), including the single catch that turns a
-     * MyriadException into an error message, so that the GUI and the console
-     * answer any given line the same way.
+     * Goes through executeLine, as each iteration of run() does, so that the
+     * GUI and the console answer any given line the same way.
      *
      * @param input the raw line the user typed, whitespace included.
      * @return the chatbot's reply.
@@ -171,21 +163,43 @@ public class Myriad {
     public String getResponse(String input) {
         assert input != null : "the GUI always passes the text field's contents";
         ui.startResponse();
-        try {
-            // Stripped here because readCommand() does it for the console, and
-            // Parser expects a tidy line from either front end.
-            Command command = Parser.parse(input.strip());
-            command.execute(tasks, ui, storage);
-            if (command.isExit()) {
-                // run() says goodbye after its loop, since ExitCommand.execute
-                // is empty; with no loop, the farewell belongs in the reply.
-                ui.showFarewell();
-                isExitRequested = true;
-            }
-        } catch (MyriadException e) {
-            ui.showError("Error: " + e.getMessage());
+        // Stripped here because readCommand() does it for the console, and
+        // Parser expects a tidy line from either front end.
+        boolean isExit = executeLine(input.strip());
+        if (isExit) {
+            // run() says goodbye after its loop, since ExitCommand.execute
+            // is empty; with no loop, the farewell belongs in the reply.
+            ui.showFarewell();
+            isExitRequested = true;
         }
         return ui.getResponse();
+    }
+
+    /**
+     * Parses and carries out one stripped line of input, showing any error
+     * through the Ui, and returns whether the command asked to end the
+     * session.
+     *
+     * Both parsing and executing throw MyriadException instead of showing
+     * an error themselves, so this is the single place that catches it and
+     * shows it, with the "Error: " prefix added here rather than repeated
+     * in every message. Save failures arrive as MyriadException too, so
+     * they are reported like any other command error instead of crashing
+     * the program.
+     *
+     * @param strippedLine one line of input, already whitespace-stripped.
+     * @return true if the command was an exit command; false otherwise,
+     *         including when the line was rejected with an error.
+     */
+    private boolean executeLine(String strippedLine) {
+        try {
+            Command command = Parser.parse(strippedLine);
+            command.execute(tasks, ui, storage);
+            return command.isExit();
+        } catch (MyriadException e) {
+            ui.showError("Error: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -199,14 +213,12 @@ public class Myriad {
     }
 
     /**
-     * Starts one chatbot session reading and writing data/myriad.txt.
+     * Starts one console chatbot session on DEFAULT_DATA_FILE.
      *
-     * @param args ignored; the data file location is fixed here rather than
-     *             taken from the command line.
+     * @param args ignored; the data file location is fixed in code rather
+     *             than taken from the command line.
      */
     public static void main(String[] args) {
-        // Built with File rather than a "data/myriad.txt" literal so the
-        // separator is right on every OS.
-        new Myriad(new File("data", "myriad.txt").getPath()).run();
+        new Myriad(DEFAULT_DATA_FILE).run();
     }
 }

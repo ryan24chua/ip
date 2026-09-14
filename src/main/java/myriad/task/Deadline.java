@@ -7,6 +7,10 @@ package myriad.task;
  * strings.
  */
 public class Deadline extends Task {
+
+    /** Leading field of a Deadline's save-format line; Storage reads it back. */
+    public static final String TYPE_CODE = "D";
+
     private TaskDateTime date;
 
     /**
@@ -23,13 +27,13 @@ public class Deadline extends Task {
     }
 
     /**
-     * Returns this task's save-format line prefixed with "D" and suffixed
-     * with the raw due date, so both the type and the date can be
+     * Returns this task's save-format line prefixed with TYPE_CODE and
+     * suffixed with the raw due date, so both the type and the date can be
      * recovered when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
-        return String.format("D | %s | %s", super.toSaveFormat(), date.toSaveFormat());
+        return String.format("%s | %s | %s", TYPE_CODE, super.toSaveFormat(), date.toSaveFormat());
     }
 
     /**

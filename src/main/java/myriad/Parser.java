@@ -52,8 +52,12 @@ public class Parser {
         // non-empty args and fall through to "unrecognized command".
         assert strippedLine != null && strippedLine.equals(strippedLine.strip())
                 : "Parser expects a line already stripped by Ui.readCommand or Myriad.getResponse";
-        String firstWord = strippedLine.split("\\s+", 2)[0];
-        String args = extractArguments(strippedLine);
+
+        // Split off the keyword once; every parse* method below then works on
+        // the argument text alone (empty if the line is just the keyword).
+        String[] keywordAndArgs = strippedLine.split("\\s+", 2);
+        String firstWord = keywordAndArgs[0];
+        String args = keywordAndArgs.length == 2 ? keywordAndArgs[1] : "";
 
         if (firstWord.equalsIgnoreCase("bye") && args.isEmpty()) {
             return new ExitCommand();
@@ -83,21 +87,6 @@ public class Parser {
     }
 
     /**
-     * Returns everything after the command keyword in a stripped line
-     * (e.g. "read book" from "todo read book"), or an empty string if the
-     * line is the keyword alone. Every parse* method below takes this
-     * argument text rather than the whole line, so the keyword is split
-     * off exactly once per line.
-     *
-     * @param strippedLine one whole line of input.
-     * @return the argument text, possibly empty, never null.
-     */
-    private static String extractArguments(String strippedLine) {
-        String[] parts = strippedLine.split("\\s+", 2);
-        return parts.length == 2 ? parts[1] : "";
-    }
-
-    /**
      * Parses the task number argument of a mark/unmark/delete command
      * (e.g. the "2" in "mark 2") and returns it as typed, 1-based. Throws
      * MyriadException if it is missing or isn't a whole number.
@@ -118,12 +107,12 @@ public class Parser {
                     "Please tell me which task number, e.g. \"mark 2\".");
         }
 
-        String arg = args.strip();
+        String numberText = args.strip();
         try {
-            return Integer.parseInt(arg);
+            return Integer.parseInt(numberText);
         } catch (NumberFormatException e) {
             throw new MyriadException(
-                    "\"" + arg + "\" is not a valid task number — it needs to be a whole "
+                    "\"" + numberText + "\" is not a valid task number — it needs to be a whole "
                             + "number, e.g. \"mark 2\".");
         }
     }

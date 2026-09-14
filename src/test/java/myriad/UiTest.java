@@ -23,7 +23,7 @@ import myriad.task.ToDo;
  */
 public class UiTest {
 
-    private static final String LINE = "____________________________________________________________";
+    private static final String DIVIDER = "____________________________________________________________";
 
     /** What a recorded reply puts between its lines, on every platform. */
     private static final String NEWLINE = "\n";
@@ -164,7 +164,7 @@ public class UiTest {
         // The scripted transcript checker asserts on these dividers, so the
         // framing has to survive any change to how messages are recorded.
         String printed = capturePrinted(() -> new Ui(true).showError("Error: boom"));
-        assertEquals(LINE + CONSOLE_NEWLINE + "Error: boom" + CONSOLE_NEWLINE + LINE + CONSOLE_NEWLINE,
+        assertEquals(DIVIDER + CONSOLE_NEWLINE + "Error: boom" + CONSOLE_NEWLINE + DIVIDER + CONSOLE_NEWLINE,
                 printed);
     }
 
