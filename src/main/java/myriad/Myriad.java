@@ -111,13 +111,7 @@ public class Myriad {
      * crashing the program.
      */
     public void run() {
-        ui.showGreeting();
-        if (loadErrorMessage != null) {
-            ui.showLoadingError(loadErrorMessage);
-        }
-        if (!skippedLines.isEmpty()) {
-            ui.showLoadWarning(skippedLines);
-        }
+        showStartupMessages();
 
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
@@ -145,6 +139,16 @@ public class Myriad {
      */
     public String getGreeting() {
         ui.startResponse();
+        showStartupMessages();
+        return ui.getResponse();
+    }
+
+    /**
+     * Shows the greeting, then any warning about saved data that could not
+     * be loaded. Shared by run() and getGreeting() so the console and the
+     * GUI always open a session with the same messages.
+     */
+    private void showStartupMessages() {
         ui.showGreeting();
         if (loadErrorMessage != null) {
             ui.showLoadingError(loadErrorMessage);
@@ -152,7 +156,6 @@ public class Myriad {
         if (!skippedLines.isEmpty()) {
             ui.showLoadWarning(skippedLines);
         }
-        return ui.getResponse();
     }
 
     /**
