@@ -48,6 +48,10 @@ public class Parser {
      *                         arguments are missing or unparseable.
      */
     public static Command parse(String strippedLine) throws MyriadException {
+        // Both front ends strip the line first; if one forgot, "bye " would have
+        // non-empty args and fall through to "unrecognized command".
+        assert strippedLine != null && strippedLine.equals(strippedLine.strip())
+                : "Parser expects a line already stripped by Ui.readCommand or Myriad.getResponse";
         String firstWord = strippedLine.split("\\s+", 2)[0];
         String args = extractArguments(strippedLine);
 

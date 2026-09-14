@@ -31,7 +31,9 @@ public class DeleteCommand extends TaskNumberCommand {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MyriadException {
         int index = resolveIndex(tasks);
+        int sizeBeforeRemove = tasks.size();
         Task removed = tasks.remove(index);
+        assert tasks.size() == sizeBeforeRemove - 1 : "delete must remove exactly one task";
         ui.showDeleted(removed, tasks.size());
         save(tasks, storage);
     }
