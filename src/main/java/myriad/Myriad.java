@@ -13,7 +13,7 @@ import myriad.command.Command;
  * "mark"/"unmark" a task done, until the user types the exit command
  * ("bye"), then prints a farewell. A line that doesn't match any known
  * command, or that's missing a required argument, throws a
- * MyriadException, which is caught once per line in readCommands() and
+ * MyriadException, which is caught once per line in executeLine() and
  * shown as an error.
  *
  * One chatbot session is one Myriad object: it holds the pieces that

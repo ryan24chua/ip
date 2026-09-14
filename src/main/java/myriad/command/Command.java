@@ -10,8 +10,8 @@ import myriad.Ui;
 /**
  * One command the user asked for, ready to be carried out. The Parser
  * turns a line of input into the matching Command subclass, and
- * Myriad.readCommands() just calls execute() on whatever it gets back —
- * so the loop doesn't need to know the list of commands at all, and
+ * Myriad.executeLine() just calls execute() on whatever it gets back —
+ * so Myriad doesn't need to know the list of commands at all, and
  * adding a command means adding a subclass here rather than editing a
  * switch in Myriad.
  *
@@ -32,7 +32,7 @@ public abstract class Command {
      * Carries out this command against the given task list, reporting
      * whatever the user should see through ui and persisting any change
      * through storage. Throws MyriadException if the command can't be
-     * carried out (e.g. it names a task that doesn't exist); readCommands()
+     * carried out (e.g. it names a task that doesn't exist); executeLine()
      * catches that and shows it as an error.
      *
      * @param tasks   the session's task list, read and possibly changed.
