@@ -61,6 +61,7 @@ public class TaskDateTime {
      * @param time the time part, or null if the input gave no time.
      */
     private TaskDateTime(LocalDate date, LocalTime time) {
+        assert date != null : "time may be null (no time given), but date never is";
         this.date = date;
         this.time = time;
     }

@@ -16,6 +16,8 @@ public class Task {
      * @param description what the task is.
      */
     public Task(String description) {
+        // Only non-null is assumed: a hand-edited save file may hold an empty description.
+        assert description != null : "Parser and Storage always pass a description string";
         this.description = description;
     }
 
