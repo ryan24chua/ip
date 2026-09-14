@@ -1,6 +1,5 @@
 package myriad;
 
-import java.io.File;
 import java.io.IOException;
 
 import javafx.application.Application;
@@ -17,11 +16,8 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
 
-    /**
-     * The session behind the window, pointed at the same data file the console
-     * front end uses, so that both talk to one saved task list.
-     */
-    private final Myriad myriad = new Myriad(new File("data", "myriad.txt").getPath(), false);
+    /** The session behind the window, on the same data file as the console. */
+    private final Myriad myriad = new Myriad(Myriad.DEFAULT_DATA_FILE, false);
 
     /**
      * Builds and shows the window when JavaFX has finished starting up.

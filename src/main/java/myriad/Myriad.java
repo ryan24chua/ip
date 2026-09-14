@@ -25,6 +25,13 @@ import myriad.command.Command;
  */
 public class Myriad {
 
+    /**
+     * Path of the data file both front ends load from and save to, so the
+     * console and the GUI share one saved task list. Built with File rather
+     * than a "data/myriad.txt" literal so the separator is right on every OS.
+     */
+    public static final String DEFAULT_DATA_FILE = new File("data", "myriad.txt").getPath();
+
     private final Ui ui;
     private final Storage storage;
     private final TaskList tasks;
@@ -201,14 +208,12 @@ public class Myriad {
     }
 
     /**
-     * Starts one chatbot session reading and writing data/myriad.txt.
+     * Starts one console chatbot session on DEFAULT_DATA_FILE.
      *
-     * @param args ignored; the data file location is fixed here rather than
-     *             taken from the command line.
+     * @param args ignored; the data file location is fixed in code rather
+     *             than taken from the command line.
      */
     public static void main(String[] args) {
-        // Built with File rather than a "data/myriad.txt" literal so the
-        // separator is right on every OS.
-        new Myriad(new File("data", "myriad.txt").getPath()).run();
+        new Myriad(DEFAULT_DATA_FILE).run();
     }
 }
