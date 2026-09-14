@@ -16,6 +16,10 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
 
+    /** Smallest size, in pixels, that the user can shrink the window to. */
+    private static final double MIN_WINDOW_HEIGHT = 220.0;
+    private static final double MIN_WINDOW_WIDTH = 417.0;
+
     /** The session behind the window, on the same data file as the console. */
     private final Myriad myriad = new Myriad(Myriad.DEFAULT_DATA_FILE, false);
 
@@ -33,8 +37,8 @@ public class Main extends Application {
 
             stage.setScene(new Scene(root));
             stage.setTitle("Myriad");
-            stage.setMinHeight(220.0);
-            stage.setMinWidth(417.0);
+            stage.setMinHeight(MIN_WINDOW_HEIGHT);
+            stage.setMinWidth(MIN_WINDOW_WIDTH);
 
             controller.setMyriad(myriad);
             stage.show();
