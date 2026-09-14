@@ -76,4 +76,6 @@ shadowJar {
 
 run {
     standardInput = System.in
+    // The JVM ignores assert statements unless started with -ea; the test task already enables them.
+    enableAssertions = true
 }

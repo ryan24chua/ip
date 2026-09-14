@@ -116,8 +116,10 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_findKeywordWithSurroundingSpace_findCommandReturned() throws MyriadException {
-        assertInstanceOf(FindCommand.class, Parser.parse("find    book   "));
+    public void parse_trailingWhitespace_assertionErrorThrown() {
+        // An unstripped line breaks parse()'s asserted precondition; Gradle
+        // runs the tests with assertions enabled (-ea), so the assert fires.
+        assertThrows(AssertionError.class, () -> Parser.parse("find    book   "));
     }
 
     // ---------------------------------------------------------------
@@ -184,12 +186,12 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_leadingWhitespace_notRecognised() {
+    public void parse_leadingWhitespace_assertionErrorThrown() {
         // parse() expects an already-stripped line (Ui.readCommand strips
-        // before calling). With leading whitespace the split yields an empty
-        // first word, so even a valid command falls through to the unknown
-        // branch. Documented so the precondition is not lost.
-        assertMessageContains("I don't recognize that command", parseExpectingFailure(" todo read book"));
+        // before calling). Without that, the split would yield an empty first
+        // word and a valid command would be misreported as unknown, so the
+        // precondition is asserted rather than left to fail silently.
+        assertThrows(AssertionError.class, () -> Parser.parse(" todo read book"));
     }
 
     @Test
@@ -441,9 +443,8 @@ public class ParserTest {
 
     @Test
     public void parse_findWithBlankKeyword_exceptionThrown() {
-        // Ui.readCommand strips the line, so a blank argument can only reach
-        // the Parser from a caller that did not strip; reject it either way.
+        // "find    " arrives here stripped to "find", leaving no keyword.
         assertMessageContains("Please include a keyword to find",
-                parseExpectingFailure("find    "));
+                parseExpectingFailure("find"));
     }
 }

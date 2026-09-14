@@ -97,14 +97,15 @@ public class TaskListTest {
     }
 
     @Test
-    public void get_negativeIndex_exceptionThrown() {
-        // get() does not bounds-check itself; the underlying ArrayList does.
-        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().get(-1));
+    public void get_negativeIndex_assertionErrorThrown() {
+        // A valid index is an asserted precondition, not a user error; Gradle
+        // runs the tests with assertions enabled (-ea), so the assert fires.
+        assertThrows(AssertionError.class, () -> threeToDos().get(-1));
     }
 
     @Test
-    public void get_indexEqualToSize_exceptionThrown() {
-        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().get(3));
+    public void get_indexEqualToSize_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> threeToDos().get(3));
     }
 
     // ---------------------------------------------------------------
@@ -190,13 +191,13 @@ public class TaskListTest {
     }
 
     @Test
-    public void markDone_outOfRangeIndex_exceptionThrown() {
-        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().markDone(3));
+    public void markDone_outOfRangeIndex_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> threeToDos().markDone(3));
     }
 
     @Test
-    public void markNotDone_outOfRangeIndex_exceptionThrown() {
-        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().markNotDone(-1));
+    public void markNotDone_outOfRangeIndex_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> threeToDos().markNotDone(-1));
     }
 
     // ---------------------------------------------------------------
@@ -245,14 +246,14 @@ public class TaskListTest {
     }
 
     @Test
-    public void remove_outOfRangeIndex_exceptionThrown() {
-        assertThrows(IndexOutOfBoundsException.class, () -> threeToDos().remove(3));
+    public void remove_outOfRangeIndex_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> threeToDos().remove(3));
     }
 
     @Test
     public void remove_outOfRangeIndex_listUnchanged() {
         TaskList tasks = threeToDos();
-        assertThrows(IndexOutOfBoundsException.class, () -> tasks.remove(3));
+        assertThrows(AssertionError.class, () -> tasks.remove(3));
         assertEquals(3, tasks.size());
     }
 

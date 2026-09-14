@@ -31,6 +31,7 @@ public class TaskList {
      * @param initialTasks the tasks to start with; copied, not aliased.
      */
     public TaskList(List<Task> initialTasks) {
+        assert initialTasks != null : "Storage.load always builds a list, even when empty";
         this.tasks = new ArrayList<>(initialTasks);
     }
 
@@ -41,6 +42,8 @@ public class TaskList {
      * @param task the task to add.
      */
     public void add(Task task) {
+        // A null would only fail later, in list or save, far from where it came from.
+        assert task != null : "the Parser always builds a task before AddCommand runs";
         tasks.add(task);
     }
 
@@ -48,12 +51,14 @@ public class TaskList {
      * Returns the task at the given 0-based index.
      *
      * @param index a 0-based index; callers are expected to have checked it
-     *              with isValidIndex first, since an out-of-range index
-     *              throws IndexOutOfBoundsException rather than a
+     *              with isValidIndex first, since an out-of-range index is
+     *              a programming bug: it fails an assertion (with -ea) or
+     *              throws IndexOutOfBoundsException, never a
      *              MyriadException.
      * @return the task at that position.
      */
     public Task get(int index) {
+        assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
         return tasks.get(index);
     }
 
@@ -82,6 +87,7 @@ public class TaskList {
      * @param index a 0-based index, expected to be valid (see get).
      */
     public void markDone(int index) {
+        assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
         tasks.get(index).setDone(true);
     }
 
@@ -91,6 +97,7 @@ public class TaskList {
      * @param index a 0-based index, expected to be valid (see get).
      */
     public void markNotDone(int index) {
+        assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
         tasks.get(index).setDone(false);
     }
 
@@ -104,6 +111,7 @@ public class TaskList {
      * @return the task that was removed, so the caller can show it.
      */
     public Task remove(int index) {
+        assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
         return tasks.remove(index);
     }
 

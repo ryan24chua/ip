@@ -96,6 +96,10 @@ public class Myriad {
         this.tasks = loadedTasks;
         this.skippedLines = loadedSkippedLines;
         this.loadErrorMessage = errorMessage;
+
+        // Either the whole file was unreadable or some lines were skipped, never both.
+        assert loadErrorMessage == null || skippedLines.isEmpty()
+                : "a failed load should not also report skipped lines";
     }
 
     /**
@@ -157,6 +161,7 @@ public class Myriad {
      * @return the chatbot's reply.
      */
     public String getResponse(String input) {
+        assert input != null : "the GUI always passes the text field's contents";
         ui.startResponse();
         // Stripped here because readCommand() does it for the console, and
         // Parser expects a tidy line from either front end.

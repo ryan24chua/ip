@@ -36,6 +36,7 @@ public class Storage {
      * @param filePath path to the data file, e.g. "data/myriad.txt".
      */
     public Storage(String filePath) {
+        assert filePath != null && !filePath.isBlank() : "the data file path is set in code, never user-typed";
         this.filePath = filePath;
     }
 
@@ -53,6 +54,7 @@ public class Storage {
      * @throws IOException if the file or its directory can't be written.
      */
     public void save(TaskList taskList) throws IOException {
+        assert taskList != null : "Command.save always passes the session's task list";
         File parentDir = new File(filePath).getParentFile();
         if (parentDir != null) {
             parentDir.mkdirs();

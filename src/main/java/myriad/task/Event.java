@@ -24,6 +24,8 @@ public class Event extends Task {
      */
     public Event(String description, TaskDateTime startDate, TaskDateTime endDate) {
         super(description);
+        // Start before end is deliberately not asserted: that comes from user input.
+        assert startDate != null && endDate != null : "TaskDateTime.parse never returns null";
 
         this.startDate = startDate;
         this.endDate = endDate;

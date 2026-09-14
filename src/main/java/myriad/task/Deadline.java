@@ -21,6 +21,7 @@ public class Deadline extends Task {
      */
     public Deadline(String description, TaskDateTime date) {
         super(description);
+        assert date != null : "TaskDateTime.parse never returns null";
 
         this.date = date;
     }
