@@ -94,15 +94,15 @@ public class Storage {
         String description = fields[2];
 
         Task task = switch (type) {
-            case "T" -> new ToDo(description);
-            case "D" -> {
+            case ToDo.TYPE_CODE -> new ToDo(description);
+            case Deadline.TYPE_CODE -> {
                 if (fields.length < 4) {
                     throw new MyriadException(
                             "a Deadline line needs a 4th field (date), found " + fields.length + " fields");
                 }
                 yield new Deadline(description, TaskDateTime.parse(fields[3]));
             }
-            case "E" -> {
+            case Event.TYPE_CODE -> {
                 if (fields.length < 5) {
                     throw new MyriadException(
                             "an Event line needs 5 fields (type, done, description, start, end), "
