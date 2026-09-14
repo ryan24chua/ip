@@ -18,7 +18,8 @@ import myriad.task.TaskDateTime;
  * whole reply back with getResponse().
  */
 public class Ui {
-    private static final String LINE = "____________________________________________________________";
+    /** Rule printed above and below each console message to frame it. */
+    private static final String DIVIDER = "____________________________________________________________";
     private static final String BANNER = "███╗   ███╗██╗   ██╗██████╗ ██╗ █████╗ ██████╗ \n"
             + "████╗ ████║╚██╗ ██╔╝██╔══██╗██║██╔══██╗██╔══██╗\n"
             + "██╔████╔██║ ╚████╔╝ ██████╔╝██║███████║██║  ██║\n"
@@ -91,12 +92,12 @@ public class Ui {
         responseBuffer.append(message.replace("\r\n", "\n"));
 
         if (isEchoingToConsole) {
-            System.out.println(LINE);
+            System.out.println(DIVIDER);
             if (consoleOnlyText != null) {
                 System.out.println(consoleOnlyText);
             }
             System.out.println(message);
-            System.out.println(LINE);
+            System.out.println(DIVIDER);
         }
     }
 
