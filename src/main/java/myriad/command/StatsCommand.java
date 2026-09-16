@@ -30,10 +30,23 @@ public class StatsCommand extends Command {
     private final LocalDate today;
 
     /**
-     * Creates a command that reports statistics as of today.
+     * Creates a command that reports statistics as of today's date on the
+     * system clock.
      */
     public StatsCommand() {
-        today = LocalDate.now();
+        this(LocalDate.now());
+    }
+
+    /**
+     * Creates a command that reports statistics as of the given date. Lets a
+     * test fix the date the "due soon" window starts from, since the
+     * system clock gives a different answer every day the test is run.
+     *
+     * @param today the date the "due soon" window is measured from.
+     */
+    public StatsCommand(LocalDate today) {
+        assert today != null : "the no-argument constructor supplies today's date";
+        this.today = today;
     }
 
     /**
