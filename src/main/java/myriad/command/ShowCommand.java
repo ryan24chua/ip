@@ -1,9 +1,9 @@
 package myriad.command;
 
 import myriad.Storage;
-import myriad.TaskList;
 import myriad.Ui;
 import myriad.task.TaskDateTime;
+import myriad.task.TaskList;
 
 /**
  * Shows every Deadline/Event occurring during a given date/time (see

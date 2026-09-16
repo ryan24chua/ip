@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import myriad.MyriadException;
 import myriad.Storage;
-import myriad.TaskList;
 import myriad.Ui;
+import myriad.task.TaskList;
 
 /**
  * One command the user asked for, ready to be carried out. The Parser

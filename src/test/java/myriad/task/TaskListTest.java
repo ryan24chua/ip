@@ -1,4 +1,4 @@
-package myriad;
+package myriad.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,11 +12,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import myriad.task.Deadline;
-import myriad.task.Event;
-import myriad.task.Task;
-import myriad.task.TaskDateTime;
-import myriad.task.ToDo;
+import myriad.MyriadException;
 
 /**
  * Tests for {@link TaskList}: the index bookkeeping every mark, unmark and

@@ -1,8 +1,8 @@
 package myriad.command;
 
 import myriad.Storage;
-import myriad.TaskList;
 import myriad.Ui;
+import myriad.task.TaskList;
 
 /**
  * Shows every task whose description contains a given keyword, ignoring

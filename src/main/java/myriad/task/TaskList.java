@@ -1,13 +1,10 @@
-package myriad;
+package myriad.task;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import myriad.task.Task;
-import myriad.task.TaskDateTime;
 
 /**
  * Holds the user's tasks and the operations that mutate them (add,
