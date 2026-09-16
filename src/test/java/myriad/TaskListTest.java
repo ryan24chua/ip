@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -514,6 +515,119 @@ public class TaskListTest {
         tasks.add(task);
 
         assertSame(task, tasks.getTasksMatching("book").get(0));
+    }
+
+    // ---------------------------------------------------------------
+    // getTasksOfType -- the per-type breakdown behind "stats"
+    // ---------------------------------------------------------------
+
+    @Test
+    public void getTasksOfType_mixedList_returnsOnlyMatchesInOriginalOrder() {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+        tasks.add(new Deadline("return book", at("2019-06-06")));
+        tasks.add(new ToDo("join sports club"));
+
+        List<Task> matches = tasks.getTasksOfType(ToDo.TYPE_CODE);
+        assertEquals(2, matches.size());
+        assertEquals("read book", describe(matches.get(0)));
+        assertEquals("join sports club", describe(matches.get(1)));
+    }
+
+    @Test
+    public void getTasksOfType_noMatches_emptyListReturned() {
+        TaskList tasks = taskListOf("read book");
+        assertTrue(tasks.getTasksOfType(Deadline.TYPE_CODE).isEmpty());
+    }
+
+    @Test
+    public void getTasksOfType_emptyList_emptyListReturned() {
+        assertTrue(new TaskList().getTasksOfType(ToDo.TYPE_CODE).isEmpty());
+    }
+
+    // ---------------------------------------------------------------
+    // getTasksDueWithin -- the due-soon window behind "stats"
+    // ---------------------------------------------------------------
+
+    @Test
+    public void getTasksDueWithin_emptyList_emptyListReturned() {
+        assertTrue(new TaskList().getTasksDueWithin(LocalDate.parse("2019-12-02"), 7).isEmpty());
+    }
+
+    @Test
+    public void getTasksDueWithin_deadlineOnLastDayOfWindow_matches() {
+        // The window runs to the *end* of date.plusDays(days), not its start,
+        // so a deadline any time on day 7 still counts.
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-09 2300")));
+        assertEquals(1, tasks.getTasksDueWithin(LocalDate.parse("2019-12-02"), 7).size());
+    }
+
+    @Test
+    public void getTasksDueWithin_deadlineOnDayAfterWindow_doesNotMatch() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("homework", at("2019-12-10")));
+        assertTrue(tasks.getTasksDueWithin(LocalDate.parse("2019-12-02"), 7).isEmpty());
+    }
+
+    @Test
+    public void getTasksDueWithin_eventStartingBeforeWindowButEndingInside_matches() {
+        // Overlap, not containment: only part of the event needs to fall in
+        // the window for it to count.
+        TaskList tasks = new TaskList();
+        tasks.add(new Event("conference", at("2019-11-30"), at("2019-12-03")));
+        assertEquals(1, tasks.getTasksDueWithin(LocalDate.parse("2019-12-02"), 7).size());
+    }
+
+    @Test
+    public void getTasksDueWithin_doneTaskStillCounted() {
+        // getTasksDueWithin filters by date only; whether a task is done is
+        // the caller's business (getOldestUndone is the one that filters on
+        // done-ness), so a done deadline in range still matches here.
+        TaskList tasks = new TaskList();
+        Deadline deadline = new Deadline("homework", at("2019-12-03"));
+        deadline.setDone(true);
+        tasks.add(deadline);
+        assertEquals(1, tasks.getTasksDueWithin(LocalDate.parse("2019-12-02"), 7).size());
+    }
+
+    // ---------------------------------------------------------------
+    // getOldestUndone -- the "oldest not done" section behind "stats"
+    // ---------------------------------------------------------------
+
+    @Test
+    public void getOldestUndone_emptyList_emptyListReturned() {
+        assertTrue(new TaskList().getOldestUndone(5).isEmpty());
+    }
+
+    @Test
+    public void getOldestUndone_doneTaskExcluded() {
+        TaskList tasks = threeToDos();
+        tasks.markDone(0);
+        List<Task> oldest = tasks.getOldestUndone(5);
+        assertEquals(2, oldest.size());
+        assertEquals("second", describe(oldest.get(0)));
+        assertEquals("third", describe(oldest.get(1)));
+    }
+
+    @Test
+    public void getOldestUndone_moreUndoneThanLimit_onlyFirstLimitReturnedInOrder() {
+        TaskList tasks = taskListOf("first", "second", "third", "fourth");
+        List<Task> oldest = tasks.getOldestUndone(2);
+        assertEquals(2, oldest.size());
+        assertEquals("first", describe(oldest.get(0)));
+        assertEquals("second", describe(oldest.get(1)));
+    }
+
+    @Test
+    public void getOldestUndone_fewerUndoneThanLimit_allUndoneReturned() {
+        TaskList tasks = threeToDos();
+        assertEquals(3, tasks.getOldestUndone(5).size());
+    }
+
+    @Test
+    public void getOldestUndone_limitZero_emptyListReturned() {
+        assertTrue(threeToDos().getOldestUndone(0).isEmpty());
     }
 
     /**

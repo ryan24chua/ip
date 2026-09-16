@@ -90,7 +90,7 @@ public class MyriadTest {
         // turn it into text the same way the console loop does.
         String response = sessionAtTempFile().getResponse("blah");
         assertEquals("Error: I don't recognize that command. Try: todo, deadline, event, list, "
-                + "mark, unmark, delete, show, find, or bye.", response);
+                + "mark, unmark, delete, show, find, stats, or bye.", response);
     }
 
     @Test

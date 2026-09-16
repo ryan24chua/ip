@@ -18,6 +18,11 @@ public class ToDo extends Task {
         super(description);
     }
 
+    @Override
+    public String getTypeCode() {
+        return TYPE_CODE;
+    }
+
     /**
      * Returns this task's save-format line prefixed with TYPE_CODE so it can
      * be recognized as a ToDo when the data file is read back in.

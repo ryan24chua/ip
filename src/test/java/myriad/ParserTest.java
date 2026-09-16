@@ -15,6 +15,7 @@ import myriad.command.FindCommand;
 import myriad.command.ListCommand;
 import myriad.command.MarkCommand;
 import myriad.command.ShowCommand;
+import myriad.command.StatsCommand;
 import myriad.command.UnmarkCommand;
 
 /**
@@ -110,6 +111,11 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_stats_statsCommandReturned() throws MyriadException {
+        assertInstanceOf(StatsCommand.class, Parser.parse("stats"));
+    }
+
+    @Test
     public void parse_findMultiWordKeyword_findCommandReturned() throws MyriadException {
         // The whole argument text is the keyword, spaces included.
         assertInstanceOf(FindCommand.class, Parser.parse("find read book"));
@@ -150,7 +156,7 @@ public class ParserTest {
         // not updated alongside it.
         String message = parseExpectingFailure("blah").getMessage();
         assertMessageListsAll(message,
-                "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "find", "bye");
+                "todo", "deadline", "event", "list", "mark", "unmark", "delete", "show", "find", "stats", "bye");
     }
 
     @Test
@@ -174,6 +180,13 @@ public class ParserTest {
     @Test
     public void parse_listWithTrailingArgument_notTreatedAsList() {
         assertMessageContains("I don't recognize that command", parseExpectingFailure("list 1"));
+    }
+
+    @Test
+    public void parse_statsWithTrailingArgument_notTreatedAsStats() {
+        // "stats" only matches when it is the whole line, same as list/bye
+        // above, so a stray argument must not be silently discarded.
+        assertMessageContains("I don't recognize that command", parseExpectingFailure("stats now"));
     }
 
     // ---------------------------------------------------------------

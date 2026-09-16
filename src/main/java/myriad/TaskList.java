@@ -1,5 +1,8 @@
 package myriad;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,6 +160,70 @@ public class TaskList {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (task.descriptionContains(keyword)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Returns a new list of every task whose type code equals typeCode, for
+     * the "stats" command's per-type breakdown. Like getTasksMatching, this
+     * is always a fresh list rather than the backing one; callers that just
+     * want the count can take size() of the result.
+     *
+     * @param typeCode the type code to match, e.g. Deadline.TYPE_CODE.
+     * @return a fresh list of the matching tasks, in their original order.
+     */
+    public ArrayList<Task> getTasksOfType(String typeCode) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getTypeCode().equals(typeCode)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Returns a new list of every task due within the next days days of
+     * date, i.e. overlapping the period from the start of date to the end
+     * of date.plusDays(days) — the same start/end convention
+     * TaskDateTime.rangeStart()/rangeEnd() use for a whole day.
+     *
+     * @param date the date the period starts from (its start of day).
+     * @param days how many days the period spans after date.
+     * @return a fresh list of the matching tasks, in their original order.
+     */
+    public ArrayList<Task> getTasksDueWithin(LocalDate date, int days) {
+        ArrayList<Task> matches = new ArrayList<>();
+        LocalDateTime from = date.atStartOfDay();
+        LocalDateTime to = date.plusDays(days).atTime(LocalTime.MAX);
+
+        for (Task task : tasks) {
+            if (task.overlaps(from, to)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Returns a new list of the first limit undone tasks in list order, for
+     * the "stats" command's "oldest not done" section. "Oldest" here means
+     * earliest added, not an explicit timestamp — tasks are appended by
+     * add() and never reordered, so list order already is add order.
+     *
+     * @param limit the maximum number of tasks to return.
+     * @return a fresh list of up to limit undone tasks, in their original order.
+     */
+    public ArrayList<Task> getOldestUndone(int limit) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (matches.size() >= limit) {
+                break;
+            }
+            if (!task.isDone()) {
                 matches.add(task);
             }
         }
