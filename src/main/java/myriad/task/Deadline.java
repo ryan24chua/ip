@@ -1,5 +1,7 @@
 package myriad.task;
 
+import java.time.LocalDateTime;
+
 /**
  * A task that has to be done by one date, optionally with a time of day.
  * The due date is kept as a TaskDateTime rather than raw text, so that
@@ -24,6 +26,11 @@ public class Deadline extends Task {
         assert date != null : "TaskDateTime.parse never returns null";
 
         this.date = date;
+    }
+
+    @Override
+    public String getTypeCode() {
+        return TYPE_CODE;
     }
 
     /**
@@ -54,5 +61,16 @@ public class Deadline extends Task {
     public boolean occursDuring(TaskDateTime query) {
         return TaskDateTime.rangesOverlap(
                 date.rangeStart(), date.rangeEnd(), query.rangeStart(), query.rangeEnd());
+    }
+
+    /**
+     * Matches if the period from from to to overlaps this deadline's own
+     * instant (or, if the deadline has no time of its own, its whole day) —
+     * see TaskDateTime.rangesOverlap for the general rule.
+     */
+    @Override
+    public boolean overlaps(LocalDateTime from, LocalDateTime to) {
+        return TaskDateTime.rangesOverlap(
+                date.rangeStart(), date.rangeEnd(), from, to);
     }
 }

@@ -1,9 +1,11 @@
 package myriad.task;
 
+import java.time.LocalDateTime;
+
 /**
  * Represents a task with a description and a done/not-done status.
  */
-public class Task {
+public abstract class Task {
     /** Whether the user has marked this task done. Starts false. */
     protected boolean isDone = false;
 
@@ -19,6 +21,15 @@ public class Task {
         // Only non-null is assumed: a hand-edited save file may hold an empty description.
         assert description != null : "Parser and Storage always pass a description string";
         this.description = description;
+    }
+
+    /**
+     * Returns whether this task is done.
+     *
+     * @return whether this task is done.
+     */
+    public boolean isDone() {
+        return this.isDone;
     }
 
     /**
@@ -59,6 +70,20 @@ public class Task {
     }
 
     /**
+     * Returns whether this task overlaps the period from from to to, for
+     * the "stats" command's due-soon count. Tasks with no date of their own
+     * (ToDo) never match, hence the default false here; Deadline and Event
+     * override this with their own date-based check.
+     *
+     * @param from the start of the period.
+     * @param to   the end of the period.
+     * @return whether this task overlaps that period; always false for a plain Task.
+     */
+    public boolean overlaps(LocalDateTime from, LocalDateTime to) {
+        return false;
+    }
+
+    /**
      * Returns whether this task's description contains keyword, ignoring
      * case, for the "find" command. Only the description is searched, not
      * the type marker or any dates, so "find 2019" won't match a deadline
@@ -70,6 +95,13 @@ public class Task {
     public boolean descriptionContains(String keyword) {
         return description.toLowerCase().contains(keyword.toLowerCase());
     }
+
+    /**
+     * Returns the code that identifies the task type.
+     * 
+     * @return type code.
+     */
+    public abstract String getTypeCode();
 
     /**
      * Returns the task's status and description, e.g. [X] read book

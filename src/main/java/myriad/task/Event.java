@@ -1,5 +1,7 @@
 package myriad.task;
 
+import java.time.LocalDateTime;
+
 /**
  * A task that spans a start and an end date/time. Unlike a Deadline, which
  * occurs at one point, an Event covers everything between its two
@@ -29,6 +31,11 @@ public class Event extends Task {
 
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    @Override
+    public String getTypeCode() {
+        return TYPE_CODE;
     }
 
     /**
@@ -61,5 +68,16 @@ public class Event extends Task {
     public boolean occursDuring(TaskDateTime query) {
         return TaskDateTime.rangesOverlap(
                 startDate.rangeStart(), endDate.rangeEnd(), query.rangeStart(), query.rangeEnd());
+    }
+
+    /**
+     * Matches if the period from from to to overlaps this event's span,
+     * from startDate's earliest instant to endDate's latest instant — see
+     * TaskDateTime.rangesOverlap for the general rule.
+     */
+    @Override
+    public boolean overlaps(LocalDateTime from, LocalDateTime to) {
+        return TaskDateTime.rangesOverlap(
+                startDate.rangeStart(), endDate.rangeEnd(), from, to);
     }
 }
