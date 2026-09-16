@@ -2,12 +2,18 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'jacoco'
     id 'com.gradleup.shadow' version '9.5.1'
 }
 
 checkstyle {
     // Rules live in config/checkstyle/checkstyle.xml, the location the plugin looks in by default.
     toolVersion = '14.1.0'
+}
+
+jacoco {
+    // 0.8.14 is the first release that can instrument Java 25 class files.
+    toolVersion = '0.8.14'
 }
 
 java {
@@ -58,6 +64,20 @@ test {
         showCauses = true
         showStackTraces = true
         showStandardStreams = false
+    }
+
+    // Every test run also produces a coverage report, at
+    // build/reports/jacoco/test/html/index.html.
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        html.required = true
+        // The XML form is what CI services and IDE plugins read.
+        xml.required = true
     }
 }
 
