@@ -21,6 +21,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+tasks.withType(JavaCompile).configureEach {
+    // Stated explicitly because Ui's banner uses box-drawing characters, which
+    // would be garbled by any build that fell back to a platform encoding.
+    options.encoding = 'UTF-8'
+    // Reports every warning javac knows about, not just the handful it shows by
+    // default, and fails the build on any of them so they cannot pile up unseen.
+    options.compilerArgs.addAll(['-Xlint:all', '-Werror'])
+}
+
 repositories {
     mavenCentral()
 }

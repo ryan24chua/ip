@@ -12,6 +12,13 @@ package myriad;
  */
 public class MyriadException extends Exception {
     /**
+     * Version of this class's serialized form. Every Throwable is
+     * Serializable, and declaring this keeps the form fixed instead of
+     * letting it be recomputed, differently, whenever the class changes.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * Creates an exception carrying the specific reason something failed.
      *
      * @param message the reason alone, without an "Error: " prefix.
