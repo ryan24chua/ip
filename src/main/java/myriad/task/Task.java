@@ -97,9 +97,10 @@ public abstract class Task {
     }
 
     /**
-     * Returns the code that identifies the task type.
-     * 
-     * @return type code.
+     * Returns the code that identifies this task's type, e.g. "T" for a
+     * ToDo — see each subclass's own TYPE_CODE constant.
+     *
+     * @return this task's type code.
      */
     public abstract String getTypeCode();
 

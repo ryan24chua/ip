@@ -1,0 +1,53 @@
+package myriad.command;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+import myriad.Storage;
+import myriad.TaskList;
+import myriad.Ui;
+import myriad.task.Deadline;
+import myriad.task.Event;
+import myriad.task.Task;
+import myriad.task.ToDo;
+
+/**
+ * Reports a snapshot of the task list: how many tasks of each type there
+ * are, which are due within the next 7 days, and the oldest tasks not yet
+ * done. Everything is computed on demand from TaskList, so it is never out
+ * of sync with the tasks actually held; nothing is stored and, like
+ * ShowCommand, reading the list never triggers a save.
+ */
+public class StatsCommand extends Command {
+
+    /** How many days ahead of today counts as "due soon". */
+    private static final int DUE_SOON_DAYS = 7;
+
+    /** How many of the oldest not-done tasks to report. */
+    private static final int OLDEST_UNDONE_LIMIT = 5;
+
+    /** The date the "due soon" window is measured from. */
+    private final LocalDate today;
+
+    /**
+     * Creates a command that reports statistics as of today.
+     */
+    public StatsCommand() {
+        today = LocalDate.now();
+    }
+
+    /**
+     * Gathers the task-count breakdown, the tasks due soon, and the oldest
+     * not-done tasks, then shows them via Ui.
+     */
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) {
+        ArrayList<Task> toDos = tasks.getTasksOfType(ToDo.TYPE_CODE);
+        ArrayList<Task> deadlines = tasks.getTasksOfType(Deadline.TYPE_CODE);
+        ArrayList<Task> events = tasks.getTasksOfType(Event.TYPE_CODE);
+        ArrayList<Task> dueSoon = tasks.getTasksDueWithin(today, DUE_SOON_DAYS);
+        ArrayList<Task> oldestUndone = tasks.getOldestUndone(OLDEST_UNDONE_LIMIT);
+
+        ui.showStats(toDos, deadlines, events, dueSoon, oldestUndone);
+    }
+}

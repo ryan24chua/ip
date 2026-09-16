@@ -284,6 +284,33 @@ public class Ui {
     }
 
     /**
+     * Shows the "stats" command's report: how many tasks of each type there
+     * are, which are due within the next 7 days, and the oldest tasks not
+     * yet done — each listed 1-indexed like showList, or a "none" line if
+     * that section is empty.
+     *
+     * @param toDos        every ToDo in the list.
+     * @param deadlines    every Deadline in the list.
+     * @param events       every Event in the list.
+     * @param dueSoon      tasks due within the next 7 days.
+     * @param oldestUndone the oldest not-done tasks, in list order.
+     */
+    public void showStats(
+            List<Task> toDos, List<Task> deadlines, List<Task> events,
+            List<Task> dueSoon, List<Task> oldestUndone) {
+        int total = toDos.size() + deadlines.size() + events.size();
+        emit("Here are your task statistics:",
+                String.format("Total tasks: %d (ToDo: %d, Deadline: %d, Event: %d)",
+                        total, toDos.size(), deadlines.size(), events.size()),
+                dueSoon.isEmpty()
+                        ? "Due in the next 7 days: none"
+                        : "Due in the next 7 days:" + formatNumberedTasks(dueSoon),
+                oldestUndone.isEmpty()
+                        ? "Oldest not done: none"
+                        : "Oldest not done:" + formatNumberedTasks(oldestUndone));
+    }
+
+    /**
      * Shows a single-line error/status message.
      *
      * @param message the message to show, prefix included.

@@ -18,9 +18,9 @@ public class ToDo extends Task {
         super(description);
     }
 
-    @Override 
+    @Override
     public String getTypeCode() {
-        return ToDo.TYPE_CODE;
+        return TYPE_CODE;
     }
 
     /**
