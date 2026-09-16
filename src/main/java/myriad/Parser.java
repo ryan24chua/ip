@@ -8,6 +8,7 @@ import myriad.command.FindCommand;
 import myriad.command.ListCommand;
 import myriad.command.MarkCommand;
 import myriad.command.ShowCommand;
+import myriad.command.StatsCommand;
 import myriad.command.UnmarkCommand;
 import myriad.task.Deadline;
 import myriad.task.Event;
@@ -79,10 +80,13 @@ public class Parser {
             return new ShowCommand(parseShowQuery(args));
         } else if (firstWord.equalsIgnoreCase("find")) {
             return new FindCommand(parseFindKeyword(args));
+        } else if (firstWord.equalsIgnoreCase("stats") && args.isEmpty()) {
+            return new StatsCommand();
         } else {
             throw new MyriadException(
-                    "I don't recognize that command. Try: todo, deadline, event, "
-                            + "list, mark, unmark, delete, show, find, or bye.");
+                    "I don't recognize that command. Try: todo, deadline, "
+                            + "event, list, mark, unmark, delete, "
+                            + "show, find, stats, or bye.");
         }
     }
 
