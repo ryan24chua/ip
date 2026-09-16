@@ -38,10 +38,13 @@ dependencies {
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+    // The BOM fixes one version for every JUnit artifact below, including the
+    // platform launcher, whose 1.x numbering differs from Jupiter's 5.x.
+    testImplementation platform("org.junit:junit-bom:${jUnitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
