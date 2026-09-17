@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import myriad.task.Task;
 import myriad.task.TaskDateTime;
+import myriad.task.TaskStats;
 
 /**
  * Owns both halves of talking to the user: every message the chatbot says,
@@ -285,29 +286,24 @@ public class Ui {
 
     /**
      * Shows the "stats" command's report: how many tasks of each type there
-     * are, which are due within the next 7 days, and the oldest tasks not
+     * are, which are due within the next few days, and the oldest tasks not
      * yet done — each listed 1-indexed like showList, or a "none" line if
      * that section is empty.
      *
-     * @param toDos        every ToDo in the list.
-     * @param deadlines    every Deadline in the list.
-     * @param events       every Event in the list.
-     * @param dueSoon      tasks due within the next 7 days.
-     * @param oldestUndone the oldest not-done tasks, in list order.
+     * @param stats the report's data, including how many days "due soon" covers.
      */
-    public void showStats(
-            List<Task> toDos, List<Task> deadlines, List<Task> events,
-            List<Task> dueSoon, List<Task> oldestUndone) {
-        int total = toDos.size() + deadlines.size() + events.size();
+    public void showStats(TaskStats stats) {
+        String dueSoonHeader = String.format("Due in the next %d days:", stats.dueSoonDays());
         emit("Here are your task statistics:",
                 String.format("Total tasks: %d (ToDo: %d, Deadline: %d, Event: %d)",
-                        total, toDos.size(), deadlines.size(), events.size()),
-                dueSoon.isEmpty()
-                        ? "Due in the next 7 days: none"
-                        : "Due in the next 7 days:" + formatNumberedTasks(dueSoon),
-                oldestUndone.isEmpty()
+                        stats.getTotalCount(), stats.toDos().size(),
+                        stats.deadlines().size(), stats.events().size()),
+                stats.dueSoon().isEmpty()
+                        ? dueSoonHeader + " none"
+                        : dueSoonHeader + formatNumberedTasks(stats.dueSoon()),
+                stats.oldestUndone().isEmpty()
                         ? "Oldest not done: none"
-                        : "Oldest not done:" + formatNumberedTasks(oldestUndone));
+                        : "Oldest not done:" + formatNumberedTasks(stats.oldestUndone()));
     }
 
     /**

@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import myriad.task.Task;
+import myriad.task.TaskStats;
 import myriad.task.ToDo;
 
 /**
@@ -153,6 +154,21 @@ public class UiTest {
         assertEquals("Warning: 2 line(s) in your saved data could not be loaded and were skipped:" + NEWLINE
                 + "  - line 2: bad" + NEWLINE
                 + "  - line 5: worse", ui.getResponse());
+    }
+
+    @Test
+    public void showStats_nonDefaultWindow_windowTakenFromStats() {
+        // The "due soon" day count belongs to StatsCommand; Ui must print
+        // whatever window it is given rather than a hard-coded 7.
+        Ui ui = guiUi();
+        TaskStats stats = new TaskStats(toDos("read book", "walk dog"), List.of(), List.of(),
+                3, List.of(), toDos("read book"));
+        ui.showStats(stats);
+        assertEquals("Here are your task statistics:" + NEWLINE
+                + "Total tasks: 2 (ToDo: 2, Deadline: 0, Event: 0)" + NEWLINE
+                + "Due in the next 3 days: none" + NEWLINE
+                + "Oldest not done:" + NEWLINE
+                + "1.[T][ ] read book", ui.getResponse());
     }
 
     // ---------------------------------------------------------------
