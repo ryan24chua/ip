@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.List;
+import java.util.Objects;
 
 import myriad.MyriadException;
 
@@ -174,6 +175,35 @@ public class TaskDateTime {
     public static boolean rangesOverlap(
             LocalDateTime aStart, LocalDateTime aEnd, LocalDateTime bStart, LocalDateTime bEnd) {
         return !aEnd.isBefore(bStart) && !bEnd.isBefore(aStart);
+    }
+
+    /**
+     * Returns whether {@code other} is a {@code TaskDateTime} for the same
+     * date and the same time, or likewise has no time. A date-only value is
+     * therefore not equal to the same date at midnight, because the user
+     * gave different information in each case.
+     *
+     * @param other the object to compare with.
+     * @return true if both have the same date and the same time or lack of one.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof TaskDateTime otherDateTime)) {
+            return false;
+        }
+        return date.equals(otherDateTime.date) && Objects.equals(time, otherDateTime.time);
+    }
+
+    /**
+     * Returns a hash code consistent with {@link #equals}, as the contract
+     * of {@link Object#hashCode} requires whenever equals is overridden.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, time);
     }
 
     /**

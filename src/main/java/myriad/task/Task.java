@@ -108,6 +108,24 @@ public abstract class Task {
     }
 
     /**
+     * Returns whether {@code other} describes the same task as this one: the
+     * same type and exactly the same description. Subclasses with dates
+     * extend this to compare them too. Whether either task is done is
+     * ignored, since marking a task done does not make it a different task.
+     *
+     * This is a separate method rather than an override of
+     * {@link Object#equals}, because a task's done status can change, and
+     * equality that ignored part of a mutable object's state would surprise
+     * anyone putting tasks in a set or map.
+     *
+     * @param other the task to compare with.
+     * @return whether the two tasks have the same type and details.
+     */
+    public boolean hasSameDetails(Task other) {
+        return getType() == other.getType() && description.equals(other.description);
+    }
+
+    /**
      * Returns which kind of task this is, e.g. {@link TaskType#TODO} for a
      * {@link ToDo}.
      *

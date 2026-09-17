@@ -380,4 +380,34 @@ public class TaskDateTimeTest {
         // save/load round trip but are never shown to the user.
         assertEquals("Dec 02 2019 1800", TaskDateTime.parse("2019-12-02T18:00:30").toString());
     }
+
+    // ---------------------------------------------------------------
+    // equals and hashCode: what makes two dates "the same" for duplicates
+    // ---------------------------------------------------------------
+
+    @Test
+    public void equals_sameDateTimeTypedDifferently_equal() throws MyriadException {
+        TaskDateTime iso = TaskDateTime.parse("2019-12-02 1800");
+        TaskDateTime slash = TaskDateTime.parse("2/12/2019 18:00");
+        assertEquals(iso, slash);
+        assertEquals(iso.hashCode(), slash.hashCode());
+    }
+
+    @Test
+    public void equals_differentTime_notEqual() throws MyriadException {
+        assertNotEquals(TaskDateTime.parse("2019-12-02 1800"), TaskDateTime.parse("2019-12-02 1801"));
+    }
+
+    @Test
+    public void equals_dateOnlyAndMidnight_notEqual() throws MyriadException {
+        // "No time given" is different information from "at 00:00".
+        assertNotEquals(TaskDateTime.parse("2019-12-02"), TaskDateTime.parse("2019-12-02 0000"));
+    }
+
+    @Test
+    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+        TaskDateTime date = TaskDateTime.parse("2019-12-02");
+        assertNotEquals(null, date);
+        assertNotEquals("2019-12-02", date);
+    }
 }

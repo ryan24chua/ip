@@ -60,6 +60,20 @@ public class Event extends Task {
         }
     }
 
+    /**
+     * Returns whether {@code other} is an event with the same description and
+     * the same start and end. See {@link Task#hasSameDetails}.
+     */
+    @Override
+    public boolean hasSameDetails(Task other) {
+        if (!super.hasSameDetails(other)) {
+            return false;
+        }
+        // Same type is checked above, so this cast cannot fail.
+        Event otherEvent = (Event) other;
+        return start.equals(otherEvent.start) && end.equals(otherEvent.end);
+    }
+
     @Override
     public TaskType getType() {
         return TaskType.EVENT;

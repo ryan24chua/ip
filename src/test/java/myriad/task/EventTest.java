@@ -145,4 +145,25 @@ public class EventTest {
         assertFalse(conference().overlaps(
                 LocalDateTime.parse("2019-12-05T00:00"), LocalDateTime.parse("2019-12-06T00:00")));
     }
+
+    // ---------------------------------------------------------------
+    // hasSameDetails
+    // ---------------------------------------------------------------
+
+    @Test
+    public void hasSameDetails_sameDescriptionStartAndEnd_true() {
+        assertTrue(conference().hasSameDetails(conference()));
+    }
+
+    @Test
+    public void hasSameDetails_differentStart_false() {
+        assertFalse(conference().hasSameDetails(
+                new Event("conference", at("2019-12-02 1500"), at("2019-12-04"))));
+    }
+
+    @Test
+    public void hasSameDetails_differentEnd_false() {
+        assertFalse(conference().hasSameDetails(
+                new Event("conference", at("2019-12-02 1400"), at("2019-12-05"))));
+    }
 }

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -686,5 +687,30 @@ public class TaskListTest {
     private static String describe(Task task) {
         String[] fields = task.toSaveFormat().split("\\s*\\|\\s*");
         return fields[2];
+    }
+
+    // ---------------------------------------------------------------
+    // findTaskWithSameDetails
+    // ---------------------------------------------------------------
+
+    @Test
+    public void findTaskWithSameDetails_emptyList_empty() {
+        assertTrue(new TaskList().findTaskWithSameDetails(new ToDo("read book")).isEmpty());
+    }
+
+    @Test
+    public void findTaskWithSameDetails_matchPresent_existingTaskReturned() {
+        TaskList tasks = threeToDos();
+        Task existing = tasks.get(1);
+
+        Optional<Task> found = tasks.findTaskWithSameDetails(new ToDo(describe(existing)));
+
+        assertTrue(found.isPresent());
+        assertSame(existing, found.get());
+    }
+
+    @Test
+    public void findTaskWithSameDetails_noMatch_empty() {
+        assertTrue(threeToDos().findTaskWithSameDetails(new ToDo("something else")).isEmpty());
     }
 }

@@ -32,6 +32,16 @@ public class Deadline extends Task {
     }
 
     /**
+     * Returns whether {@code other} is a deadline with the same description
+     * and the same due date. See {@link Task#hasSameDetails}.
+     */
+    @Override
+    public boolean hasSameDetails(Task other) {
+        // Same type is checked first, so the cast below cannot fail.
+        return super.hasSameDetails(other) && by.equals(((Deadline) other).by);
+    }
+
+    /**
      * Returns this task's save-format line prefixed with its type code and
      * suffixed with the raw due date, so both the type and the date can be
      * recovered when the data file is read back in.
