@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,7 +20,9 @@ import org.junit.jupiter.api.io.TempDir;
  * Tests for {@link Myriad#getResponse(String)}, the single seam a GUI talks
  * through. It has to answer a line exactly as the console loop would — same
  * wording, same error handling — while also doing the two things the loop
- * does around it: greeting first, and saying goodbye at the end.
+ * does around it: greeting first, and saying goodbye at the end. The console
+ * loop itself, {@link Myriad#run()}, is tested too, by swapping standard
+ * input and output for in-memory streams.
  * <p>
  * Every test points the session at a JUnit-managed temporary data file, so
  * the real one at {@code data/myriad.txt} is never touched. No JavaFX class
@@ -43,6 +50,27 @@ public class MyriadTest {
     /** Writes the given lines to the data file, newline-separated. */
     private void writeDataFile(String... lines) throws IOException {
         Files.writeString(dataFile(), String.join("\n", lines) + "\n");
+    }
+
+    /**
+     * Runs a console session on the temp data file, feeding {@code input} to
+     * it as if typed, and returns everything it printed with line endings
+     * normalised. Standard input and output are restored afterwards, even if
+     * the session throws, so later tests are unaffected.
+     */
+    private String runConsoleSession(String input) {
+        InputStream originalIn = System.in;
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream printed = new ByteArrayOutputStream();
+        try {
+            System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+            System.setOut(new PrintStream(printed, true, StandardCharsets.UTF_8));
+            new Myriad(dataFile().toString()).run();
+        } finally {
+            System.setIn(originalIn);
+            System.setOut(originalOut);
+        }
+        return printed.toString(StandardCharsets.UTF_8).replace("\r\n", "\n");
     }
 
     // ---------------------------------------------------------------
@@ -258,5 +286,52 @@ public class MyriadTest {
         myriad.getResponse("blah");
         myriad.getResponse("list");
         assertFalse(myriad.isLastResponseError());
+    }
+
+    // ---------------------------------------------------------------
+    // run: the console session
+    // ---------------------------------------------------------------
+
+    @Test
+    public void run_commandsThenBye_eachAnsweredThenFarewell() {
+        String printed = runConsoleSession("todo read book\nblah\nbye\n");
+
+        int greeting = printed.indexOf("Hello! I'm Myriad.");
+        int added = printed.indexOf("Got it. I've added this task:");
+        int error = printed.indexOf("Error: I don't recognize that command.");
+        int farewell = printed.indexOf("Bye. Hope to see you again soon!");
+        assertTrue(greeting >= 0 && greeting < added && added < error && error < farewell, printed);
+    }
+
+    @Test
+    public void run_linesAfterBye_ignored() throws IOException {
+        // The loop stops at the exit command, so the todo after it never runs.
+        runConsoleSession("todo read book\nbye\ntodo never added\n");
+        assertEquals("T | 0 | read book\n", Files.readString(dataFile()));
+    }
+
+    @Test
+    public void run_inputEndsWithoutBye_farewellStillShown() {
+        // Piped input can simply run out; that ends the session like "bye" does.
+        String printed = runConsoleSession("list\n");
+        assertTrue(printed.endsWith("Bye. Hope to see you again soon!\n"
+                + "____________________________________________________________\n"), printed);
+    }
+
+    @Test
+    public void run_byeWithSurroundingWhitespace_sessionEnds() throws IOException {
+        // The console strips each line as it reads it, as getResponse does for the GUI.
+        runConsoleSession("   bye   \ntodo never added\n");
+        assertFalse(Files.exists(dataFile()));
+    }
+
+    @Test
+    public void run_badSavedLine_warningPrintedAfterGreeting() throws IOException {
+        writeDataFile("T | 0 | read book", "nonsense");
+        String printed = runConsoleSession("bye\n");
+
+        int greeting = printed.indexOf("Hello! I'm Myriad.");
+        int warning = printed.indexOf("could not be loaded and were skipped");
+        assertTrue(greeting >= 0 && greeting < warning, printed);
     }
 }

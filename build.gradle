@@ -72,6 +72,15 @@ test {
     systemProperty 'user.language', 'zh'
     systemProperty 'user.country', 'CN'
 
+    // Runs the tests from a scratch folder inside build/, so a relative path
+    // used by a test (e.g. a data file with no folder in its name) is created
+    // there and removed by "gradlew clean", never beside the real data/ folder.
+    File testWorkingDir = layout.buildDirectory.dir('test-working-dir').get().asFile
+    workingDir = testWorkingDir
+    doFirst {
+        testWorkingDir.mkdirs()
+    }
+
     testLogging {
         events 'passed', 'skipped', 'failed'
 
