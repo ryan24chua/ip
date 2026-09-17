@@ -47,7 +47,9 @@ public class Main extends Application {
         } catch (IOException e) {
             // The layout file ships inside the application, so a failure here
             // means a broken build rather than anything the user can act on.
-            e.printStackTrace();
+            // Throwing makes JavaFX abort the launch; returning quietly would
+            // leave the program running with no window to show or close.
+            throw new IllegalStateException("Could not load the main window layout /view/MainWindow.fxml", e);
         }
     }
 }

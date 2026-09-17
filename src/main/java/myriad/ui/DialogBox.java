@@ -63,7 +63,9 @@ public class DialogBox extends HBox {
         } catch (IOException e) {
             // The layout file ships inside the application, so a failure here
             // means a broken build rather than anything the user can act on.
-            e.printStackTrace();
+            // Stopping now reports the real cause; carrying on would only fail
+            // later with a NullPointerException on the unset dialog label.
+            throw new IllegalStateException("Could not load the dialog box layout /view/DialogBox.fxml", e);
         }
 
         dialog.setText(message);
