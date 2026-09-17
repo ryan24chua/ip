@@ -156,4 +156,19 @@ public class DialogBox extends HBox {
         dialogBox.flip();
         return dialogBox;
     }
+
+    /**
+     * Returns a dialog box for an error the chatbot reports, laid out like
+     * any other reply but restyled so that a rejected command stands out
+     * from the answers around it.
+     *
+     * @param message the error message.
+     * @param picture Myriad's display picture, or null if none is available.
+     * @return a dialog box with the picture on the left and the error style applied.
+     */
+    public static DialogBox getErrorDialog(String message, Image picture) {
+        DialogBox dialogBox = getMyriadDialog(message, picture);
+        dialogBox.dialog.getStyleClass().add("error-label");
+        return dialogBox;
+    }
 }

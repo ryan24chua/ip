@@ -83,7 +83,11 @@ public class MainWindow {
 
         String response = myriad.getResponse(input);
         dialogContainer.getChildren().add(DialogBox.getUserDialog(input, userPicture));
-        showMyriadMessage(response);
+        if (myriad.isLastResponseError()) {
+            dialogContainer.getChildren().add(DialogBox.getErrorDialog(response, myriadPicture));
+        } else {
+            showMyriadMessage(response);
+        }
 
         if (myriad.isExitRequested()) {
             closeAfterFarewell();
