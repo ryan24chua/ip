@@ -61,6 +61,14 @@ public class Myriad {
     private boolean isExitRequested = false;
 
     /**
+     * Whether the most recent reply from {@link #getResponse} reported an
+     * error. Like {@link #isExitRequested}, this exists for a GUI: the reply
+     * is plain text, so without it a GUI could not tell an error apart from
+     * an ordinary answer in order to highlight it.
+     */
+    private boolean isLastResponseError = false;
+
+    /**
      * Sets up one chatbot session: creates the {@link Ui}, points
      * {@link Storage} at {@code filePath}, and loads whatever tasks were
      * saved there last session. A file that can't be read at all isn't
@@ -190,6 +198,7 @@ public class Myriad {
     public String getResponse(String input) {
         assert input != null : "the GUI always passes the text field's contents";
         ui.startResponse();
+        isLastResponseError = false;
         // Stripped here because readCommand() does it for the console, and
         // Parser expects a tidy line from either front end.
         boolean isExit = executeLine(input.strip());
@@ -225,6 +234,7 @@ public class Myriad {
             return command.isExit();
         } catch (MyriadException e) {
             ui.showError("Error: " + e.getMessage());
+            isLastResponseError = true;
             return false;
         }
     }
@@ -237,6 +247,18 @@ public class Myriad {
      */
     public boolean isExitRequested() {
         return isExitRequested;
+    }
+
+    /**
+     * Returns whether the reply from the latest {@link #getResponse} call was
+     * an error message, so that a GUI can show it differently from an
+     * ordinary answer.
+     *
+     * @return true if the latest line was rejected with an error; false if it
+     *         succeeded or no line has been run yet.
+     */
+    public boolean isLastResponseError() {
+        return isLastResponseError;
     }
 
     /**

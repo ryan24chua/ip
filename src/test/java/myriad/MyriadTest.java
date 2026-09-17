@@ -195,4 +195,44 @@ public class MyriadTest {
         myriad.getResponse("todo read book");
         assertFalse(myriad.isExitRequested());
     }
+
+    // ---------------------------------------------------------------
+    // Telling errors apart from ordinary replies
+    // ---------------------------------------------------------------
+
+    @Test
+    public void isLastResponseError_beforeAnyCommand_false() {
+        assertFalse(sessionAtTempFile().isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_validCommand_false() {
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("todo read book");
+        assertFalse(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_unrecognisedCommand_true() {
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("blah");
+        assertTrue(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_executionFailure_true() {
+        // An error raised while executing, not parsing, counts too.
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("delete 1");
+        assertTrue(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_errorThenValidCommand_false() {
+        // The flag describes only the latest reply, so it must not stick.
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("blah");
+        myriad.getResponse("list");
+        assertFalse(myriad.isLastResponseError());
+    }
 }
