@@ -3,8 +3,12 @@ package myriad.storage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,11 +61,23 @@ public class Storage {
      * Lines always end in "\n" and the file is always UTF-8, whatever the
      * platform, so a data file moved between machines reads back the same.
      *
+     * The data file is never written in place. The new contents go to a
+     * temporary file beside it, which is flushed to disk and then moved over
+     * the data file in one step, so a crash or power cut part-way through a
+     * save leaves either the old list or the new one, never a half-written
+     * file. If anything fails, the temporary file is removed and the data
+     * file is left as it was.
+     *
      * @param taskList the list to write out in full.
      * @throws IOException if the file or its directory can't be written.
      */
     public void save(TaskList taskList) throws IOException {
         assert taskList != null : "Command.save always passes the session's task list";
+        if (Files.isDirectory(dataFile)) {
+            // Checked up front: moving a file onto an empty directory can
+            // quietly replace the directory rather than fail.
+            throw new FileSystemException(dataFile.toString(), null, "is a directory");
+        }
         Path parentDir = dataFile.getParent();
         if (parentDir != null) {
             // Unlike File.mkdirs, this throws if the directory can't be made,
@@ -73,7 +89,42 @@ public class Storage {
         for (Task task : taskList.asList()) {
             content.append(task.toSaveFormat()).append('\n');
         }
-        Files.writeString(dataFile, content, StandardCharsets.UTF_8);
+
+        // A fixed name, rather than a new random one each time, so a file
+        // left behind by a crash is reused by the next save instead of piling up.
+        Path tempFile = dataFile.resolveSibling(dataFile.getFileName() + ".tmp");
+        try {
+            // SYNC makes the write reach the disk before the move below, so the
+            // file moved into place is never one the OS had not yet written out.
+            Files.writeString(tempFile, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+            replaceWith(tempFile, dataFile);
+        } catch (IOException e) {
+            try {
+                Files.deleteIfExists(tempFile);
+            } catch (IOException cleanupFailure) {
+                e.addSuppressed(cleanupFailure);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Moves source over target, replacing target if it exists. Uses an
+     * atomic move, which readers see as a single instant switch from the old
+     * file to the new one, and falls back to an ordinary move only on a file
+     * system that cannot do that.
+     *
+     * @param source the file to move.
+     * @param target where to move it, replacing any file already there.
+     * @throws IOException if the move fails.
+     */
+    private static void replaceWith(Path source, Path target) throws IOException {
+        try {
+            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     /**

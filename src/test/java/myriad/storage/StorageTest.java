@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -59,6 +60,13 @@ public class StorageTest {
     /** A Storage pointed at the temp data file. */
     private Storage storageAtTempFile() {
         return new Storage(dataFile().toString());
+    }
+
+    /** Returns the names of everything in the temp directory, sorted. */
+    private List<String> listFileNames() throws IOException {
+        try (Stream<Path> entries = Files.list(tempDir)) {
+            return entries.map(entry -> entry.getFileName().toString()).sorted().toList();
+        }
     }
 
     // ---------------------------------------------------------------
@@ -229,6 +237,53 @@ public class StorageTest {
         Path directory = tempDir.resolve("subdir");
         Files.createDirectory(directory);
         assertThrows(IOException.class, () -> new Storage(directory.toString()).save(new TaskList()));
+        // The empty directory must not have been replaced by a file.
+        assertTrue(Files.isDirectory(directory));
+    }
+
+    // ---------------------------------------------------------------
+    // save: the data file is replaced in one step, never half-written
+    // ---------------------------------------------------------------
+
+    @Test
+    public void save_successful_noTemporaryFileLeftBehind() throws Exception {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        storageAtTempFile().save(tasks);
+        storageAtTempFile().save(tasks);
+
+        assertEquals(List.of("myriad.txt"), listFileNames());
+    }
+
+    @Test
+    public void save_temporaryFileLeftByEarlierCrash_replacedAndRemoved() throws Exception {
+        // A crash between writing the temporary file and moving it into place
+        // leaves it behind; the next save must reuse it, not be blocked by it.
+        Files.writeString(tempDir.resolve("myriad.txt.tmp"), "half-written junk");
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        storageAtTempFile().save(tasks);
+
+        assertEquals("T | 0 | read book\n", Files.readString(dataFile()));
+        assertEquals(List.of("myriad.txt"), listFileNames());
+    }
+
+    @Test
+    public void save_temporaryFileCannotBeWritten_dataFileUnchanged() throws Exception {
+        // A directory where the temporary file should go makes the write
+        // fail, standing in for a full disk part-way through a save. The
+        // previous save's contents must survive intact.
+        writeDataFile("T | 1 | saved earlier");
+        Path blockingDirectory = Files.createDirectory(tempDir.resolve("myriad.txt.tmp"));
+        Files.writeString(blockingDirectory.resolve("keeps it non-empty"), "");
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("never saved"));
+
+        assertThrows(IOException.class, () -> storageAtTempFile().save(tasks));
+
+        assertEquals("T | 1 | saved earlier\n", Files.readString(dataFile()));
     }
 
     // ---------------------------------------------------------------
