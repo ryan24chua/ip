@@ -65,6 +65,13 @@ dependencies {
 test {
     useJUnitPlatform()
 
+    // Runs the tests as if on a Chinese-language computer, whatever language
+    // this machine uses. Any output that wrongly follows the machine's
+    // language, such as a month name, then fails the tests on every machine,
+    // including CI, instead of only on non-English ones.
+    systemProperty 'user.language', 'zh'
+    systemProperty 'user.country', 'CN'
+
     testLogging {
         events 'passed', 'skipped', 'failed'
 
