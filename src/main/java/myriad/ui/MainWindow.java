@@ -48,14 +48,21 @@ public class MainWindow {
 
     /**
      * Injects the chatbot session this window talks to, and shows its greeting.
-     * Called by {@link Main} once the layout has loaded, because a controller
-     * cannot be given constructor arguments by {@code FXMLLoader}.
+     * The greeting is shown as a warning when it reports that saved data
+     * could not be loaded, so that the problem is not missed. Called by
+     * {@link Main} once the layout has loaded, because a controller cannot be
+     * given constructor arguments by {@code FXMLLoader}.
      *
      * @param myriad the session that answers what the user types.
      */
     public void setMyriad(Myriad myriad) {
         this.myriad = myriad;
-        showMyriadMessage(myriad.getGreeting());
+        String greeting = myriad.getGreeting();
+        if (myriad.hasLoadProblem()) {
+            dialogContainer.getChildren().add(DialogBox.getWarningDialog(greeting, myriadPicture));
+        } else {
+            showMyriadMessage(greeting);
+        }
     }
 
     /**

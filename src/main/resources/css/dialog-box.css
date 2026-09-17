@@ -39,6 +39,14 @@
     -fx-border-width: 1px 1px 1px 4px;
 }
 
+/* A warning, such as saved data that failed to load: amber rather than red. */
+.warning-label {
+    -fx-background-color: #fff6e0;
+    -fx-text-fill: #6b4a00;
+    -fx-border-color: #ecd49a #ecd49a #ecd49a #e0a100;
+    -fx-border-width: 1px 1px 1px 4px;
+}
+
 #displayPicture {
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 8, 0.3, 0, 2);
 }

@@ -171,4 +171,20 @@ public class DialogBox extends HBox {
         dialogBox.dialog.getStyleClass().add("error-label");
         return dialogBox;
     }
+
+    /**
+     * Returns a dialog box for a message that carries a warning, such as a
+     * greeting that reports saved data could not be loaded. It is styled
+     * apart from both ordinary replies and errors, because nothing the user
+     * typed was wrong, yet the message still needs to be noticed.
+     *
+     * @param message the message containing the warning.
+     * @param picture Myriad's display picture, or null if none is available.
+     * @return a dialog box with the picture on the left and the warning style applied.
+     */
+    public static DialogBox getWarningDialog(String message, Image picture) {
+        DialogBox dialogBox = getMyriadDialog(message, picture);
+        dialogBox.dialog.getStyleClass().add("warning-label");
+        return dialogBox;
+    }
 }
