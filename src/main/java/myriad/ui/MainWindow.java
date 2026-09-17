@@ -43,13 +43,17 @@ public class MainWindow {
 
     /**
      * Prepares the window once JavaFX has injected the controls named in the
-     * layout file. Keeps the newest message in view: the scroll position is
-     * tied to the height of the transcript, which grows every time a dialog
-     * box is added. Also listens for the arrow keys in the text field.
+     * layout file. Keeps the newest message in view by scrolling to the bottom
+     * whenever the transcript grows, which happens every time a dialog box is
+     * added. Also listens for the arrow keys in the text field.
      */
     @FXML
     public void initialize() {
-        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        // A listener rather than a binding: a bound scroll position cannot be
+        // changed by anything else, so the user could not scroll back up to
+        // read earlier replies.
+        dialogContainer.heightProperty().addListener((observable, oldHeight, newHeight) ->
+                scrollPane.setVvalue(scrollPane.getVmax()));
         userInput.setOnKeyPressed(this::handleHistoryKey);
     }
 
