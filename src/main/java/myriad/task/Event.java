@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * A task that spans a start and an end date/time. Unlike a Deadline, which
  * occurs at one point, an Event covers everything between its two
- * endpoints — which is what occursDuring below compares against.
+ * endpoints — which is what overlaps below compares against.
  */
 public class Event extends Task {
 
@@ -60,17 +60,6 @@ public class Event extends Task {
     @Override
     public String toString() {
         return String.format("[E]%s (from: %s to: %s)", super.toString(), start, end);
-    }
-
-    /**
-     * Matches if query overlaps this event's span, from start's
-     * earliest instant to end's latest instant — see
-     * TaskDateTime.rangesOverlap for the general rule.
-     */
-    @Override
-    public boolean occursDuring(TaskDateTime query) {
-        return TaskDateTime.rangesOverlap(
-                start.rangeStart(), end.rangeEnd(), query.rangeStart(), query.rangeEnd());
     }
 
     /**

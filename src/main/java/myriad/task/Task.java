@@ -58,15 +58,16 @@ public abstract class Task {
 
     /**
      * Returns whether this task occurs during query, for the "show task"
-     * command. Tasks with no date of their own (ToDo) never match, hence
-     * the default false here; Deadline and Event override this with their
-     * own date-based check.
+     * command. A date-only query stands for its whole day, so it matches
+     * anything overlapping that day. Defined once here in terms of
+     * overlaps, and final, so the "show" and "stats" commands can never
+     * disagree about when a task takes place.
      *
      * @param query the date, or date and time, being asked about.
-     * @return whether this task overlaps query; always false for a plain Task.
+     * @return whether this task overlaps query; always false for a ToDo.
      */
-    public boolean occursDuring(TaskDateTime query) {
-        return false;
+    public final boolean occursDuring(TaskDateTime query) {
+        return overlaps(query.rangeStart(), query.rangeEnd());
     }
 
     /**

@@ -2,7 +2,7 @@ package myriad.task;
 
 /**
  * A task with a description and nothing else — no date of its own, so it
- * never matches the "show" command (Task.occursDuring stays false).
+ * never matches the "show" or "stats" commands (Task.overlaps stays false).
  */
 public class ToDo extends Task {
 

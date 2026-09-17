@@ -139,7 +139,7 @@ public class TaskDateTime {
     /**
      * Returns whether the closed interval [aStart, aEnd] overlaps the
      * closed interval [bStart, bEnd]. Shared by Deadline and Event's
-     * occursDuring(TaskDateTime) — each just supplies its own two range
+     * overlaps(LocalDateTime, LocalDateTime) — each just supplies its own two range
      * endpoints (a Deadline's range is its own rangeStart()/rangeEnd(); an
      * Event's spans from its start's rangeStart() to its end's rangeEnd()).
      *

@@ -54,17 +54,6 @@ public class Deadline extends Task {
     }
 
     /**
-     * Matches if query overlaps this deadline's own instant (or, if the
-     * deadline has no time of its own, its whole day) — see
-     * TaskDateTime.rangesOverlap for the general rule.
-     */
-    @Override
-    public boolean occursDuring(TaskDateTime query) {
-        return TaskDateTime.rangesOverlap(
-                by.rangeStart(), by.rangeEnd(), query.rangeStart(), query.rangeEnd());
-    }
-
-    /**
      * Matches if the period from from to to overlaps this deadline's own
      * instant (or, if the deadline has no time of its own, its whole day) —
      * see TaskDateTime.rangesOverlap for the general rule.
