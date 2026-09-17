@@ -1,6 +1,7 @@
 package myriad.task;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 /**
  * Represents a task with a description and a done/not-done status.
@@ -90,11 +91,15 @@ public abstract class Task {
      * the type marker or any dates, so "find 2019" won't match a deadline
      * merely because it falls in that year.
      *
+     * Both sides are lower-cased with Locale.ROOT rather than the machine's
+     * default locale, whose rules can differ: in Turkish, for example, "I"
+     * lower-cases to a dotless "ı", so "find TITLE" would miss "title".
+     *
      * @param keyword the text to look for within the description.
      * @return whether the description contains keyword, ignoring case.
      */
     public boolean descriptionContains(String keyword) {
-        return description.toLowerCase().contains(keyword.toLowerCase());
+        return description.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
     }
 
     /**
