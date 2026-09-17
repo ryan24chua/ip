@@ -146,6 +146,18 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_keywordWithLookalikeLetter_notRecognised() {
+        // Keywords are lower-cased with Locale.ROOT, so only ASCII case
+        // differences are ignored. Letters that merely fold to "i" or "s"
+        // letter by letter, such as the dotted "İ", dotless "ı" or long "ſ",
+        // do not make a keyword.
+        String[] lines = {"lİst", "lıst", "LİST", "ſtatſ", "fınd book"};
+        for (String line : lines) {
+            assertMessageContains("I don't recognize that command", parseExpectingFailure(line));
+        }
+    }
+
+    @Test
     public void parse_unknownKeyword_exceptionThrown() {
         MyriadException e = parseExpectingFailure("blah");
         assertMessageContains("I don't recognize that command", e);

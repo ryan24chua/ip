@@ -1,5 +1,7 @@
 package myriad.parser;
 
+import java.util.Locale;
+
 import myriad.MyriadException;
 import myriad.command.AddCommand;
 import myriad.command.Command;
@@ -37,9 +39,9 @@ public class Parser {
     /**
      * Builds the Command a stripped input line asks for, with that line's
      * arguments already interpreted. The first word is matched
-     * case-insensitively against the known command keywords. "bye" and
-     * "list" take no arguments, so they only match when they are the
-     * whole line. Throws MyriadException if the line names no known
+     * case-insensitively against the known command keywords. "list",
+     * "stats" and "bye" take no arguments, so they only match when they are
+     * the whole line. Throws MyriadException if the line names no known
      * command, or if its arguments can't be made sense of — so a command
      * object only ever exists if it can actually be attempted.
      *
@@ -58,37 +60,55 @@ public class Parser {
         // Split off the keyword once; every parse* method below then works on
         // the argument text alone (empty if the line is just the keyword).
         String[] keywordAndArgs = strippedLine.split("\\s+", 2);
-        String firstWord = keywordAndArgs[0];
+        // Lower-cased once, so that every case below is written in lower case.
+        String keyword = keywordAndArgs[0].toLowerCase(Locale.ROOT);
         String args = keywordAndArgs.length == 2 ? keywordAndArgs[1] : "";
 
-        if (firstWord.equalsIgnoreCase("bye") && args.isEmpty()) {
-            return new ExitCommand();
-        } else if (firstWord.equalsIgnoreCase("list") && args.isEmpty()) {
-            return new ListCommand();
-        } else if (firstWord.equalsIgnoreCase("mark")) {
-            return new MarkCommand(parseTaskNumber(args));
-        } else if (firstWord.equalsIgnoreCase("unmark")) {
-            return new UnmarkCommand(parseTaskNumber(args));
-        } else if (firstWord.equalsIgnoreCase("todo")) {
-            return new AddCommand(parseToDo(args));
-        } else if (firstWord.equalsIgnoreCase("deadline")) {
-            return new AddCommand(parseDeadline(args));
-        } else if (firstWord.equalsIgnoreCase("event")) {
-            return new AddCommand(parseEvent(args));
-        } else if (firstWord.equalsIgnoreCase("delete")) {
-            return new DeleteCommand(parseTaskNumber(args));
-        } else if (firstWord.equalsIgnoreCase("show")) {
-            return new ShowCommand(parseShowQuery(args));
-        } else if (firstWord.equalsIgnoreCase("find")) {
-            return new FindCommand(parseFindKeyword(args));
-        } else if (firstWord.equalsIgnoreCase("stats") && args.isEmpty()) {
-            return new StatsCommand();
-        } else {
-            throw new MyriadException(
-                    "I don't recognize that command. Try: todo, deadline, "
-                            + "event, list, mark, unmark, delete, "
-                            + "show, find, stats, or bye.");
+        return switch (keyword) {
+            case "todo" -> new AddCommand(parseToDo(args));
+            case "deadline" -> new AddCommand(parseDeadline(args));
+            case "event" -> new AddCommand(parseEvent(args));
+            case "list" -> requireNoArguments(args, new ListCommand());
+            case "mark" -> new MarkCommand(parseTaskNumber(args));
+            case "unmark" -> new UnmarkCommand(parseTaskNumber(args));
+            case "delete" -> new DeleteCommand(parseTaskNumber(args));
+            case "show" -> new ShowCommand(parseShowQuery(args));
+            case "find" -> new FindCommand(parseFindKeyword(args));
+            case "stats" -> requireNoArguments(args, new StatsCommand());
+            case "bye" -> requireNoArguments(args, new ExitCommand());
+            default -> throw createUnrecognizedCommandException();
+        };
+    }
+
+    /**
+     * Returns command if its keyword was the whole line, for the commands
+     * that take no arguments. Throws the same MyriadException as an unknown
+     * keyword otherwise, so that "bye now" is rejected outright rather than
+     * quietly ending the session with the "now" ignored.
+     *
+     * @param args    the argument text after the keyword.
+     * @param command the command the keyword names.
+     * @return command, if args is empty.
+     * @throws MyriadException if args is not empty.
+     */
+    private static Command requireNoArguments(String args, Command command) throws MyriadException {
+        if (!args.isEmpty()) {
+            throw createUnrecognizedCommandException();
         }
+        return command;
+    }
+
+    /**
+     * Returns the exception for a line that names no known command, listing
+     * every keyword the user can try instead.
+     *
+     * @return the exception to throw.
+     */
+    private static MyriadException createUnrecognizedCommandException() {
+        return new MyriadException(
+                "I don't recognize that command. Try: todo, deadline, "
+                        + "event, list, mark, unmark, delete, "
+                        + "show, find, stats, or bye.");
     }
 
     /**
