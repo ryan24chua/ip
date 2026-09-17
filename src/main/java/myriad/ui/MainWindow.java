@@ -1,5 +1,7 @@
 package myriad.ui;
 
+import java.util.Optional;
+
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -7,14 +9,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import myriad.Myriad;
 
 /**
  * Controls the chat window described by {@code view/MainWindow.fxml}: turns what the
- * user types into a request to the chatbot, and adds both sides of the
- * exchange to the transcript.
+ * user types into a request to the chatbot, adds both sides of the exchange
+ * to the transcript, and lets the Up and Down keys recall earlier commands.
  */
 public class MainWindow {
 
@@ -34,15 +38,44 @@ public class MainWindow {
 
     private final Image myriadPicture = DialogBox.loadPicture("/images/DaMyriad.png");
 
+    /** Commands sent this session, for recalling with the arrow keys. */
+    private final CommandHistory history = new CommandHistory();
+
     /**
      * Prepares the window once JavaFX has injected the controls named in the
      * layout file. Keeps the newest message in view: the scroll position is
      * tied to the height of the transcript, which grows every time a dialog
-     * box is added.
+     * box is added. Also listens for the arrow keys in the text field.
      */
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        userInput.setOnKeyPressed(this::handleHistoryKey);
+    }
+
+    /**
+     * Replaces the text in the field with an earlier command on Up, or a
+     * later one on Down, and moves the caret to the end so the user can edit
+     * it straight away. The key press is consumed so that the text field does
+     * not also act on it by moving the caret back to the start.
+     *
+     * @param event the key the user pressed in the text field.
+     */
+    private void handleHistoryKey(KeyEvent event) {
+        Optional<String> recalled;
+        if (event.getCode() == KeyCode.UP) {
+            recalled = history.getPrevious();
+        } else if (event.getCode() == KeyCode.DOWN) {
+            recalled = history.getNext();
+        } else {
+            return;
+        }
+
+        recalled.ifPresent(command -> {
+            userInput.setText(command);
+            userInput.end();
+        });
+        event.consume();
     }
 
     /**
@@ -83,6 +116,7 @@ public class MainWindow {
     private void handleUserInput() {
         String input = userInput.getText();
         userInput.clear();
+        history.add(input);
         if (input.isBlank()) {
             return;
         }
