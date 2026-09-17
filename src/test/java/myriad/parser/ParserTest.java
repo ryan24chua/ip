@@ -398,6 +398,14 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_eventWithToMarkerButNoEnd_endErrorThrown() {
+        // Unlike the case above, "/to" is typed but nothing follows it, so the
+        // end text is present but blank rather than missing altogether.
+        assertMessageContains("Please include an end time after /to",
+                parseExpectingFailure("event party /from 2019-12-02 1400 /to"));
+    }
+
+    @Test
     public void parse_eventWithoutBothMarkers_startErrorThrown() {
         // With no "/from" the remaining text is empty, so the start check is
         // the first one to fail.

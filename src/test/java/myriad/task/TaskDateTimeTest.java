@@ -1,6 +1,7 @@
 package myriad.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -394,9 +395,17 @@ public class TaskDateTimeTest {
     }
 
     @Test
-    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+    public void equals_sameObject_equal() throws MyriadException {
         TaskDateTime date = TaskDateTime.parse("2019-12-02");
-        assertNotEquals(null, date);
-        assertNotEquals("2019-12-02", date);
+        assertTrue(date.equals(date));
+    }
+
+    @Test
+    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+        // equals is called on the TaskDateTime directly: assertNotEquals(null,
+        // date) would compare from the null side and never reach this method.
+        TaskDateTime date = TaskDateTime.parse("2019-12-02");
+        assertFalse(date.equals(null));
+        assertFalse(date.equals("2019-12-02"));
     }
 }
