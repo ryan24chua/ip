@@ -262,6 +262,17 @@ public class Myriad {
     }
 
     /**
+     * Returns whether anything went wrong loading the saved data, either the
+     * whole file or some of its lines. A GUI uses this to show the greeting,
+     * which carries the warning, in a style that draws the user's eye.
+     *
+     * @return true if the greeting includes a load warning.
+     */
+    public boolean hasLoadProblem() {
+        return loadErrorMessage != null || !skippedLines.isEmpty();
+    }
+
+    /**
      * Starts one console chatbot session on {@link #DEFAULT_DATA_FILE}.
      *
      * @param args ignored; the data file location is fixed in code rather

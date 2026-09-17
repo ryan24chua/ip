@@ -92,6 +92,30 @@ public class MyriadTest {
     }
 
     @Test
+    public void hasLoadProblem_noSavedData_false() {
+        // A missing file is a first run, not a problem.
+        assertFalse(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_validSavedData_false() throws IOException {
+        writeDataFile("T | 0 | read book");
+        assertFalse(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_savedDataWithBadLine_true() throws IOException {
+        writeDataFile("T | 0 | read book", "nonsense");
+        assertTrue(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_unreadableDataFile_true() throws IOException {
+        Files.createDirectory(dataFile());
+        assertTrue(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
     public void getGreeting_calledTwice_notRepeatedWithinOneReply() {
         // Each call is its own reply, so the second must not carry the first.
         Myriad myriad = sessionAtTempFile();
