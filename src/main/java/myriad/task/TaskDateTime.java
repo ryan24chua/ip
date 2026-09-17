@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.List;
 
 import myriad.MyriadException;
@@ -30,17 +31,17 @@ public class TaskDateTime {
      */
     private static final List<DateTimeFormatter> DATE_TIME_FORMATS = List.of(
             DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
-            DateTimeFormatter.ofPattern("d/M/yyyy HHmm"),
-            DateTimeFormatter.ofPattern("d/M/yyyy HH:mm"));
+            createStrictFormatter("uuuu-MM-dd HHmm"),
+            createStrictFormatter("uuuu-MM-dd HH:mm"),
+            createStrictFormatter("d/M/uuuu HHmm"),
+            createStrictFormatter("d/M/uuuu HH:mm"));
 
     /**
      * Date-only formats, tried after every date+time format has failed.
      */
     private static final List<DateTimeFormatter> DATE_ONLY_FORMATS = List.of(
             DateTimeFormatter.ISO_LOCAL_DATE,
-            DateTimeFormatter.ofPattern("d/M/yyyy"));
+            createStrictFormatter("d/M/uuuu"));
 
     /** Display format used by {@link #toString()} when a time is present. */
     private static final DateTimeFormatter DISPLAY_DATE_TIME =
@@ -65,6 +66,24 @@ public class TaskDateTime {
         assert date != null : "time may be null (no time given), but date never is";
         this.date = date;
         this.time = time;
+    }
+
+    /**
+     * Returns a formatter for {@code pattern} that rejects dates which do not
+     * exist, such as 30 February. A formatter from
+     * {@link DateTimeFormatter#ofPattern} is lenient by default and would move
+     * such a date to the last day of the month without telling the user.
+     * The ISO formatters used alongside these are already strict.
+     *
+     * The year is written {@code uuuu} rather than {@code yyyy}: in strict
+     * mode, {@code yyyy} means "year of era" and cannot be resolved into a
+     * date without an era (AD/BC) that no user types.
+     *
+     * @param pattern the pattern, e.g. {@code "d/M/uuuu"}.
+     * @return the strict formatter.
+     */
+    private static DateTimeFormatter createStrictFormatter(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.STRICT);
     }
 
     /**
