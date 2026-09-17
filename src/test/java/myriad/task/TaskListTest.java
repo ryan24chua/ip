@@ -524,7 +524,7 @@ public class TaskListTest {
         tasks.add(new Deadline("return book", at("2019-06-06")));
         tasks.add(new ToDo("join sports club"));
 
-        List<Task> matches = tasks.getTasksOfType(ToDo.TYPE_CODE);
+        List<Task> matches = tasks.getTasksOfType(TaskType.TODO);
         assertEquals(2, matches.size());
         assertEquals("read book", describe(matches.get(0)));
         assertEquals("join sports club", describe(matches.get(1)));
@@ -533,12 +533,12 @@ public class TaskListTest {
     @Test
     public void getTasksOfType_noMatches_emptyListReturned() {
         TaskList tasks = taskListOf("read book");
-        assertTrue(tasks.getTasksOfType(Deadline.TYPE_CODE).isEmpty());
+        assertTrue(tasks.getTasksOfType(TaskType.DEADLINE).isEmpty());
     }
 
     @Test
     public void getTasksOfType_emptyList_emptyListReturned() {
-        assertTrue(new TaskList().getTasksOfType(ToDo.TYPE_CODE).isEmpty());
+        assertTrue(new TaskList().getTasksOfType(TaskType.TODO).isEmpty());
     }
 
     // ---------------------------------------------------------------

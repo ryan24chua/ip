@@ -14,6 +14,7 @@ import myriad.task.Event;
 import myriad.task.Task;
 import myriad.task.TaskDateTime;
 import myriad.task.TaskList;
+import myriad.task.TaskType;
 import myriad.task.ToDo;
 
 /**
@@ -93,20 +94,22 @@ public class Storage {
             throw new MyriadException(
                     "expected at least 3 fields (type | done | description), found " + fields.length);
         }
-        String type = fields[0];
+        TaskType type = TaskType.fromCode(fields[0])
+                .orElseThrow(() -> new MyriadException("unknown task type \"" + fields[0] + "\""));
         boolean isDone = fields[1].equals("1");
         String description = fields[2];
 
+        // No default branch: the compiler checks that every TaskType is handled.
         Task task = switch (type) {
-            case ToDo.TYPE_CODE -> new ToDo(description);
-            case Deadline.TYPE_CODE -> {
+            case TODO -> new ToDo(description);
+            case DEADLINE -> {
                 if (fields.length < 4) {
                     throw new MyriadException(
                             "a Deadline line needs a 4th field (date), found " + fields.length + " fields");
                 }
                 yield new Deadline(description, TaskDateTime.parse(fields[3]));
             }
-            case Event.TYPE_CODE -> {
+            case EVENT -> {
                 if (fields.length < 5) {
                     throw new MyriadException(
                             "an Event line needs 5 fields (type, done, description, start, end), "
@@ -114,7 +117,6 @@ public class Storage {
                 }
                 yield new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
             }
-            default -> throw new MyriadException("unknown task type \"" + type + "\"");
         };
         task.setDone(isDone);
         return task;

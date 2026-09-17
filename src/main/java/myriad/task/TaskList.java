@@ -164,18 +164,18 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of every task whose type code equals typeCode, for
+     * Returns a new list of every task of the given type, for
      * the "stats" command's per-type breakdown. Like getTasksMatching, this
      * is always a fresh list rather than the backing one; callers that just
      * want the count can take size() of the result.
      *
-     * @param typeCode the type code to match, e.g. Deadline.TYPE_CODE.
+     * @param type the type to match, e.g. TaskType.DEADLINE.
      * @return a fresh list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> getTasksOfType(String typeCode) {
+    public ArrayList<Task> getTasksOfType(TaskType type) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
-            if (task.getTypeCode().equals(typeCode)) {
+            if (task.getType() == type) {
                 matches.add(task);
             }
         }

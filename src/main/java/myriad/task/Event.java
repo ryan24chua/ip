@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
  */
 public class Event extends Task {
 
-    /** Leading field of an Event's save-format line; Storage reads it back. */
-    public static final String TYPE_CODE = "E";
-
     /** When the event starts. */
     private final TaskDateTime start;
 
@@ -37,19 +34,19 @@ public class Event extends Task {
     }
 
     @Override
-    public String getTypeCode() {
-        return TYPE_CODE;
+    public TaskType getType() {
+        return TaskType.EVENT;
     }
 
     /**
-     * Returns this task's save-format line prefixed with TYPE_CODE and
+     * Returns this task's save-format line prefixed with its type code and
      * suffixed with the raw start and end times, so the type and both times
      * can be recovered when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
         return String.format("%s | %s | %s | %s",
-                TYPE_CODE, super.toSaveFormat(), start.toSaveFormat(), end.toSaveFormat());
+                getType().getCode(), super.toSaveFormat(), start.toSaveFormat(), end.toSaveFormat());
     }
 
     /**

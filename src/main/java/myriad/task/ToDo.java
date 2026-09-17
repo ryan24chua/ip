@@ -6,9 +6,6 @@ package myriad.task;
  */
 public class ToDo extends Task {
 
-    /** Leading field of a ToDo's save-format line; Storage reads it back. */
-    public static final String TYPE_CODE = "T";
-
     /**
      * Creates a not-done ToDo with the given description.
      *
@@ -19,17 +16,17 @@ public class ToDo extends Task {
     }
 
     @Override
-    public String getTypeCode() {
-        return TYPE_CODE;
+    public TaskType getType() {
+        return TaskType.TODO;
     }
 
     /**
-     * Returns this task's save-format line prefixed with TYPE_CODE so it can
+     * Returns this task's save-format line prefixed with its type code so it can
      * be recognized as a ToDo when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
-        return String.format("%s | %s", TYPE_CODE, super.toSaveFormat());
+        return String.format("%s | %s", getType().getCode(), super.toSaveFormat());
     }
 
     /**

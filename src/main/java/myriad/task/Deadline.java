@@ -10,9 +10,6 @@ import java.time.LocalDateTime;
  */
 public class Deadline extends Task {
 
-    /** Leading field of a Deadline's save-format line; Storage reads it back. */
-    public static final String TYPE_CODE = "D";
-
     /** When the task is due. */
     private final TaskDateTime by;
 
@@ -30,18 +27,18 @@ public class Deadline extends Task {
     }
 
     @Override
-    public String getTypeCode() {
-        return TYPE_CODE;
+    public TaskType getType() {
+        return TaskType.DEADLINE;
     }
 
     /**
-     * Returns this task's save-format line prefixed with TYPE_CODE and
+     * Returns this task's save-format line prefixed with its type code and
      * suffixed with the raw due date, so both the type and the date can be
      * recovered when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
-        return String.format("%s | %s | %s", TYPE_CODE, super.toSaveFormat(), by.toSaveFormat());
+        return String.format("%s | %s | %s", getType().getCode(), super.toSaveFormat(), by.toSaveFormat());
     }
 
     /**
