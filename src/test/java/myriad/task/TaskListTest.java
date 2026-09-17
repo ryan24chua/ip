@@ -267,15 +267,27 @@ public class TaskListTest {
     }
 
     @Test
-    public void asList_returnedListMutated_taskListAlsoChanges() {
-        // Known limitation: asList() hands back the live internal list rather
-        // than a copy, so a caller can add or remove tasks without going
-        // through TaskList at all. Only Ui calls it today, and only to read,
-        // but the aliasing is real -- recorded here so a future caller that
-        // mutates it is a deliberate choice rather than a surprise.
+    public void asList_mutationAttempted_exceptionThrownAndTaskListUnchanged() {
+        // Tasks can only be changed through TaskList's own methods, so the
+        // view it hands out refuses every change.
         TaskList tasks = threeToDos();
-        tasks.asList().clear();
-        assertEquals(0, tasks.size());
+        List<Task> listed = tasks.asList();
+
+        assertThrows(UnsupportedOperationException.class, listed::clear);
+        assertThrows(UnsupportedOperationException.class, () -> listed.add(new ToDo("sneaky")));
+        assertThrows(UnsupportedOperationException.class, () -> listed.remove(0));
+        assertEquals(3, tasks.size());
+    }
+
+    @Test
+    public void asList_taskAddedAfterViewTaken_viewShowsIt() {
+        // The view is live rather than a snapshot.
+        TaskList tasks = threeToDos();
+        List<Task> listed = tasks.asList();
+
+        tasks.add(new ToDo("fourth"));
+
+        assertEquals(4, listed.size());
     }
 
     @Test
@@ -410,14 +422,12 @@ public class TaskListTest {
     }
 
     @Test
-    public void getTasksOccurringOn_returnedListMutated_taskListUnaffected() {
-        // Unlike asList(), this is always a fresh list, so the caller can do
-        // as it likes with it.
+    public void getTasksOccurringOn_mutationAttempted_exceptionThrownAndTaskListUnchanged() {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("homework", at("2019-12-02")));
+        List<Task> matches = tasks.getTasksOccurringOn(at("2019-12-02"));
 
-        tasks.getTasksOccurringOn(at("2019-12-02")).clear();
-
+        assertThrows(UnsupportedOperationException.class, matches::clear);
         assertEquals(1, tasks.size());
     }
 
@@ -494,13 +504,26 @@ public class TaskListTest {
     }
 
     @Test
-    public void getTasksMatching_returnedListMutated_taskListUnaffected() {
-        // Like getTasksOccurringOn, this hands back a fresh list rather than
-        // the backing one.
+    public void getTasksMatching_mutationAttempted_exceptionThrownAndTaskListUnchanged() {
         TaskList tasks = taskListOf("read book");
+        List<Task> matches = tasks.getTasksMatching("book");
 
-        tasks.getTasksMatching("book").clear();
+        assertThrows(UnsupportedOperationException.class, matches::clear);
+        assertEquals(1, tasks.size());
+    }
 
+    @Test
+    public void statsQueries_mutationAttempted_exceptionThrown() {
+        // The three queries behind "stats" hand out read-only lists too.
+        TaskList tasks = taskListOf("read book");
+        List<List<Task>> results = List.of(
+                tasks.getTasksOfType(TaskType.TODO),
+                tasks.getTasksDueWithin(LocalDate.parse("2019-12-02"), 7),
+                tasks.getOldestUndone(5));
+
+        for (List<Task> result : results) {
+            assertThrows(UnsupportedOperationException.class, () -> result.add(new ToDo("sneaky")));
+        }
         assertEquals(1, tasks.size());
     }
 

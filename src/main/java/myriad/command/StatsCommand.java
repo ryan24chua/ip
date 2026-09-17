@@ -1,7 +1,7 @@
 package myriad.command;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 import myriad.storage.Storage;
 import myriad.task.Task;
@@ -53,11 +53,11 @@ public class StatsCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ArrayList<Task> toDos = tasks.getTasksOfType(TaskType.TODO);
-        ArrayList<Task> deadlines = tasks.getTasksOfType(TaskType.DEADLINE);
-        ArrayList<Task> events = tasks.getTasksOfType(TaskType.EVENT);
-        ArrayList<Task> dueSoon = tasks.getTasksDueWithin(today, DUE_SOON_DAYS);
-        ArrayList<Task> oldestUndone = tasks.getOldestUndone(OLDEST_UNDONE_LIMIT);
+        List<Task> toDos = tasks.getTasksOfType(TaskType.TODO);
+        List<Task> deadlines = tasks.getTasksOfType(TaskType.DEADLINE);
+        List<Task> events = tasks.getTasksOfType(TaskType.EVENT);
+        List<Task> dueSoon = tasks.getTasksDueWithin(today, DUE_SOON_DAYS);
+        List<Task> oldestUndone = tasks.getOldestUndone(OLDEST_UNDONE_LIMIT);
 
         ui.showStats(toDos, deadlines, events, dueSoon, oldestUndone);
     }

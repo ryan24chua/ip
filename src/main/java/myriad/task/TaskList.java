@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * responsible for displaying anything about a TaskList's contents.
  */
 public class TaskList {
-    private final ArrayList<Task> tasks;
+    private final List<Task> tasks;
 
     /**
      * Creates an empty task list, for a first run with nothing saved yet.
@@ -116,70 +117,71 @@ public class TaskList {
     }
 
     /**
-     * Returns the live, mutable list of tasks — not a defensive copy.
-     * Callers that only need to read/display tasks (e.g. Ui) are fine;
-     * mutating the returned list bypasses TaskList entirely.
+     * Returns a read-only view of every task, in task-number order. The view
+     * is live, so it reflects later changes without being fetched again, but
+     * any attempt to change it through the view throws
+     * UnsupportedOperationException: tasks are only added, marked or removed
+     * through this class's own methods.
      *
-     * @return this list's own backing list, in task-number order.
+     * @return a read-only view of the tasks, in task-number order.
      */
-    public ArrayList<Task> asList() {
-        return tasks;
+    public List<Task> asList() {
+        return Collections.unmodifiableList(tasks);
     }
 
     /**
      * Returns a new list of every task whose occursDuring(query) is true,
-     * for the "show task" command. Unlike asList(), this is always a fresh
-     * list — safe to hand to a caller without exposing the underlying
-     * tasks list.
+     * for the "show task" command. Unlike asList(), this is a snapshot: it
+     * does not change if the task list changes afterwards.
      *
      * @param query the date, or date and time, being asked about.
-     * @return a fresh list of the matching tasks, in their original order.
+     * @return a new read-only list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> getTasksOccurringOn(TaskDateTime query) {
+    public List<Task> getTasksOccurringOn(TaskDateTime query) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (task.occursDuring(query)) {
                 matches.add(task);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 
     /**
      * Returns a new list of every task whose description contains keyword,
      * ignoring case, for the "find" command. Like getTasksOccurringOn, this
-     * is always a fresh list rather than the backing one.
+     * is a read-only snapshot.
      *
      * @param keyword the text to look for in task descriptions.
-     * @return a fresh list of the matching tasks, in their original order.
+     * @return a new read-only list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> getTasksMatching(String keyword) {
+    public List<Task> getTasksMatching(String keyword) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (task.descriptionContains(keyword)) {
                 matches.add(task);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 
     /**
      * Returns a new list of every task of the given type, for
      * the "stats" command's per-type breakdown. Like getTasksMatching, this
-     * is always a fresh list rather than the backing one; callers that just
-     * want the count can take size() of the result.
+     * is a read-only snapshot; callers that just want the count can take
+     * size() of the result.
      *
      * @param type the type to match, e.g. TaskType.DEADLINE.
-     * @return a fresh list of the matching tasks, in their original order.
+     * @return a new read-only list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> getTasksOfType(TaskType type) {
+    public List<Task> getTasksOfType(TaskType type) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (task.getType() == type) {
                 matches.add(task);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 
     /**
@@ -190,9 +192,9 @@ public class TaskList {
      *
      * @param date the date the period starts from (its start of day).
      * @param days how many days the period spans after date.
-     * @return a fresh list of the matching tasks, in their original order.
+     * @return a new read-only list of the matching tasks, in their original order.
      */
-    public ArrayList<Task> getTasksDueWithin(LocalDate date, int days) {
+    public List<Task> getTasksDueWithin(LocalDate date, int days) {
         ArrayList<Task> matches = new ArrayList<>();
         LocalDateTime from = date.atStartOfDay();
         LocalDateTime to = date.plusDays(days).atTime(LocalTime.MAX);
@@ -202,7 +204,7 @@ public class TaskList {
                 matches.add(task);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 
     /**
@@ -212,9 +214,9 @@ public class TaskList {
      * add() and never reordered, so list order already is add order.
      *
      * @param limit the maximum number of tasks to return.
-     * @return a fresh list of up to limit undone tasks, in their original order.
+     * @return a new read-only list of up to limit undone tasks, in their original order.
      */
-    public ArrayList<Task> getOldestUndone(int limit) {
+    public List<Task> getOldestUndone(int limit) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
             if (matches.size() >= limit) {
@@ -224,6 +226,6 @@ public class TaskList {
                 matches.add(task);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 }
