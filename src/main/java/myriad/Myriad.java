@@ -85,26 +85,43 @@ public class Myriad {
         this.ui = new Ui(isEchoingToConsole);
         this.storage = new Storage(filePath);
 
-        TaskList loadedTasks;
-        List<String> loadedSkippedLines;
-        String errorMessage;
-        try {
-            LoadResult loaded = storage.load();
-            loadedTasks = new TaskList(loaded.tasks());
-            loadedSkippedLines = loaded.skippedLines();
-            errorMessage = null;
-        } catch (MyriadException e) {
-            loadedTasks = new TaskList();
-            loadedSkippedLines = List.of();
-            errorMessage = e.getMessage();
-        }
-        this.tasks = loadedTasks;
-        this.skippedLines = loadedSkippedLines;
-        this.loadErrorMessage = errorMessage;
+        LoadedData loaded = loadSavedData(storage);
+        this.tasks = loaded.tasks();
+        this.skippedLines = loaded.skippedLines();
+        this.loadErrorMessage = loaded.errorMessage();
 
         // Either the whole file was unreadable or some lines were skipped, never both.
         assert loadErrorMessage == null || skippedLines.isEmpty()
                 : "a failed load should not also report skipped lines";
+    }
+
+    /**
+     * What a session starts with after trying to load its data file. A
+     * record lets loadSavedData hand back all three values at once, since a
+     * method cannot assign the constructor's final fields itself.
+     *
+     * @param tasks        the tasks to start the session with.
+     * @param skippedLines descriptions of saved lines that could not be loaded.
+     * @param errorMessage why the whole file could not be read, or null if it was read.
+     */
+    private record LoadedData(TaskList tasks, List<String> skippedLines, String errorMessage) {
+    }
+
+    /**
+     * Loads the saved tasks from storage, falling back to an empty list if
+     * the file cannot be read at all, so that a single unreadable file does
+     * not stop the session from starting.
+     *
+     * @param storage the storage to load from.
+     * @return the loaded tasks and any problems to report after the greeting.
+     */
+    private static LoadedData loadSavedData(Storage storage) {
+        try {
+            LoadResult result = storage.load();
+            return new LoadedData(new TaskList(result.tasks()), result.skippedLines(), null);
+        } catch (MyriadException e) {
+            return new LoadedData(new TaskList(), List.of(), e.getMessage());
+        }
     }
 
     /**

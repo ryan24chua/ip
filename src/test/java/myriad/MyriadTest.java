@@ -66,6 +66,32 @@ public class MyriadTest {
     }
 
     @Test
+    public void getGreeting_unreadableDataFile_errorFollowsGreeting() throws IOException {
+        // A directory where the data file should be cannot be read as a file
+        // on any OS, so the whole load fails rather than skipping lines.
+        Files.createDirectory(dataFile());
+        String greeting = sessionAtTempFile().getGreeting();
+        assertTrue(greeting.startsWith("Hello! I'm Myriad."));
+        assertTrue(greeting.contains("couldn't read your saved tasks"));
+        assertFalse(greeting.contains("were skipped"));
+    }
+
+    @Test
+    public void getResponse_unreadableDataFile_sessionStartsEmpty() throws IOException {
+        Files.createDirectory(dataFile());
+        assertEquals("Here are the tasks in your list:", sessionAtTempFile().getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_savedDataWithBadLine_validTasksStillLoaded() throws IOException {
+        writeDataFile("T | 0 | read book", "nonsense", "T | 1 | walk dog");
+        assertEquals("Here are the tasks in your list:" + NEWLINE
+                + "1.[T][ ] read book" + NEWLINE
+                + "2.[T][X] walk dog",
+                sessionAtTempFile().getResponse("list"));
+    }
+
+    @Test
     public void getGreeting_calledTwice_notRepeatedWithinOneReply() {
         // Each call is its own reply, so the second must not carry the first.
         Myriad myriad = sessionAtTempFile();
