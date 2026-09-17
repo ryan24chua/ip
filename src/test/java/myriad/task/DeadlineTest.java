@@ -86,4 +86,21 @@ public class DeadlineTest {
         assertTrue(dueAt("2019-12-02").overlaps(
                 LocalDateTime.parse("2019-12-02T23:59"), LocalDateTime.parse("2019-12-05T00:00")));
     }
+
+    // ---------------------------------------------------------------
+    // hasSameDetails
+    // ---------------------------------------------------------------
+
+    @Test
+    public void hasSameDetails_sameDescriptionAndDate_true() {
+        assertTrue(new Deadline("homework", at("2019-12-02 1800"))
+                .hasSameDetails(new Deadline("homework", at("2/12/2019 18:00"))));
+    }
+
+    @Test
+    public void hasSameDetails_differentDate_false() {
+        // The same piece of homework can be due again another week.
+        assertFalse(new Deadline("homework", at("2019-12-02"))
+                .hasSameDetails(new Deadline("homework", at("2019-12-09"))));
+    }
 }

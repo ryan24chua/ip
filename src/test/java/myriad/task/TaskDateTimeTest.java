@@ -206,20 +206,38 @@ public class TaskDateTimeTest {
         assertThrows(NullPointerException.class, () -> TaskDateTime.parse(null));
     }
 
+    // ---------------------------------------------------------------
+    // parse: dates that do not exist are rejected in every format
+    // ---------------------------------------------------------------
+
     @Test
-    public void parse_impossibleDayInSlashFormat_silentlyClampedToMonthEnd() throws MyriadException {
-        // Known limitation: DateTimeFormatter.ofPattern uses the SMART
-        // resolver, which clamps an out-of-range day to the last day of the
-        // month instead of rejecting it. So "31/2/2019" becomes 28 Feb rather
-        // than an error -- whereas the ISO format above rejects "2019-02-30".
-        // The two date-only formats therefore disagree on invalid dates.
-        assertEquals("2019-02-28", TaskDateTime.parse("31/2/2019").toSaveFormat());
+    public void parse_impossibleDates_exceptionThrown() {
+        // Every accepted format must reject these rather than quietly moving
+        // the date to the end of the month, which is what a lenient formatter
+        // would do.
+        String[] impossibleDates = {
+            "31/2/2019", "29/2/2019", "31/4/2019", "32/1/2019", "0/1/2019", "1/13/2019",
+            "30/2/2019 1800", "30/2/2019 18:00",
+            "2019-02-30 1800", "2019-02-30 18:00", "2019-02-29T18:00", "2019-04-31"
+        };
+        for (String raw : impossibleDates) {
+            assertThrows(MyriadException.class, () -> TaskDateTime.parse(raw), raw + " should be rejected");
+        }
     }
 
     @Test
-    public void parse_feb29InNonLeapYear_silentlyClampedToFeb28() throws MyriadException {
-        // Known limitation: same SMART-resolver cause as above.
-        assertEquals("2019-02-28", TaskDateTime.parse("29/2/2019").toSaveFormat());
+    public void parse_impossibleTimes_exceptionThrown() {
+        String[] impossibleTimes = {"2019-12-02 2400", "2019-12-02 1860", "2/12/2019 25:00"};
+        for (String raw : impossibleTimes) {
+            assertThrows(MyriadException.class, () -> TaskDateTime.parse(raw), raw + " should be rejected");
+        }
+    }
+
+    @Test
+    public void parse_feb29InLeapYear_accepted() throws MyriadException {
+        // Strict checking must still accept a date that does exist.
+        assertEquals("2020-02-29", TaskDateTime.parse("29/2/2020").toSaveFormat());
+        assertEquals("2020-02-29T18:00", TaskDateTime.parse("29/2/2020 1800").toSaveFormat());
     }
 
     // ---------------------------------------------------------------
@@ -361,5 +379,35 @@ public class TaskDateTimeTest {
         // Display is lossy where toSaveFormat() is not: the seconds survive a
         // save/load round trip but are never shown to the user.
         assertEquals("Dec 02 2019 1800", TaskDateTime.parse("2019-12-02T18:00:30").toString());
+    }
+
+    // ---------------------------------------------------------------
+    // equals and hashCode: what makes two dates "the same" for duplicates
+    // ---------------------------------------------------------------
+
+    @Test
+    public void equals_sameDateTimeTypedDifferently_equal() throws MyriadException {
+        TaskDateTime iso = TaskDateTime.parse("2019-12-02 1800");
+        TaskDateTime slash = TaskDateTime.parse("2/12/2019 18:00");
+        assertEquals(iso, slash);
+        assertEquals(iso.hashCode(), slash.hashCode());
+    }
+
+    @Test
+    public void equals_differentTime_notEqual() throws MyriadException {
+        assertNotEquals(TaskDateTime.parse("2019-12-02 1800"), TaskDateTime.parse("2019-12-02 1801"));
+    }
+
+    @Test
+    public void equals_dateOnlyAndMidnight_notEqual() throws MyriadException {
+        // "No time given" is different information from "at 00:00".
+        assertNotEquals(TaskDateTime.parse("2019-12-02"), TaskDateTime.parse("2019-12-02 0000"));
+    }
+
+    @Test
+    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+        TaskDateTime date = TaskDateTime.parse("2019-12-02");
+        assertNotEquals(null, date);
+        assertNotEquals("2019-12-02", date);
     }
 }

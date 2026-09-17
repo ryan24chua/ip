@@ -42,6 +42,12 @@ public class Parser {
     /** Separates an event's start from its end. */
     private static final Pattern MARKER_TO = createMarkerPattern("/to");
 
+    /**
+     * Separates the fields of a saved task. A description may not contain it,
+     * because nothing escapes it in the data file.
+     */
+    private static final String SAVE_FIELD_SEPARATOR = "|";
+
     /** Not meant to be instantiated: every method here is static. */
     private Parser() {
     }
@@ -156,19 +162,38 @@ public class Parser {
     }
 
     /**
+     * Checks that {@code description} can be saved and read back unchanged.
+     * The data file separates fields with {@code |}, so a description holding
+     * one would be split apart on the next launch, losing text or the whole
+     * task. Rejecting it here is simpler than escaping it in the save format,
+     * and keeps existing data files readable.
+     *
+     * @param description the task description the user typed.
+     * @throws MyriadException if {@code description} contains {@code |}.
+     */
+    private static void checkDescriptionCanBeSaved(String description) throws MyriadException {
+        if (description.contains(SAVE_FIELD_SEPARATOR)) {
+            throw new MyriadException(
+                    "A task description can't contain \"" + SAVE_FIELD_SEPARATOR
+                            + "\", because that character separates fields in the save file.");
+        }
+    }
+
+    /**
      * Builds the {@link ToDo} described by a {@code todo} command's
      * arguments. Throws {@link MyriadException} if the description is
-     * missing.
+     * missing or cannot be saved.
      *
      * @param args the argument text after {@code todo}.
      * @return the new {@code ToDo}.
-     * @throws MyriadException if the description is missing.
+     * @throws MyriadException if the description is missing or contains {@code |}.
      */
     private static Task parseToDo(String args) throws MyriadException {
         if (args.isEmpty()) {
             throw new MyriadException(
                     "Please include a task description, e.g. \"todo read book\".");
         }
+        checkDescriptionCanBeSaved(args);
         return new ToDo(args);
     }
 
@@ -206,13 +231,13 @@ public class Parser {
     /**
      * Builds the {@link Deadline} described by a
      * {@code deadline <description> /by <date>} command's arguments. Throws
-     * {@link MyriadException} if the description or the date is missing, or
-     * if the date doesn't parse.
+     * {@link MyriadException} if the description or the date is missing, if
+     * the description cannot be saved, or if the date doesn't parse.
      *
      * @param args the argument text after {@code deadline}.
      * @return the new {@code Deadline}.
      * @throws MyriadException if the description or date is missing or
-     *                         unparseable.
+     *                         unparseable, or the description contains {@code |}.
      */
     private static Task parseDeadline(String args) throws MyriadException {
         String[] descAndDate = splitOnMarker(args, MARKER_BY);
@@ -227,6 +252,7 @@ public class Parser {
             throw new MyriadException(
                     "Please include a date after /by, e.g. \"" + example + "\".");
         }
+        checkDescriptionCanBeSaved(description);
         return new Deadline(description, TaskDateTime.parse(date));
     }
 
@@ -234,12 +260,14 @@ public class Parser {
      * Builds the {@link Event} described by an
      * {@code event <description> /from <start> /to <end>} command's
      * arguments. Throws {@link MyriadException} if the description, start or
-     * end is missing, or if either date doesn't parse.
+     * end is missing, if the description cannot be saved, if either date
+     * doesn't parse, or if the event would end before or when it starts.
      *
      * @param args the argument text after {@code event}.
      * @return the new {@code Event}.
      * @throws MyriadException if the description, start or end is missing or
-     *                         unparseable.
+     *                         unparseable, the description contains {@code |},
+     *                         or the end is not after the start.
      */
     private static Task parseEvent(String args) throws MyriadException {
         String[] descAndRest = splitOnMarker(args, MARKER_FROM);
@@ -261,7 +289,11 @@ public class Parser {
             throw new MyriadException(
                     "Please include an end time after /to, e.g. \"" + example + "\".");
         }
-        return new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end));
+        checkDescriptionCanBeSaved(description);
+        TaskDateTime startTime = TaskDateTime.parse(start);
+        TaskDateTime endTime = TaskDateTime.parse(end);
+        Event.checkTimesInOrder(startTime, endTime);
+        return new Event(description, startTime, endTime);
     }
 
     /**

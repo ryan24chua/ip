@@ -68,4 +68,44 @@ public class TaskTest {
         Locale turkish = Locale.forLanguageTag("tr-TR");
         runWithDefaultLocale(turkish, () -> assertTrue(new ToDo("write title").descriptionContains("TITLE")));
     }
+
+    // ---------------------------------------------------------------
+    // hasSameDetails: the duplicate check behind adding a task
+    // ---------------------------------------------------------------
+
+    @Test
+    public void hasSameDetails_toDosWithSameDescription_true() {
+        assertTrue(new ToDo("read book").hasSameDetails(new ToDo("read book")));
+    }
+
+    @Test
+    public void hasSameDetails_oneMarkedDone_stillTrue() {
+        // Marking a task done does not make it a different task.
+        ToDo done = new ToDo("read book");
+        done.setDone(true);
+        assertTrue(new ToDo("read book").hasSameDetails(done));
+    }
+
+    @Test
+    public void hasSameDetails_differentDescription_false() {
+        assertFalse(new ToDo("read book").hasSameDetails(new ToDo("read books")));
+    }
+
+    @Test
+    public void hasSameDetails_descriptionDiffersOnlyInCase_false() {
+        // Matching is exact, so the user can still add "Read book" on purpose.
+        assertFalse(new ToDo("read book").hasSameDetails(new ToDo("Read book")));
+    }
+
+    @Test
+    public void hasSameDetails_differentTypesWithSameDescription_false() {
+        Task toDo = new ToDo("homework");
+        Task deadline = new Deadline("homework", at("2019-12-02"));
+        Task event = new Event("homework", at("2019-12-02"), at("2019-12-03"));
+
+        assertFalse(toDo.hasSameDetails(deadline));
+        assertFalse(deadline.hasSameDetails(toDo));
+        assertFalse(deadline.hasSameDetails(event));
+        assertFalse(event.hasSameDetails(toDo));
+    }
 }

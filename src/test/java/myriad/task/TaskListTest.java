@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -412,9 +413,10 @@ public class TaskListTest {
 
     @Test
     public void getTasksOccurringOn_eventEndingBeforeItStarts_neverMatches() {
-        // Known limitation: nothing rejects an inverted event when it is
-        // built, and the overlap check then fails for every query -- so the
-        // task exists in the list but "show" can never find it, on any date.
+        // The Parser and Storage reject an inverted event before building it
+        // (see Event.checkTimesInOrder), but the constructor itself does not.
+        // This records what the overlap check does with one built directly:
+        // it fails for every query, so "show" could never find the task.
         TaskList tasks = new TaskList();
         tasks.add(new Event("impossible", at("2019-12-05"), at("2019-12-01")));
         assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-01")).size());
@@ -685,5 +687,30 @@ public class TaskListTest {
     private static String describe(Task task) {
         String[] fields = task.toSaveFormat().split("\\s*\\|\\s*");
         return fields[2];
+    }
+
+    // ---------------------------------------------------------------
+    // findTaskWithSameDetails
+    // ---------------------------------------------------------------
+
+    @Test
+    public void findTaskWithSameDetails_emptyList_empty() {
+        assertTrue(new TaskList().findTaskWithSameDetails(new ToDo("read book")).isEmpty());
+    }
+
+    @Test
+    public void findTaskWithSameDetails_matchPresent_existingTaskReturned() {
+        TaskList tasks = threeToDos();
+        Task existing = tasks.get(1);
+
+        Optional<Task> found = tasks.findTaskWithSameDetails(new ToDo(describe(existing)));
+
+        assertTrue(found.isPresent());
+        assertSame(existing, found.get());
+    }
+
+    @Test
+    public void findTaskWithSameDetails_noMatch_empty() {
+        assertTrue(threeToDos().findTaskWithSameDetails(new ToDo("something else")).isEmpty());
     }
 }

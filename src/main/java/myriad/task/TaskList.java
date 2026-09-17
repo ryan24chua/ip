@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -163,6 +164,20 @@ public class TaskList {
      */
     public List<Task> getTasksMatching(String keyword) {
         return filter(task -> task.descriptionContains(keyword));
+    }
+
+    /**
+     * Returns the task already in the list with the same details as
+     * {@code task}, if there is one, so that adding a duplicate can be
+     * refused. See {@link Task#hasSameDetails} for what counts as the same.
+     *
+     * @param task the task about to be added.
+     * @return the existing task with the same details, or empty if there is none.
+     */
+    public Optional<Task> findTaskWithSameDetails(Task task) {
+        return tasks.stream()
+                .filter(existing -> existing.hasSameDetails(task))
+                .findFirst();
     }
 
     /**

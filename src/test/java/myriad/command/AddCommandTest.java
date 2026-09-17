@@ -109,4 +109,38 @@ public class AddCommandTest {
         assertEquals(1, tasks.size());
         assertTrue(ui.getResponse().startsWith("Got it. I've added this task:"), ui.getResponse());
     }
+
+    @Test
+    public void execute_duplicateTask_errorThrownAndNothingChanged() throws MyriadException, IOException {
+        TaskList tasks = new TaskList();
+        Ui ui = new Ui(false);
+        Storage storage = storageAtTempFile();
+        new AddCommand(new ToDo("read book")).execute(tasks, ui, storage);
+        String savedBefore = Files.readString(dataFile());
+        ui.startResponse();
+
+        MyriadException e = assertThrows(MyriadException.class, () ->
+                new AddCommand(new ToDo("read book")).execute(tasks, ui, storage));
+
+        assertEquals("That task is already in your list: [T][ ] read book", e.getMessage());
+        assertEquals(1, tasks.size());
+        // Refused before anything else happens: no acknowledgement, no save.
+        assertEquals("", ui.getResponse());
+        assertEquals(savedBefore, Files.readString(dataFile()));
+    }
+
+    @Test
+    public void execute_duplicateOfDoneTask_errorShowsExistingTask() throws MyriadException {
+        // The message shows the task already in the list, done mark and all,
+        // rather than the new one, so the user can see why it was refused.
+        TaskList tasks = new TaskList();
+        Task existing = new ToDo("read book");
+        existing.setDone(true);
+        tasks.add(existing);
+
+        MyriadException e = assertThrows(MyriadException.class, () ->
+                new AddCommand(new ToDo("read book")).execute(tasks, new Ui(false), storageAtTempFile()));
+
+        assertEquals("That task is already in your list: [T][X] read book", e.getMessage());
+    }
 }

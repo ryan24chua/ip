@@ -457,6 +457,17 @@ public class StorageTest {
         assertEquals(0, storageAtTempFile().load().tasks().size());
     }
 
+    @Test
+    public void load_eventEndingBeforeItStarts_skipped() throws Exception {
+        // A hand-edited file must not bring back an event the Parser would reject.
+        writeDataFile("E | 0 | party | 2019-12-05 | 2019-12-01", "T | 0 | read book");
+
+        LoadResult result = storageAtTempFile().load();
+
+        assertEquals(1, result.tasks().size());
+        assertTrue(result.skippedLines().get(0).contains("An event must end after it starts"));
+    }
+
     // ---------------------------------------------------------------
     // load: the done flag and extra fields
     // ---------------------------------------------------------------
@@ -509,7 +520,9 @@ public class StorageTest {
     }
 
     // ---------------------------------------------------------------
-    // Known limitation: the save format has no escaping
+    // Known limitation: the save format has no escaping. The Parser
+    // rejects "|" in descriptions so a user cannot reach this, but Storage
+    // itself does not guard against it, as these tests record.
     // ---------------------------------------------------------------
 
     @Test
@@ -518,8 +531,7 @@ public class StorageTest {
         // description containing one is split into several fields on the way
         // back in. Here "a | b" is saved as "T | 0 | a | b", which reloads as
         // a ToDo called "a" with "b" silently discarded as an extra field.
-        // Nothing rejects such a description when the task is created, so the
-        // user loses part of their text at the next launch with no warning.
+        // A task built directly, bypassing the Parser, still reaches this.
         TaskList original = new TaskList();
         original.add(new ToDo("a | b"));
 

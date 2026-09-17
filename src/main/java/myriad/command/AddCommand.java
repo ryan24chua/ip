@@ -1,5 +1,7 @@
 package myriad.command;
 
+import java.util.Optional;
+
 import myriad.MyriadException;
 import myriad.storage.Storage;
 import myriad.task.Task;
@@ -35,9 +37,20 @@ public class AddCommand extends Command {
      * attempted, so a save failure never undoes the in-memory add: the
      * task still shows up in {@code list} for the rest of the session even
      * if it couldn't be written to disk.
+     *
+     * A task with the same details as one already in the list is refused
+     * instead, since a second copy is almost always a slip and would make
+     * the list harder to read and the task numbers harder to keep track of.
+     * The duplicate check happens here rather than in the {@code Parser},
+     * because it depends on what the list holds when the command runs.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MyriadException {
+        Optional<Task> existing = tasks.findTaskWithSameDetails(task);
+        if (existing.isPresent()) {
+            throw new MyriadException("That task is already in your list: " + existing.get());
+        }
+
         tasks.add(task);
         ui.showAddedTask(task, tasks.size());
         save(tasks, storage);
