@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Tests for {@link CommandHistory}: the cursor bookkeeping behind recalling
  * earlier commands with the Up and Down keys.

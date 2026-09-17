@@ -9,6 +9,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import myriad.Myriad;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Displays the Myriad window. The layout itself lives in
  * {@code view/MainWindow.fxml} and the behaviour in {@link MainWindow}, so this class is

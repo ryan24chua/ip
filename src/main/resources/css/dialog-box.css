@@ -1,3 +1,6 @@
+/* AI-assisted: most of this file was written with Claude Code (Claude Opus),
+   used by Ryan Chua, who reviewed and adapted the output. */
+
 /*
  * One message bubble. This stylesheet is attached to the dialog box itself
  * rather than to the whole scene, so the bare .label selector below reaches

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Remembers the commands the user has sent, so that they can be recalled
  * one at a time, newest first, like the history in a command-line shell.

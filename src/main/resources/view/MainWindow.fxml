@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<!-- AI-assisted: most of this file was written with Claude Code (Claude Opus),
+     used by Ryan Chua, who reviewed and adapted the output. -->
+
 <!--
     The chat window: a scrolling transcript above an input row. The layout is
     built from boxes rather than fixed pixel offsets, so it follows the window

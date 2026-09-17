@@ -5,6 +5,9 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 
+<!-- AI-assisted: most of this file was written with Claude Code (Claude Opus),
+     used by Ryan Chua, who reviewed and adapted the output. -->
+
 <!--
     One message in the conversation, laid out as Myriad's reply: a small
     picture on the left and the text beside it. A user's message reuses this

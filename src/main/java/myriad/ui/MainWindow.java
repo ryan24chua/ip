@@ -15,6 +15,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import myriad.Myriad;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Controls the chat window described by {@code view/MainWindow.fxml}: turns what the
  * user types into a request to the chatbot, adds both sides of the exchange

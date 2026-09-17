@@ -13,6 +13,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Circle;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Represents one message in the conversation. The two sides are deliberately
  * drawn differently, because a chat with an app is not a chat between equals:

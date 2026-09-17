@@ -3,6 +3,8 @@ package myriad;
 import javafx.application.Application;
 import myriad.ui.Main;
 
+// AI-assisted: most of this file was written with Claude Code (Claude Opus),
+// used by Ryan Chua, who reviewed and adapted the output.
 /**
  * Starts the Myriad GUI.
  *
