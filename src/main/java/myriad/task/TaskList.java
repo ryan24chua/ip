@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Holds the user's tasks and the operations that mutate them (add,
@@ -138,13 +139,7 @@ public class TaskList {
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksOccurringOn(TaskDateTime query) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.occursDuring(query)) {
-                matches.add(task);
-            }
-        }
-        return Collections.unmodifiableList(matches);
+        return filter(task -> task.occursDuring(query));
     }
 
     /**
@@ -156,13 +151,7 @@ public class TaskList {
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksMatching(String keyword) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.descriptionContains(keyword)) {
-                matches.add(task);
-            }
-        }
-        return Collections.unmodifiableList(matches);
+        return filter(task -> task.descriptionContains(keyword));
     }
 
     /**
@@ -175,13 +164,7 @@ public class TaskList {
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksOfType(TaskType type) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getType() == type) {
-                matches.add(task);
-            }
-        }
-        return Collections.unmodifiableList(matches);
+        return filter(task -> task.getType() == type);
     }
 
     /**
@@ -195,16 +178,9 @@ public class TaskList {
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksDueWithin(LocalDate date, int days) {
-        ArrayList<Task> matches = new ArrayList<>();
         LocalDateTime from = date.atStartOfDay();
         LocalDateTime to = date.plusDays(days).atTime(LocalTime.MAX);
-
-        for (Task task : tasks) {
-            if (task.overlaps(from, to)) {
-                matches.add(task);
-            }
-        }
-        return Collections.unmodifiableList(matches);
+        return filter(task -> task.overlaps(from, to));
     }
 
     /**
@@ -213,19 +189,35 @@ public class TaskList {
      * earliest added, not an explicit timestamp — tasks are appended by
      * add() and never reordered, so list order already is add order.
      *
-     * @param limit the maximum number of tasks to return.
+     * @param limit the maximum number of tasks to return; never negative.
      * @return a new read-only list of up to limit undone tasks, in their original order.
      */
     public List<Task> getOldestUndone(int limit) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (matches.size() >= limit) {
-                break;
-            }
-            if (!task.isDone()) {
-                matches.add(task);
-            }
-        }
-        return Collections.unmodifiableList(matches);
+        // Stream.limit rejects a negative limit with its own exception; the
+        // limit is a constant in code, so a negative one is a programming bug.
+        assert limit >= 0 : "limit is a non-negative constant, e.g. StatsCommand.OLDEST_UNDONE_LIMIT";
+        return tasks.stream()
+                .filter(task -> !task.isDone())
+                .limit(limit)
+                .toList();
+    }
+
+    /**
+     * Returns a new read-only list of every task that satisfies condition,
+     * in task-number order. Shared by the query methods above, which differ
+     * only in the condition they test.
+     *
+     * Uses a stream: filter keeps the tasks the condition accepts, and
+     * toList collects them into a list that cannot be modified. A for loop
+     * adding matches to an ArrayList, as these methods used to repeat, does
+     * the same with more lines.
+     *
+     * @param condition the test a task must pass to be included.
+     * @return a new read-only list of the matching tasks, in their original order.
+     */
+    private List<Task> filter(Predicate<Task> condition) {
+        return tasks.stream()
+                .filter(condition)
+                .toList();
     }
 }

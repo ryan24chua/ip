@@ -649,6 +649,13 @@ public class TaskListTest {
         assertTrue(threeToDos().getOldestUndone(0).isEmpty());
     }
 
+    @Test
+    public void getOldestUndone_negativeLimit_assertionFails() {
+        // The limit is a constant in code, so a negative one is a bug to
+        // surface, not an input to quietly answer with an empty list.
+        assertThrows(AssertionError.class, () -> threeToDos().getOldestUndone(-1));
+    }
+
     /**
      * Returns a task's description, recovered from its save format. The Task
      * classes expose no getter, and the save format's last field is the
