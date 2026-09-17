@@ -2,6 +2,8 @@ package myriad.task;
 
 import java.time.LocalDateTime;
 
+import myriad.MyriadException;
+
 /**
  * A task that spans a start and an end date/time. Unlike a {@link Deadline},
  * which occurs at one point, an {@code Event} covers everything between its
@@ -12,13 +14,14 @@ public class Event extends Task {
     /** When the event starts. */
     private final TaskDateTime start;
 
-    /** When the event ends; not checked to be after {@link #start}. */
+    /** When the event ends; see {@link #checkTimesInOrder} for how it relates to {@link #start}. */
     private final TaskDateTime end;
 
     /**
-     * Creates a not-done {@code Event}. The two times are taken as given:
-     * they are not checked for {@code start} being before {@code end}, since
-     * the {@code Parser} accepts whatever the user typed.
+     * Creates a not-done {@code Event}. The two times are taken as given, so
+     * callers building one from user input or saved data should first check
+     * them with {@link #checkTimesInOrder}; the constructor does not, so that
+     * it does not have to declare a checked exception for every caller.
      *
      * @param description what the event is.
      * @param start       when it starts, already parsed.
@@ -26,11 +29,35 @@ public class Event extends Task {
      */
     public Event(String description, TaskDateTime start, TaskDateTime end) {
         super(description);
-        // Start before end is deliberately not asserted: that comes from user input.
+        // Start before end is not asserted: the times come from user input, so
+        // they are checked with checkTimesInOrder, which reports a proper error.
         assert start != null && end != null : "TaskDateTime.parse never returns null";
 
         this.start = start;
         this.end = end;
+    }
+
+    /**
+     * Checks that an event with these times ends after it starts, so that an
+     * impossible event is rejected with an explanation rather than stored.
+     * An event whose start and end are the same instant is rejected too,
+     * since it would not last any time.
+     *
+     * A date given without a time stands for its whole day, so the check
+     * compares the earliest instant of {@code start} with the latest instant
+     * of {@code end}. That keeps a one-day event such as
+     * {@code /from 2019-12-02 /to 2019-12-02} valid.
+     *
+     * @param start when the event starts.
+     * @param end   when the event ends.
+     * @throws MyriadException if the end is not after the start.
+     */
+    public static void checkTimesInOrder(TaskDateTime start, TaskDateTime end) throws MyriadException {
+        if (!start.rangeStart().isBefore(end.rangeEnd())) {
+            throw new MyriadException(String.format(
+                    "An event must end after it starts, but it ends (%s) before or when it starts (%s).",
+                    end, start));
+        }
     }
 
     @Override

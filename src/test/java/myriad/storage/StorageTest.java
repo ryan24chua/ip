@@ -457,6 +457,17 @@ public class StorageTest {
         assertEquals(0, storageAtTempFile().load().tasks().size());
     }
 
+    @Test
+    public void load_eventEndingBeforeItStarts_skipped() throws Exception {
+        // A hand-edited file must not bring back an event the Parser would reject.
+        writeDataFile("E | 0 | party | 2019-12-05 | 2019-12-01", "T | 0 | read book");
+
+        LoadResult result = storageAtTempFile().load();
+
+        assertEquals(1, result.tasks().size());
+        assertTrue(result.skippedLines().get(0).contains("An event must end after it starts"));
+    }
+
     // ---------------------------------------------------------------
     // load: the done flag and extra fields
     // ---------------------------------------------------------------

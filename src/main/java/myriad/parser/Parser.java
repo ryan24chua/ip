@@ -234,12 +234,13 @@ public class Parser {
      * Builds the {@link Event} described by an
      * {@code event <description> /from <start> /to <end>} command's
      * arguments. Throws {@link MyriadException} if the description, start or
-     * end is missing, or if either date doesn't parse.
+     * end is missing, if either date doesn't parse, or if the event would end
+     * before or when it starts.
      *
      * @param args the argument text after {@code event}.
      * @return the new {@code Event}.
      * @throws MyriadException if the description, start or end is missing or
-     *                         unparseable.
+     *                         unparseable, or the end is not after the start.
      */
     private static Task parseEvent(String args) throws MyriadException {
         String[] descAndRest = splitOnMarker(args, MARKER_FROM);
@@ -261,7 +262,10 @@ public class Parser {
             throw new MyriadException(
                     "Please include an end time after /to, e.g. \"" + example + "\".");
         }
-        return new Event(description, TaskDateTime.parse(start), TaskDateTime.parse(end));
+        TaskDateTime startTime = TaskDateTime.parse(start);
+        TaskDateTime endTime = TaskDateTime.parse(end);
+        Event.checkTimesInOrder(startTime, endTime);
+        return new Event(description, startTime, endTime);
     }
 
     /**

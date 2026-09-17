@@ -412,9 +412,10 @@ public class TaskListTest {
 
     @Test
     public void getTasksOccurringOn_eventEndingBeforeItStarts_neverMatches() {
-        // Known limitation: nothing rejects an inverted event when it is
-        // built, and the overlap check then fails for every query -- so the
-        // task exists in the list but "show" can never find it, on any date.
+        // The Parser and Storage reject an inverted event before building it
+        // (see Event.checkTimesInOrder), but the constructor itself does not.
+        // This records what the overlap check does with one built directly:
+        // it fails for every query, so "show" could never find the task.
         TaskList tasks = new TaskList();
         tasks.add(new Event("impossible", at("2019-12-05"), at("2019-12-01")));
         assertEquals(0, tasks.getTasksOccurringOn(at("2019-12-01")).size());

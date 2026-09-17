@@ -146,8 +146,9 @@ public class Storage {
      *
      * @param line one line of the data file.
      * @return the {@code Task} that line describes, with its done status restored.
-     * @throws MyriadException if the line has too few fields or an unknown
-     *                         type letter.
+     * @throws MyriadException if the line has too few fields, an unknown
+     *                         type letter, an unparseable date, or an event
+     *                         that ends before it starts.
      */
     private static Task parseLine(String line) throws MyriadException {
         String[] fields = line.split("\\s*\\|\\s*");
@@ -176,7 +177,11 @@ public class Storage {
                             "an Event line needs 5 fields (type, done, description, start, end), "
                                     + "found " + fields.length);
                 }
-                yield new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
+                TaskDateTime start = TaskDateTime.parse(fields[3]);
+                TaskDateTime end = TaskDateTime.parse(fields[4]);
+                // A hand-edited file could hold an impossible event; skip it like any bad line.
+                Event.checkTimesInOrder(start, end);
+                yield new Event(description, start, end);
             }
         };
         task.setDone(isDone);

@@ -434,13 +434,28 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_eventEndingBeforeItStarts_acceptedNotRejected() {
-        // Known limitation: the Parser checks that both times are present and
-        // parseable, but nothing checks that the start is not after the end,
-        // so an impossible event is accepted here and never matches a "show"
-        // query later.
-        assertDoesNotThrow(() ->
-                Parser.parse("event party /from 2019-12-05 /to 2019-12-01"));
+    public void parse_eventEndingBeforeItStarts_exceptionThrown() {
+        assertMessageContains("An event must end after it starts",
+                parseExpectingFailure("event party /from 2019-12-05 /to 2019-12-01"));
+    }
+
+    @Test
+    public void parse_eventEndingEarlierOnSameDay_exceptionThrown() {
+        assertMessageContains("An event must end after it starts",
+                parseExpectingFailure("event party /from 2019-12-02 1600 /to 2019-12-02 1400"));
+    }
+
+    @Test
+    public void parse_eventEndingWhenItStarts_exceptionThrown() {
+        // An event that lasts no time at all is as impossible as one that ends first.
+        assertMessageContains("An event must end after it starts",
+                parseExpectingFailure("event party /from 2019-12-02 1400 /to 2019-12-02 1400"));
+    }
+
+    @Test
+    public void parse_eventOnOneWholeDay_accepted() {
+        // A date without a time stands for the whole day, so this lasts a day.
+        assertDoesNotThrow(() -> Parser.parse("event holiday /from 2019-12-02 /to 2019-12-02"));
     }
 
     // ---------------------------------------------------------------
