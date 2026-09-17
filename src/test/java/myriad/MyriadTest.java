@@ -92,6 +92,30 @@ public class MyriadTest {
     }
 
     @Test
+    public void hasLoadProblem_noSavedData_false() {
+        // A missing file is a first run, not a problem.
+        assertFalse(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_validSavedData_false() throws IOException {
+        writeDataFile("T | 0 | read book");
+        assertFalse(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_savedDataWithBadLine_true() throws IOException {
+        writeDataFile("T | 0 | read book", "nonsense");
+        assertTrue(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
+    public void hasLoadProblem_unreadableDataFile_true() throws IOException {
+        Files.createDirectory(dataFile());
+        assertTrue(sessionAtTempFile().hasLoadProblem());
+    }
+
+    @Test
     public void getGreeting_calledTwice_notRepeatedWithinOneReply() {
         // Each call is its own reply, so the second must not carry the first.
         Myriad myriad = sessionAtTempFile();
@@ -194,5 +218,45 @@ public class MyriadTest {
         Myriad myriad = sessionAtTempFile();
         myriad.getResponse("todo read book");
         assertFalse(myriad.isExitRequested());
+    }
+
+    // ---------------------------------------------------------------
+    // Telling errors apart from ordinary replies
+    // ---------------------------------------------------------------
+
+    @Test
+    public void isLastResponseError_beforeAnyCommand_false() {
+        assertFalse(sessionAtTempFile().isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_validCommand_false() {
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("todo read book");
+        assertFalse(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_unrecognisedCommand_true() {
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("blah");
+        assertTrue(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_executionFailure_true() {
+        // An error raised while executing, not parsing, counts too.
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("delete 1");
+        assertTrue(myriad.isLastResponseError());
+    }
+
+    @Test
+    public void isLastResponseError_errorThenValidCommand_false() {
+        // The flag describes only the latest reply, so it must not stick.
+        Myriad myriad = sessionAtTempFile();
+        myriad.getResponse("blah");
+        myriad.getResponse("list");
+        assertFalse(myriad.isLastResponseError());
     }
 }

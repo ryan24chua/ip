@@ -19,11 +19,13 @@
     -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
-/*
- * The text field keeps the height set in MainWindow.fxml: the scroll pane above
- * it is anchored 41px from the bottom to clear it, so a taller input row would
- * overlap the transcript.
- */
+/* A thin rule separates the input row from the transcript scrolling above it. */
+.input-row {
+    -fx-background-color: white;
+    -fx-border-color: myriad-line transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
 .text-field {
     -fx-background-color: white;
     -fx-border-color: myriad-line;
