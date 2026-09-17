@@ -1,6 +1,7 @@
 package myriad.parser;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import myriad.MyriadException;
 import myriad.command.AddCommand;
@@ -31,6 +32,15 @@ import myriad.task.ToDo;
  * would carry no state and only add ceremony at every call site.
  */
 public class Parser {
+
+    /** Separates a deadline's description from its due date. */
+    private static final Pattern MARKER_BY = createMarkerPattern("/by");
+
+    /** Separates an event's description from its start. */
+    private static final Pattern MARKER_FROM = createMarkerPattern("/from");
+
+    /** Separates an event's start from its end. */
+    private static final Pattern MARKER_TO = createMarkerPattern("/to");
 
     /** Not meant to be instantiated: every method here is static. */
     private Parser() {
@@ -159,19 +169,33 @@ public class Parser {
     }
 
     /**
-     * Splits text on the given marker (e.g. "/by"), matched
-     * case-insensitively with optional surrounding whitespace consumed —
-     * this mirrors the case-insensitive matching used for command keywords
-     * elsewhere (e.g. "deadline" itself). Returns a 1-element array holding
-     * all of the text if the marker isn't found, or a 2-element array of the
-     * text before/after the marker if it is.
+     * Returns a pattern matching marker (e.g. "/by") case-insensitively,
+     * together with any whitespace around it, so that splitting on it also
+     * trims the text either side. This mirrors the case-insensitive
+     * matching used for command keywords (e.g. "deadline" itself).
+     *
+     * The marker is quoted, so that its characters are matched literally
+     * rather than read as regular expression syntax, and the pattern is
+     * compiled once here rather than again on every line parsed.
+     *
+     * @param marker the marker text, e.g. "/by".
+     * @return the compiled pattern.
+     */
+    private static Pattern createMarkerPattern(String marker) {
+        return Pattern.compile("\\s*" + Pattern.quote(marker) + "\\s*", Pattern.CASE_INSENSITIVE);
+    }
+
+    /**
+     * Splits text at the first match of marker. Returns a 1-element array
+     * holding all of the text if the marker isn't found, or a 2-element
+     * array of the text before/after the marker if it is.
      *
      * @param text   the text to split.
-     * @param marker the marker to split on, e.g. "/by".
+     * @param marker the marker pattern to split on, e.g. MARKER_BY.
      * @return a 1- or 2-element array, as described above.
      */
-    private static String[] splitOnMarker(String text, String marker) {
-        return text.split("(?i)\\s*" + marker + "\\s*", 2);
+    private static String[] splitOnMarker(String text, Pattern marker) {
+        return marker.split(text, 2);
     }
 
     /**
@@ -185,7 +209,7 @@ public class Parser {
      *                         unparseable.
      */
     private static Task parseDeadline(String args) throws MyriadException {
-        String[] descAndDate = splitOnMarker(args, "/by");
+        String[] descAndDate = splitOnMarker(args, MARKER_BY);
         String description = descAndDate[0];
         String date = descAndDate.length == 2 ? descAndDate[1] : null;
 
@@ -212,11 +236,11 @@ public class Parser {
      *                         unparseable.
      */
     private static Task parseEvent(String args) throws MyriadException {
-        String[] descAndRest = splitOnMarker(args, "/from");
+        String[] descAndRest = splitOnMarker(args, MARKER_FROM);
         String description = descAndRest[0];
         String rest = descAndRest.length == 2 ? descAndRest[1] : "";
 
-        String[] startAndEnd = splitOnMarker(rest, "/to");
+        String[] startAndEnd = splitOnMarker(rest, MARKER_TO);
         String start = startAndEnd[0];
         String end = startAndEnd.length == 2 ? startAndEnd[1] : null;
 

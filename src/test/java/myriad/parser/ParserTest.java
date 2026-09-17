@@ -102,6 +102,16 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_markersInAnyCase_stillRecognised() throws MyriadException {
+        // Markers are matched case-insensitively, like keywords. An
+        // unrecognised marker would leave the date missing, and parse would
+        // throw instead of returning a command.
+        assertInstanceOf(AddCommand.class, Parser.parse("deadline return book /BY 2019-12-02"));
+        assertInstanceOf(AddCommand.class,
+                Parser.parse("event party /From 2019-12-02 1400 /TO 2019-12-02 1600"));
+    }
+
+    @Test
     public void parse_show_showCommandReturned() throws MyriadException {
         assertInstanceOf(ShowCommand.class, Parser.parse("show 2019-12-02"));
     }
