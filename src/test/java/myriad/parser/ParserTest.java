@@ -433,6 +433,32 @@ public class ParserTest {
                 Parser.parse("event party /From 2019-12-02 1400 /TO 2019-12-02 1600"));
     }
 
+    // ---------------------------------------------------------------
+    // descriptions the save file could not hold
+    // ---------------------------------------------------------------
+
+    @Test
+    public void parse_descriptionContainingSeparator_exceptionThrown() {
+        // Every command that creates a task must refuse "|", or the task would
+        // be cut short or lost when the data file is next loaded.
+        String[] lines = {
+            "todo a | b",
+            "todo a|b",
+            "todo |",
+            "deadline submit a | b /by 2019-12-02",
+            "event party | dance /from 2019-12-02 1400 /to 2019-12-02 1600"
+        };
+        for (String line : lines) {
+            assertMessageContains("can't contain \"|\"", parseExpectingFailure(line));
+        }
+    }
+
+    @Test
+    public void parse_descriptionWithOtherSymbols_accepted() {
+        // Only the separator is a problem; other punctuation saves safely.
+        assertDoesNotThrow(() -> Parser.parse("todo read book: ch. 1-3 (50%) & notes/summary #2!"));
+    }
+
     @Test
     public void parse_eventEndingBeforeItStarts_exceptionThrown() {
         assertMessageContains("An event must end after it starts",
