@@ -1,10 +1,12 @@
 package myriad.storage;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -202,6 +204,27 @@ public class StorageTest {
     }
 
     @Test
+    public void save_nonAsciiDescription_writtenAsUtf8() throws Exception {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("caf" + (char) 0xE9));
+
+        storageAtTempFile().save(tasks);
+
+        // "é" is the two bytes C3 A9 in UTF-8, whatever the platform default.
+        byte[] expected = {'T', ' ', '|', ' ', '0', ' ', '|', ' ', 'c', 'a', 'f', (byte) 0xC3, (byte) 0xA9, '\n'};
+        assertArrayEquals(expected, Files.readAllBytes(dataFile()));
+    }
+
+    @Test
+    public void save_parentPathIsAFile_ioExceptionThrown() throws Exception {
+        // The data file's directory can't be created where a file already
+        // sits, and that has to surface as an IOException the caller reports.
+        Files.writeString(dataFile(), "");
+        Storage storage = new Storage(dataFile().resolve("myriad.txt").toString());
+        assertThrows(IOException.class, () -> storage.save(new TaskList()));
+    }
+
+    @Test
     public void save_pathIsADirectory_ioExceptionThrown() throws Exception {
         Path directory = tempDir.resolve("subdir");
         Files.createDirectory(directory);
@@ -243,6 +266,54 @@ public class StorageTest {
     public void load_severalMalformedLines_allReported() throws Exception {
         writeDataFile("broken one", "T | 0 | fine", "broken two");
         assertEquals(2, storageAtTempFile().load().skippedLines().size());
+    }
+
+    @Test
+    public void load_windowsAndOldMacLineEndings_everyLineLoaded() throws Exception {
+        // A data file edited on Windows may end its lines in "\r\n", and a
+        // very old editor in a bare "\r"; neither may leave a stray "\r" in a
+        // task or merge two lines.
+        Files.writeString(dataFile(), "T | 0 | first\r\nT | 1 | second\rT | 0 | third\n");
+
+        LoadResult result = storageAtTempFile().load();
+
+        assertEquals(3, result.tasks().size());
+        assertEquals("[T][X] second", result.tasks().get(1).toString());
+        assertEquals(0, result.skippedLines().size());
+    }
+
+    @Test
+    public void load_bytesNotValidUtf8_everyLineStillLoaded() throws Exception {
+        // A file re-saved in another encoding, such as Windows-1252 from an
+        // old Notepad, holds bytes that aren't valid UTF-8. Each one becomes a
+        // replacement character, and every line, including the ones around
+        // it, still loads, instead of the whole file quietly coming back empty.
+        byte[] content = ("T | 0 | first\nT | 0 | caf" + (char) 0xE9 + "\nT | 0 | third\n")
+                .getBytes(StandardCharsets.ISO_8859_1);
+        Files.write(dataFile(), content);
+
+        LoadResult result = storageAtTempFile().load();
+
+        assertEquals(3, result.tasks().size());
+        assertEquals("[T][ ] caf" + (char) 0xFFFD, result.tasks().get(1).toString());
+        assertEquals("[T][ ] third", result.tasks().get(2).toString());
+    }
+
+    @Test
+    public void saveThenLoad_descriptionWithUnicodeLineSeparators_restoredIntact() throws Exception {
+        // U+2028 and U+0085 are line separators to some readers, but save()
+        // never ends a line with them, so load() must not split on them.
+        String description = "a" + (char) 0x2028 + "b" + (char) 0x0085 + "c";
+        TaskList original = new TaskList();
+        original.add(new ToDo(description));
+        original.add(new ToDo("next"));
+
+        storageAtTempFile().save(original);
+        LoadResult result = storageAtTempFile().load();
+
+        assertEquals(2, result.tasks().size());
+        assertEquals("[T][ ] " + description, result.tasks().get(0).toString());
+        assertEquals(0, result.skippedLines().size());
     }
 
     @Test

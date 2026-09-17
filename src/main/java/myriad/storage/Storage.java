@@ -1,12 +1,12 @@
 package myriad.storage;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import myriad.MyriadException;
 import myriad.task.Deadline;
@@ -29,7 +29,8 @@ import myriad.task.ToDo;
  */
 public class Storage {
 
-    private final String filePath;
+    /** The data file this Storage reads and writes. */
+    private final Path dataFile;
 
     /**
      * Creates a Storage that reads and writes the given file. The file need
@@ -40,7 +41,7 @@ public class Storage {
      */
     public Storage(String filePath) {
         assert filePath != null && !filePath.isBlank() : "the data file path is set in code, never user-typed";
-        this.filePath = filePath;
+        this.dataFile = Path.of(filePath);
     }
 
     /**
@@ -51,23 +52,28 @@ public class Storage {
      * mirrors the in-memory list — simpler than tracking per-task deltas,
      * and cheap at the scale of a personal task list. IOException (e.g.
      * disk full, permission denied) is declared for the caller to
-     * translate into a user-facing message — see Myriad.save.
+     * translate into a user-facing message — see Command.save.
+     *
+     * Lines always end in "\n" and the file is always UTF-8, whatever the
+     * platform, so a data file moved between machines reads back the same.
      *
      * @param taskList the list to write out in full.
      * @throws IOException if the file or its directory can't be written.
      */
     public void save(TaskList taskList) throws IOException {
         assert taskList != null : "Command.save always passes the session's task list";
-        File parentDir = new File(filePath).getParentFile();
+        Path parentDir = dataFile.getParent();
         if (parentDir != null) {
-            parentDir.mkdirs();
+            // Unlike File.mkdirs, this throws if the directory can't be made,
+            // instead of leaving the write below to fail less clearly.
+            Files.createDirectories(parentDir);
         }
 
-        try (FileWriter writer = new FileWriter(filePath, false)) {
-            for (Task task : taskList.asList()) {
-                writer.write(task.toSaveFormat() + "\n");
-            }
+        StringBuilder content = new StringBuilder();
+        for (Task task : taskList.asList()) {
+            content.append(task.toSaveFormat()).append('\n');
         }
+        Files.writeString(dataFile, content, StandardCharsets.UTF_8);
     }
 
     /**
@@ -138,32 +144,54 @@ public class Storage {
      * all — permission denied, or the path is a directory — which is a real
      * failure worth reporting, unlike the file simply not being there yet.
      *
+     * The file is decoded as UTF-8, with any byte that isn't valid UTF-8
+     * replaced by the Unicode replacement character rather than stopping
+     * the read, so a file saved in another encoding still loads every line
+     * it can. Lines are split only on "\n", "\r\n" and "\r", which are the
+     * only line endings save() or a text editor would write; a description
+     * containing another Unicode line separator stays one line.
+     *
      * @return the tasks loaded, plus a description of each skipped line.
      * @throws MyriadException if the file exists but can't be opened at all.
      */
     public LoadResult load() throws MyriadException {
         List<Task> tasks = new ArrayList<>();
         List<String> skippedLines = new ArrayList<>();
-        File dataFile = new File(filePath);
 
-        if (!dataFile.exists()) {
+        if (!Files.exists(dataFile)) {
             return new LoadResult(tasks, skippedLines);
         }
 
-        try (Scanner reader = new Scanner(dataFile)) {
-            int lineNumber = 0;
-            while (reader.hasNextLine()) {
-                lineNumber++;
-                String line = reader.nextLine();
-                try {
-                    tasks.add(parseLine(line));
-                } catch (MyriadException e) {
-                    skippedLines.add("line " + lineNumber + ": " + e.getMessage());
-                }
+        String content;
+        try {
+            content = new String(Files.readAllBytes(dataFile), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new MyriadException(describeReadFailure(e));
+        }
+
+        List<String> lines = content.lines().toList();
+        for (int i = 0; i < lines.size(); i++) {
+            try {
+                tasks.add(parseLine(lines.get(i)));
+            } catch (MyriadException e) {
+                skippedLines.add("line " + (i + 1) + ": " + e.getMessage());
             }
-        } catch (FileNotFoundException e) {
-            throw new MyriadException(e.getMessage());
         }
         return new LoadResult(tasks, skippedLines);
+    }
+
+    /**
+     * Returns a short reason the data file couldn't be read, for the load
+     * warning. An AccessDeniedException's own message is only the file's
+     * path, which on its own doesn't say what went wrong.
+     *
+     * @param e the failure reported while reading the file.
+     * @return the path and, where the exception doesn't already say, why.
+     */
+    private static String describeReadFailure(IOException e) {
+        if (e instanceof AccessDeniedException) {
+            return e.getMessage() + " (access denied)";
+        }
+        return e.getMessage();
     }
 }
