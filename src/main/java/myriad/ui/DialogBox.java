@@ -30,12 +30,12 @@ public class DialogBox extends HBox {
     private static final double PICTURE_SIZE = 32.0;
 
     /**
-     * Room the text cannot use: the padding and spacing set in {@code DialogBox.fxml},
-     * plus the bubble's own padding and border from {@code dialog-box.css}. The CSS
-     * insets are counted here because the binding below works from the box's
-     * own width, which does not know about them.
+     * Room beside the picture that the bubble cannot use: the left and right
+     * padding plus the spacing set in {@code DialogBox.fxml}. The bubble's own
+     * padding and border from {@code dialog-box.css} are not counted, because
+     * a Label's width already includes them.
      */
-    private static final double BOX_CHROME_WIDTH = 48.0;
+    private static final double BOX_CHROME_WIDTH = 24.0;
 
     /** Room left for the picture, the spacing and the padding around them. */
     private static final double NON_TEXT_WIDTH = PICTURE_SIZE + BOX_CHROME_WIDTH;

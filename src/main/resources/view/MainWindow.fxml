@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
@@ -32,7 +33,11 @@
                     AnchorPane.rightAnchor="1.0"
                     AnchorPane.topAnchor="1.0">
             <content>
-                <VBox fx:id="dialogContainer" minWidth="0.0" spacing="4.0" />
+                <VBox fx:id="dialogContainer" minWidth="0.0" spacing="4.0">
+                    <padding>
+                        <Insets bottom="6.0" top="6.0" />
+                    </padding>
+                </VBox>
             </content>
         </ScrollPane>
         <TextField fx:id="userInput"

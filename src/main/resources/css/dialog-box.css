@@ -13,8 +13,10 @@
 .label {
     -fx-background-color: white;
     -fx-text-fill: #22262b;
-    -fx-font-size: 13px;
-    -fx-padding: 8px 12px 8px 12px;
+    -fx-font-size: 14px;
+    /* A little extra room between lines keeps long task lists easy to scan. */
+    -fx-line-spacing: 2px;
+    -fx-padding: 6px 10px 6px 10px;
     -fx-border-color: #dfe3e8;
     -fx-border-width: 1px;
     /* The blunt corner points at Myriad's picture, to the top left. */
@@ -51,5 +53,6 @@
 }
 
 #displayPicture {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 8, 0.3, 0, 2);
+    /* A faint shadow only, since a heavy one would crowd a 32px picture. */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 3, 0, 0, 1);
 }
