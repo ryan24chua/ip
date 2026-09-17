@@ -42,14 +42,6 @@ public class Ui {
     private Scanner scanner;
 
     /**
-     * Creates a Ui for a console session: one that reads standard input and
-     * prints every message to standard output.
-     */
-    public Ui() {
-        this(true);
-    }
-
-    /**
      * Creates a Ui that records every message so the caller can read a whole
      * reply back as one String, and additionally prints each message to the
      * console when isEchoingToConsole is true.
