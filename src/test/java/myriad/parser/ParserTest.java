@@ -1,4 +1,4 @@
-package myriad;
+package myriad.parser;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import myriad.MyriadException;
 import myriad.command.AddCommand;
 import myriad.command.Command;
 import myriad.command.DeleteCommand;

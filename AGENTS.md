@@ -36,7 +36,7 @@ This is not advisory. Any new or edited Java â€” main sources and tests alike â€
 
 ## Testing
 
-JUnit 5 tests live under `src/test/java/`, mirroring the main source package structure. A test class is named `<ClassName>Test` (e.g. `myriad.Parser` is tested by `src/test/java/myriad/ParserTest.java`). Run the suite with `./gradlew test`; the HTML report lands at `build/reports/tests/test/index.html`.
+JUnit 5 tests live under `src/test/java/`, mirroring the main source package structure. A test class is named `<ClassName>Test` (e.g. `myriad.parser.Parser` is tested by `src/test/java/myriad/parser/ParserTest.java`). Run the suite with `./gradlew test`; the HTML report lands at `build/reports/tests/test/index.html`.
 
 Name test methods `featureUnderTest_testScenario_expectedBehavior()`, e.g. `resolveIndex_emptyList_exceptionThrown()`.
 

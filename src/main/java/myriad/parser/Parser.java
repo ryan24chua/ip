@@ -1,5 +1,6 @@
-package myriad;
+package myriad.parser;
 
+import myriad.MyriadException;
 import myriad.command.AddCommand;
 import myriad.command.Command;
 import myriad.command.DeleteCommand;
