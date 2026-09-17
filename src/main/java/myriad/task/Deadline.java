@@ -13,19 +13,20 @@ public class Deadline extends Task {
     /** Leading field of a Deadline's save-format line; Storage reads it back. */
     public static final String TYPE_CODE = "D";
 
-    private TaskDateTime date;
+    /** When the task is due. */
+    private final TaskDateTime by;
 
     /**
      * Creates a not-done Deadline.
      *
      * @param description what the task is.
-     * @param date        when it is due, already parsed.
+     * @param by          when it is due, already parsed.
      */
-    public Deadline(String description, TaskDateTime date) {
+    public Deadline(String description, TaskDateTime by) {
         super(description);
-        assert date != null : "TaskDateTime.parse never returns null";
+        assert by != null : "TaskDateTime.parse never returns null";
 
-        this.date = date;
+        this.by = by;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return String.format("%s | %s | %s", TYPE_CODE, super.toSaveFormat(), date.toSaveFormat());
+        return String.format("%s | %s | %s", TYPE_CODE, super.toSaveFormat(), by.toSaveFormat());
     }
 
     /**
@@ -49,7 +50,7 @@ public class Deadline extends Task {
      */
     @Override
     public String toString() {
-        return String.format("[D]%s (by: %s)", super.toString(), this.date);
+        return String.format("[D]%s (by: %s)", super.toString(), by);
     }
 
     /**
@@ -60,7 +61,7 @@ public class Deadline extends Task {
     @Override
     public boolean occursDuring(TaskDateTime query) {
         return TaskDateTime.rangesOverlap(
-                date.rangeStart(), date.rangeEnd(), query.rangeStart(), query.rangeEnd());
+                by.rangeStart(), by.rangeEnd(), query.rangeStart(), query.rangeEnd());
     }
 
     /**
@@ -71,6 +72,6 @@ public class Deadline extends Task {
     @Override
     public boolean overlaps(LocalDateTime from, LocalDateTime to) {
         return TaskDateTime.rangesOverlap(
-                date.rangeStart(), date.rangeEnd(), from, to);
+                by.rangeStart(), by.rangeEnd(), from, to);
     }
 }

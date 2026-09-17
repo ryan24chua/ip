@@ -12,8 +12,11 @@ public class Event extends Task {
     /** Leading field of an Event's save-format line; Storage reads it back. */
     public static final String TYPE_CODE = "E";
 
-    private TaskDateTime startDate;
-    private TaskDateTime endDate;
+    /** When the event starts. */
+    private final TaskDateTime start;
+
+    /** When the event ends; not checked to be after start. */
+    private final TaskDateTime end;
 
     /**
      * Creates a not-done Event. The two times are taken as given: they are
@@ -21,16 +24,16 @@ public class Event extends Task {
      * whatever the user typed.
      *
      * @param description what the event is.
-     * @param startDate   when it starts, already parsed.
-     * @param endDate     when it ends, already parsed.
+     * @param start       when it starts, already parsed.
+     * @param end         when it ends, already parsed.
      */
-    public Event(String description, TaskDateTime startDate, TaskDateTime endDate) {
+    public Event(String description, TaskDateTime start, TaskDateTime end) {
         super(description);
         // Start before end is deliberately not asserted: that comes from user input.
-        assert startDate != null && endDate != null : "TaskDateTime.parse never returns null";
+        assert start != null && end != null : "TaskDateTime.parse never returns null";
 
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.start = start;
+        this.end = end;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class Event extends Task {
     @Override
     public String toSaveFormat() {
         return String.format("%s | %s | %s | %s",
-                TYPE_CODE, super.toSaveFormat(), startDate.toSaveFormat(), endDate.toSaveFormat());
+                TYPE_CODE, super.toSaveFormat(), start.toSaveFormat(), end.toSaveFormat());
     }
 
     /**
@@ -56,28 +59,28 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
-        return String.format("[E]%s (from: %s to: %s)", super.toString(), this.startDate, this.endDate);
+        return String.format("[E]%s (from: %s to: %s)", super.toString(), start, end);
     }
 
     /**
-     * Matches if query overlaps this event's span, from startDate's
-     * earliest instant to endDate's latest instant — see
+     * Matches if query overlaps this event's span, from start's
+     * earliest instant to end's latest instant — see
      * TaskDateTime.rangesOverlap for the general rule.
      */
     @Override
     public boolean occursDuring(TaskDateTime query) {
         return TaskDateTime.rangesOverlap(
-                startDate.rangeStart(), endDate.rangeEnd(), query.rangeStart(), query.rangeEnd());
+                start.rangeStart(), end.rangeEnd(), query.rangeStart(), query.rangeEnd());
     }
 
     /**
      * Matches if the period from from to to overlaps this event's span,
-     * from startDate's earliest instant to endDate's latest instant — see
+     * from start's earliest instant to end's latest instant — see
      * TaskDateTime.rangesOverlap for the general rule.
      */
     @Override
     public boolean overlaps(LocalDateTime from, LocalDateTime to) {
         return TaskDateTime.rangesOverlap(
-                startDate.rangeStart(), endDate.rangeEnd(), from, to);
+                start.rangeStart(), end.rangeEnd(), from, to);
     }
 }

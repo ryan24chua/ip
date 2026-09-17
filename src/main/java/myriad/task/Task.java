@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
  */
 public abstract class Task {
     /** Whether the user has marked this task done. Starts false. */
-    protected boolean isDone = false;
+    private boolean isDone;
 
     /** What the task is, exactly as the user typed it. */
-    protected String description;
+    private final String description;
 
     /**
      * Creates a task with the given description. The task starts not done.
