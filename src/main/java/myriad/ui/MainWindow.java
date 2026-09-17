@@ -32,7 +32,6 @@ public class MainWindow {
 
     private Myriad myriad;
 
-    private final Image userPicture = DialogBox.loadPicture("/images/DaUser.png");
     private final Image myriadPicture = DialogBox.loadPicture("/images/DaMyriad.png");
 
     /**
@@ -89,7 +88,7 @@ public class MainWindow {
         }
 
         String response = myriad.getResponse(input);
-        dialogContainer.getChildren().add(DialogBox.getUserDialog(input, userPicture));
+        dialogContainer.getChildren().add(DialogBox.getUserDialog(input));
         if (myriad.isLastResponseError()) {
             dialogContainer.getChildren().add(DialogBox.getErrorDialog(response, myriadPicture));
         } else {
