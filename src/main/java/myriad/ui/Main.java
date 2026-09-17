@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import myriad.Myriad;
 
@@ -19,7 +19,7 @@ public class Main extends Application {
 
     /** Smallest size, in pixels, that the user can shrink the window to. */
     private static final double MIN_WINDOW_HEIGHT = 220.0;
-    private static final double MIN_WINDOW_WIDTH = 417.0;
+    private static final double MIN_WINDOW_WIDTH = 300.0;
 
     /** The session behind the window, on the same data file as the console. */
     private final Myriad myriad = new Myriad(Myriad.DEFAULT_DATA_FILE, false);
@@ -33,7 +33,7 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
-            AnchorPane root = fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             MainWindow controller = fxmlLoader.getController();
 
             stage.setScene(new Scene(root));
