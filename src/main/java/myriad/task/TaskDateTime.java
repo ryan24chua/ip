@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import myriad.MyriadException;
@@ -44,13 +45,19 @@ public class TaskDateTime {
             DateTimeFormatter.ISO_LOCAL_DATE,
             createStrictFormatter("d/M/uuuu"));
 
-    /** Display format used by {@link #toString()} when a time is present. */
+    /**
+     * Display format used by {@link #toString()} when a time is present. Its
+     * month names are always English, whatever the language of the computer,
+     * because every reply they appear in is English. Without an explicit
+     * locale the formatter would take the default one when this class loads,
+     * so a Chinese-language computer would show "12月 02 2019" mid-sentence.
+     */
     private static final DateTimeFormatter DISPLAY_DATE_TIME =
-            DateTimeFormatter.ofPattern("MMM dd yyyy HHmm");
+            DateTimeFormatter.ofPattern("MMM dd yyyy HHmm", Locale.ENGLISH);
 
     /** Display format used by {@link #toString()} when only a date is present. */
     private static final DateTimeFormatter DISPLAY_DATE_ONLY =
-            DateTimeFormatter.ofPattern("MMM dd yyyy");
+            DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
 
     private final LocalDate date;
     private final LocalTime time;

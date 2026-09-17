@@ -1,6 +1,7 @@
 package myriad.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,41 +9,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import myriad.MyriadException;
 
 /**
  * Tests for {@link TaskDateTime}, the class that decides which date/time
- * strings Myriad accepts and how they are written to the save file.
+ * strings Myriad accepts, how they are written to the save file, and how
+ * they are shown to the user.
  * <p>
- * Assertions are made through {@code toSaveFormat()} wherever possible: it
- * is ISO-8601 and therefore locale-independent, unlike {@code toString()},
- * whose "MMM" month name depends on the default locale.
+ * The display format always uses English month names. Gradle runs the tests
+ * with a Chinese default locale (see {@code build.gradle}), so the
+ * {@code toString()} tests also prove that the display does not follow the
+ * language of the machine.
  */
 public class TaskDateTimeTest {
-
-    /** Saved so the locale guard below can be undone after the class runs. */
-    private static Locale originalLocale;
-
-    /**
-     * Pins the default locale for the duration of this class. Only the
-     * toString() tests actually need it — "MMM" renders as "Dec" in English
-     * but not in every locale — but setting it once here keeps those tests
-     * from depending on the machine they run on.
-     */
-    @BeforeAll
-    public static void setEnglishLocale() {
-        originalLocale = Locale.getDefault();
-        Locale.setDefault(Locale.ENGLISH);
-    }
-
-    @AfterAll
-    public static void restoreLocale() {
-        Locale.setDefault(originalLocale);
-    }
 
     /**
      * Fails the test unless saving each input and re-parsing what was saved
@@ -375,6 +356,15 @@ public class TaskDateTimeTest {
     }
 
     @Test
+    public void toString_testJvmLocaleNotEnglish_monthNameStillEnglish() throws MyriadException {
+        // build.gradle runs the tests with a Chinese default locale, so this
+        // and the other toString tests would fail if the display formatters
+        // followed the machine's language instead of always using English.
+        assertEquals("zh", Locale.getDefault().getLanguage(), "run the tests through Gradle");
+        assertEquals("Sep 20 2026 1400", TaskDateTime.parse("2026-09-20 1400").toString());
+    }
+
+    @Test
     public void toString_withSeconds_secondsNotDisplayed() throws MyriadException {
         // Display is lossy where toSaveFormat() is not: the seconds survive a
         // save/load round trip but are never shown to the user.
@@ -405,9 +395,17 @@ public class TaskDateTimeTest {
     }
 
     @Test
-    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+    public void equals_sameObject_equal() throws MyriadException {
         TaskDateTime date = TaskDateTime.parse("2019-12-02");
-        assertNotEquals(null, date);
-        assertNotEquals("2019-12-02", date);
+        assertTrue(date.equals(date));
+    }
+
+    @Test
+    public void equals_nullOrOtherType_notEqual() throws MyriadException {
+        // equals is called on the TaskDateTime directly: assertNotEquals(null,
+        // date) would compare from the null side and never reach this method.
+        TaskDateTime date = TaskDateTime.parse("2019-12-02");
+        assertFalse(date.equals(null));
+        assertFalse(date.equals("2019-12-02"));
     }
 }

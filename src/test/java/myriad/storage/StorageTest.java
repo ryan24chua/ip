@@ -212,6 +212,28 @@ public class StorageTest {
     }
 
     @Test
+    public void saveThenLoad_bareFileNameWithoutFolder_roundTrips() throws Exception {
+        // A path with no folder has no parent directory to create, which save
+        // must skip rather than fail on. A bare name is relative to the working
+        // directory, which build.gradle points at a scratch folder in build/.
+        // The name is made unique and deleted afterwards, so reruns never clash.
+        Path bareName = Path.of("storage-test-" + System.nanoTime() + ".txt");
+        assertEquals(null, bareName.getParent());
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("read book"));
+
+        try {
+            new Storage(bareName.toString()).save(tasks);
+            List<Task> reloaded = new Storage(bareName.toString()).load().tasks();
+
+            assertEquals(1, reloaded.size());
+            assertEquals("[T][ ] read book", reloaded.get(0).toString());
+        } finally {
+            Files.deleteIfExists(bareName);
+        }
+    }
+
+    @Test
     public void save_nonAsciiDescription_writtenAsUtf8() throws Exception {
         TaskList tasks = new TaskList();
         tasks.add(new ToDo("caf" + (char) 0xE9));
