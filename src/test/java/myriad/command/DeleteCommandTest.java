@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import myriad.MyriadException;
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.TaskList;
 import myriad.task.ToDo;
+import myriad.ui.Ui;
 
 /**
  * Tests for {@link DeleteCommand#execute}. Deleting is the one command that

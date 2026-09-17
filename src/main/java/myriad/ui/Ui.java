@@ -1,4 +1,4 @@
-package myriad;
+package myriad.ui;
 
 import java.util.List;
 import java.util.Scanner;

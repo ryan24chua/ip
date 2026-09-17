@@ -1,4 +1,4 @@
-package myriad;
+package myriad.ui;
 
 import java.io.IOException;
 
@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import myriad.Myriad;
 
 /**
  * Displays the Myriad window. The layout itself lives in

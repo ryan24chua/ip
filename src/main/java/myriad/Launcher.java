@@ -1,6 +1,7 @@
 package myriad;
 
 import javafx.application.Application;
+import myriad.ui.Main;
 
 /**
  * Starts the Myriad GUI.

@@ -1,9 +1,9 @@
 package myriad.command;
 
 import myriad.MyriadException;
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.TaskList;
+import myriad.ui.Ui;
 
 /**
  * Marks the task with the given number as done.

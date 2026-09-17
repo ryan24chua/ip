@@ -1,8 +1,8 @@
 package myriad.command;
 
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.TaskList;
+import myriad.ui.Ui;
 
 /**
  * Ends the session. Does nothing when executed — the farewell is printed

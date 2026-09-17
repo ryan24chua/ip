@@ -1,10 +1,10 @@
 package myriad.command;
 
 import myriad.MyriadException;
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.Task;
 import myriad.task.TaskList;
+import myriad.ui.Ui;
 
 /**
  * Adds a task to the list. One class serves "todo", "deadline" and

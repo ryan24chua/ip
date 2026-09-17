@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import myriad.MyriadException;
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.TaskList;
 import myriad.task.ToDo;
+import myriad.ui.Ui;
 
 /**
  * Tests for {@link TaskNumberCommand#resolveIndex}, the check shared by

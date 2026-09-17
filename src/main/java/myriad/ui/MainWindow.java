@@ -1,4 +1,4 @@
-package myriad;
+package myriad.ui;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import myriad.Myriad;
 
 /**
  * Controls the chat window described by view/MainWindow.fxml: turns what the

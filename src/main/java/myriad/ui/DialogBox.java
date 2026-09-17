@@ -1,4 +1,4 @@
-package myriad;
+package myriad.ui;
 
 import java.io.IOException;
 import java.io.InputStream;

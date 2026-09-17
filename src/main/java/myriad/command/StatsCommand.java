@@ -3,13 +3,13 @@ package myriad.command;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import myriad.Ui;
 import myriad.storage.Storage;
 import myriad.task.Deadline;
 import myriad.task.Event;
 import myriad.task.Task;
 import myriad.task.TaskList;
 import myriad.task.ToDo;
+import myriad.ui.Ui;
 
 /**
  * Reports a snapshot of the task list: how many tasks of each type there
