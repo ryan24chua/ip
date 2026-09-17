@@ -16,7 +16,7 @@ public class DeleteCommand extends TaskNumberCommand {
      *
      * @param taskNumber the task number as typed, 1-based and not yet
      *                   checked against the list (see
-     *                   TaskNumberCommand.resolveIndex).
+     *                   {@link TaskNumberCommand#resolveIndex}).
      */
     public DeleteCommand(int taskNumber) {
         super(taskNumber);

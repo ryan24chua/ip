@@ -12,7 +12,7 @@ import javafx.util.Duration;
 import myriad.Myriad;
 
 /**
- * Controls the chat window described by view/MainWindow.fxml: turns what the
+ * Controls the chat window described by {@code view/MainWindow.fxml}: turns what the
  * user types into a request to the chatbot, and adds both sides of the
  * exchange to the transcript.
  */
@@ -48,8 +48,8 @@ public class MainWindow {
 
     /**
      * Injects the chatbot session this window talks to, and shows its greeting.
-     * Called by Main once the layout has loaded, because a controller cannot
-     * be given constructor arguments by FXMLLoader.
+     * Called by {@link Main} once the layout has loaded, because a controller
+     * cannot be given constructor arguments by {@code FXMLLoader}.
      *
      * @param myriad the session that answers what the user types.
      */
@@ -91,7 +91,7 @@ public class MainWindow {
     }
 
     /**
-     * Adds one of Myriad's messages to the transcript.
+     * Adds one of the chatbot's messages to the transcript.
      *
      * @param message the text to show.
      */

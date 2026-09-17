@@ -22,18 +22,18 @@ import javafx.scene.shape.Circle;
  * the text they said. The user's messages sit on the right and Myriad's on
  * the left, so that a glance down the window shows who said what.
  *
- * The layout comes from view/DialogBox.fxml, which is an fx:root file: each
+ * The layout comes from {@code view/DialogBox.fxml}, which is an {@code fx:root} file: each
  * instance makes itself both the root and the controller of that file, so
  * that many dialog boxes can be built from one layout description.
  */
 public class DialogBox extends HBox {
 
-    /** Width and height the picture is drawn at, matching DialogBox.fxml. */
+    /** Width and height the picture is drawn at, matching {@code DialogBox.fxml}. */
     private static final double PICTURE_SIZE = 80.0;
 
     /**
-     * Room the text cannot use: the padding and spacing set in DialogBox.fxml,
-     * plus the bubble's own padding and border from dialog-box.css. The CSS
+     * Room the text cannot use: the padding and spacing set in {@code DialogBox.fxml},
+     * plus the bubble's own padding and border from {@code dialog-box.css}. The CSS
      * insets are counted here because the binding below works from the box's
      * own width, which does not know about them.
      */
@@ -48,8 +48,8 @@ public class DialogBox extends HBox {
     private ImageView displayPicture;
 
     /**
-     * Creates a dialog box showing message next to picture, laid out with the
-     * picture on the right.
+     * Creates a dialog box showing {@code message} next to {@code picture},
+     * laid out with the picture on the right.
      *
      * @param message what the speaker said.
      * @param picture the speaker's display picture, or null if none is available.
@@ -122,7 +122,7 @@ public class DialogBox extends HBox {
      * null when there is no file there. A missing picture leaves a blank space
      * instead of stopping the window from opening.
      *
-     * @param resourcePath classpath location of the image, e.g. "/images/DaUser.png".
+     * @param resourcePath classpath location of the image, e.g. {@code "/images/DaUser.png"}.
      * @return the loaded image, or null if the file is absent.
      */
     public static Image loadPicture(String resourcePath) {
@@ -145,7 +145,7 @@ public class DialogBox extends HBox {
     }
 
     /**
-     * Returns a dialog box for something Myriad said.
+     * Returns a dialog box for something the chatbot said.
      *
      * @param message the chatbot's reply.
      * @param picture Myriad's display picture, or null if none is available.

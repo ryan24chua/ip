@@ -7,10 +7,10 @@ import myriad.ui.Main;
  * Starts the Myriad GUI.
  *
  * The launch call lives here, in a class that does not itself extend
- * Application, because a JVM told to run an Application subclass directly
- * checks for JavaFX on the module path and quits with "JavaFX runtime
- * components are missing" when — as here — JavaFX is on the classpath
- * instead. Launching from an unrelated class skips that check.
+ * {@link Application}, because a JVM told to run an {@code Application}
+ * subclass directly checks for JavaFX on the module path and quits with
+ * "JavaFX runtime components are missing" when, as here, JavaFX is on the
+ * classpath instead. Launching from an unrelated class skips that check.
  */
 public class Launcher {
 

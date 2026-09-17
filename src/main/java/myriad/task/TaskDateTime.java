@@ -12,21 +12,21 @@ import myriad.MyriadException;
 /**
  * An immutable date, optionally paired with a time, parsed from user- or
  * save-file-supplied text. Whether a time was given matters: it decides
- * both what toString() prints (a bare date vs. a date+time) and lets
+ * what {@link #toString()} prints (a bare date vs. a date+time), and lets
  * "no time" be represented honestly instead of being defaulted to
  * midnight and displayed as if the user had typed one.
  * <p>
- * The only way to build one is parse(String) — it tries a fixed
+ * The only way to build one is {@link #parse(String)}, which tries a fixed
  * list of formats in turn, so callers never need to know which specific
  * format the text ended up matching.
  */
 public class TaskDateTime {
     /**
-     * Formats that include a time component, tried before the date-only
-     * ones below. Trying these first is what keeps parsing unambiguous:
-     * a date-only string like "2019-12-02" simply doesn't have enough
-     * characters to satisfy any of these, so it always falls through to
-     * the date-only attempts rather than being mis-parsed here.
+     * Formats that include a time component, tried before
+     * {@link #DATE_ONLY_FORMATS}. Trying these first is what keeps parsing
+     * unambiguous: a date-only string like {@code 2019-12-02} simply doesn't
+     * have enough characters to satisfy any of these, so it always falls
+     * through to the date-only attempts rather than being mis-parsed here.
      */
     private static final List<DateTimeFormatter> DATE_TIME_FORMATS = List.of(
             DateTimeFormatter.ISO_LOCAL_DATE_TIME,
@@ -42,11 +42,11 @@ public class TaskDateTime {
             DateTimeFormatter.ISO_LOCAL_DATE,
             DateTimeFormatter.ofPattern("d/M/yyyy"));
 
-    /** Display format used by toString() when a time is present. */
+    /** Display format used by {@link #toString()} when a time is present. */
     private static final DateTimeFormatter DISPLAY_DATE_TIME =
             DateTimeFormatter.ofPattern("MMM dd yyyy HHmm");
 
-    /** Display format used by toString() when only a date is present. */
+    /** Display format used by {@link #toString()} when only a date is present. */
     private static final DateTimeFormatter DISPLAY_DATE_ONLY =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
 
@@ -54,8 +54,9 @@ public class TaskDateTime {
     private final LocalTime time;
 
     /**
-     * Creates a value directly from its parts. Private so that parse() is
-     * the only entry point, which keeps the accepted formats in one place.
+     * Creates a value directly from its parts. Private so that
+     * {@link #parse(String)} is the only entry point, which keeps the
+     * accepted formats in one place.
      *
      * @param date the date part.
      * @param time the time part, or null if the input gave no time.
@@ -67,14 +68,15 @@ public class TaskDateTime {
     }
 
     /**
-     * Parses raw against, in order, every format in DATE_TIME_FORMATS then
-     * every format in DATE_ONLY_FORMATS, returning as soon as one succeeds.
-     * Throws MyriadException, naming a couple of example accepted formats,
-     * if raw matches none of them.
+     * Parses {@code raw} against, in order, every format in
+     * {@link #DATE_TIME_FORMATS} then every format in
+     * {@link #DATE_ONLY_FORMATS}, returning as soon as one succeeds. Throws
+     * {@link MyriadException}, naming a couple of example accepted formats,
+     * if {@code raw} matches none of them.
      *
      * @param raw the date/time text, from user input or the data file.
      * @return the parsed value, remembering whether a time was given.
-     * @throws MyriadException if raw matches no accepted format.
+     * @throws MyriadException if {@code raw} matches no accepted format.
      */
     public static TaskDateTime parse(String raw) throws MyriadException {
         for (DateTimeFormatter formatter : DATE_TIME_FORMATS) {
@@ -100,11 +102,11 @@ public class TaskDateTime {
 
     /**
      * Returns this value as an ISO-8601 string suitable for saving to disk:
-     * date+time (with the "T" separator) if a time is present, otherwise
-     * just the date. Both forms are themselves accepted by parse() (they're
-     * DATE_TIME_FORMATS.get(0) and DATE_ONLY_FORMATS.get(0) respectively),
-     * so a value written by toSaveFormat() is always re-readable by parse()
-     * on the next load.
+     * date+time (with the {@code T} separator) if a time is present,
+     * otherwise just the date. Both forms are themselves accepted by
+     * {@link #parse(String)} (they are the first entries of
+     * {@link #DATE_TIME_FORMATS} and {@link #DATE_ONLY_FORMATS}), so a saved
+     * value is always re-readable on the next load.
      *
      * @return an ISO-8601 date, or date and time, string.
      */
@@ -114,10 +116,10 @@ public class TaskDateTime {
 
     /**
      * Returns the earliest instant this value could refer to: the exact
-     * date+time if a time is present, otherwise the very start of date
-     * (00:00). Paired with rangeEnd(), this lets a date-only value stand
-     * in for "any time during that day" when checking overlap with
-     * another TaskDateTime.
+     * date+time if a time is present, otherwise the very start of the date
+     * (00:00). Paired with {@link #rangeEnd()}, this lets a date-only value
+     * stand in for "any time during that day" when checking overlap with
+     * another {@code TaskDateTime}.
      *
      * @return the start of the interval this value stands for.
      */
@@ -127,8 +129,8 @@ public class TaskDateTime {
 
     /**
      * Returns the latest instant this value could refer to: the exact
-     * date+time if a time is present, otherwise the very end of date
-     * (23:59:59.999999999). See rangeStart().
+     * date+time if a time is present, otherwise the very end of the date
+     * (23:59:59.999999999). See {@link #rangeStart()}.
      *
      * @return the end of the interval this value stands for.
      */
@@ -137,11 +139,12 @@ public class TaskDateTime {
     }
 
     /**
-     * Returns whether the closed interval [aStart, aEnd] overlaps the
-     * closed interval [bStart, bEnd]. Shared by Deadline and Event's
-     * overlaps(LocalDateTime, LocalDateTime) — each just supplies its own two range
-     * endpoints (a Deadline's range is its own rangeStart()/rangeEnd(); an
-     * Event's spans from its start's rangeStart() to its end's rangeEnd()).
+     * Returns whether the closed interval [{@code aStart}, {@code aEnd}]
+     * overlaps the closed interval [{@code bStart}, {@code bEnd}]. Shared by
+     * {@link Deadline#overlaps} and {@link Event#overlaps}, which each just
+     * supply their own two range endpoints: a deadline's range is its own
+     * {@link #rangeStart()} to {@link #rangeEnd()}, and an event's runs from
+     * its start's {@code rangeStart()} to its end's {@code rangeEnd()}.
      *
      * @param aStart start of the first interval.
      * @param aEnd   end of the first interval.
@@ -155,10 +158,11 @@ public class TaskDateTime {
     }
 
     /**
-     * Returns this value in the user-facing display format: "MMM dd yyyy"
-     * for a date-only value, or "MMM dd yyyy HHmm" when a time is present.
+     * Returns this value in the user-facing display format:
+     * {@code MMM dd yyyy} for a date-only value, or {@code MMM dd yyyy HHmm}
+     * when a time is present.
      *
-     * @return the display form, e.g. "Dec 02 2019 1800".
+     * @return the display form, e.g. {@code Dec 02 2019 1800}.
      */
     @Override
     public String toString() {

@@ -5,9 +5,9 @@ import myriad.task.TaskList;
 
 /**
  * Shared behaviour of the commands that name an existing task by its
- * number: mark, unmark and delete. All three take the same argument and
- * have to reject the same three ways of getting it wrong, so the number
- * and the check live here once instead of in each of them.
+ * number: {@code mark}, {@code unmark} and {@code delete}. All three take
+ * the same argument and have to reject the same ways of getting it wrong,
+ * so the number and the check live here once instead of in each of them.
  */
 public abstract class TaskNumberCommand extends Command {
 
@@ -25,14 +25,14 @@ public abstract class TaskNumberCommand extends Command {
     }
 
     /**
-     * Turns the task number into a 0-based index into tasks. Throws
-     * MyriadException if no task has that number — the check happens here,
-     * at execute time, rather than when the Parser built this command,
-     * because whether a number is in range depends on how many tasks there
-     * are at the moment the command runs.
+     * Turns the task number into a 0-based index into {@code tasks}. Throws
+     * {@link MyriadException} if no task has that number. The check happens
+     * here, at execute time, rather than when the {@code Parser} built this
+     * command, because whether a number is in range depends on how many
+     * tasks there are at the moment the command runs.
      *
      * @param tasks the list the number has to be valid for.
-     * @return the matching 0-based index into tasks.
+     * @return the matching 0-based index into {@code tasks}.
      * @throws MyriadException if no task currently has that number.
      */
     protected int resolveIndex(TaskList tasks) throws MyriadException {

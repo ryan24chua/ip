@@ -10,10 +10,11 @@ import myriad.ui.Ui;
 
 /**
  * Reports a snapshot of the task list: how many tasks of each type there
- * are, which are due within the next 7 days, and the oldest tasks not yet
- * done. Everything is computed on demand from TaskList, so it is never out
- * of sync with the tasks actually held; nothing is stored and, like
- * ShowCommand, reading the list never triggers a save.
+ * are, which are due within the next {@value #DUE_SOON_DAYS} days, and the
+ * oldest tasks not yet done. Everything is computed on demand from
+ * {@link TaskList}, so it is never out of sync with the tasks actually
+ * held; nothing is stored and, like {@link ShowCommand}, reading the list
+ * never triggers a save.
  */
 public class StatsCommand extends Command {
 
@@ -48,7 +49,7 @@ public class StatsCommand extends Command {
 
     /**
      * Gathers the task-count breakdown, the tasks due soon, and the oldest
-     * not-done tasks, then shows them via Ui.
+     * not-done tasks into a {@link TaskStats}, then shows it via {@link Ui}.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

@@ -10,12 +10,12 @@ import myriad.ui.Ui;
  */
 public class ListCommand extends Command {
 
-    /** Creates the command "list" asks for; it takes no arguments. */
+    /** Creates the command {@code list} asks for; it takes no arguments. */
     public ListCommand() {
     }
 
     /**
-     * Shows every task in the list, numbered, through the Ui.
+     * Shows every task in the list, numbered, through the {@link Ui}.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

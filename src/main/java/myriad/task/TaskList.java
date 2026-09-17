@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Holds the user's tasks and the operations that mutate them (add,
- * mark done/not done). Has no console I/O of its own — Ui is solely
- * responsible for displaying anything about a TaskList's contents.
+ * Holds the user's tasks, the operations that change them (add, mark done
+ * or not done, remove), and the queries the commands ask of them. Has no
+ * console I/O of its own: {@code Ui} is solely responsible for displaying
+ * anything about a {@code TaskList}'s contents.
  */
 public class TaskList {
     private final List<Task> tasks;
@@ -26,9 +27,9 @@ public class TaskList {
     /**
      * Creates a task list holding the given tasks, e.g. the ones just
      * loaded from disk. The tasks are copied into a list of this object's
-     * own rather than kept as an alias of initialTasks, so a later change
-     * to the caller's list can't quietly change this TaskList behind the
-     * back of its own add/remove methods.
+     * own rather than kept as an alias of {@code initialTasks}, so a later
+     * change to the caller's list can't quietly change this
+     * {@code TaskList} behind the back of its own add and remove methods.
      *
      * @param initialTasks the tasks to start with; copied, not aliased.
      */
@@ -53,10 +54,10 @@ public class TaskList {
      * Returns the task at the given 0-based index.
      *
      * @param index a 0-based index; callers are expected to have checked it
-     *              with isValidIndex first, since an out-of-range index is
-     *              a programming bug: it fails an assertion (with -ea) or
-     *              throws IndexOutOfBoundsException, never a
-     *              MyriadException.
+     *              with {@link #isValidIndex} first, since an out-of-range
+     *              index is a programming bug: it fails an assertion (with
+     *              {@code -ea}) or throws {@link IndexOutOfBoundsException},
+     *              never a {@code MyriadException}.
      * @return the task at that position.
      */
     public Task get(int index) {
@@ -83,7 +84,7 @@ public class TaskList {
     }
 
     /**
-     * Returns whether index is a valid 0-based index into this list.
+     * Returns whether {@code index} is a valid 0-based index into this list.
      *
      * @param index the index to check.
      * @return true if a task currently sits at that index.
@@ -95,7 +96,7 @@ public class TaskList {
     /**
      * Marks the task at the given 0-based index as done.
      *
-     * @param index a 0-based index, expected to be valid (see get).
+     * @param index a 0-based index, expected to be valid (see {@link #get}).
      */
     public void markDone(int index) {
         assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
@@ -105,7 +106,7 @@ public class TaskList {
     /**
      * Marks the task at the given 0-based index as not done yet.
      *
-     * @param index a 0-based index, expected to be valid (see get).
+     * @param index a 0-based index, expected to be valid (see {@link #get}).
      */
     public void markNotDone(int index) {
         assert isValidIndex(index) : "index " + index + " should have been checked by resolveIndex";
@@ -118,7 +119,7 @@ public class TaskList {
      * delete — which is why task numbers are re-checked at execute time
      * rather than at parse time.
      *
-     * @param index a 0-based index, expected to be valid (see get).
+     * @param index a 0-based index, expected to be valid (see {@link #get}).
      * @return the task that was removed, so the caller can show it.
      */
     public Task remove(int index) {
@@ -130,8 +131,8 @@ public class TaskList {
      * Returns a read-only view of every task, in task-number order. The view
      * is live, so it reflects later changes without being fetched again, but
      * any attempt to change it through the view throws
-     * UnsupportedOperationException: tasks are only added, marked or removed
-     * through this class's own methods.
+     * {@link UnsupportedOperationException}: tasks are only added, marked or
+     * removed through this class's own methods.
      *
      * @return a read-only view of the tasks, in task-number order.
      */
@@ -140,9 +141,10 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of every task whose occursDuring(query) is true,
-     * for the "show task" command. Unlike asList(), this is a snapshot: it
-     * does not change if the task list changes afterwards.
+     * Returns a new list of every task whose {@link Task#occursDuring} is
+     * true for {@code query}, for the {@code show} command. Unlike
+     * {@link #asList()}, this is a snapshot: it does not change if the task
+     * list changes afterwards.
      *
      * @param query the date, or date and time, being asked about.
      * @return a new read-only list of the matching tasks, in their original order.
@@ -152,9 +154,9 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of every task whose description contains keyword,
-     * ignoring case, for the "find" command. Like getTasksOccurringOn, this
-     * is a read-only snapshot.
+     * Returns a new list of every task whose description contains
+     * {@code keyword}, ignoring case, for the {@code find} command. Like
+     * {@link #getTasksOccurringOn}, this is a read-only snapshot.
      *
      * @param keyword the text to look for in task descriptions.
      * @return a new read-only list of the matching tasks, in their original order.
@@ -164,12 +166,12 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of every task of the given type, for
-     * the "stats" command's per-type breakdown. Like getTasksMatching, this
-     * is a read-only snapshot; callers that just want the count can take
-     * size() of the result.
+     * Returns a new list of every task of the given type, for the
+     * {@code stats} command's per-type breakdown. Like
+     * {@link #getTasksMatching}, this is a read-only snapshot; callers that
+     * just want the count can take the {@code size()} of the result.
      *
-     * @param type the type to match, e.g. TaskType.DEADLINE.
+     * @param type the type to match, e.g. {@link TaskType#DEADLINE}.
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksOfType(TaskType type) {
@@ -177,13 +179,14 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of every task due within the next days days of
-     * date, i.e. overlapping the period from the start of date to the end
-     * of date.plusDays(days) — the same start/end convention
-     * TaskDateTime.rangeStart()/rangeEnd() use for a whole day.
+     * Returns a new list of every task due within the next {@code days} days
+     * of {@code date}, i.e. overlapping the period from the start of
+     * {@code date} to the end of {@code date.plusDays(days)} — the same
+     * start/end convention {@link TaskDateTime#rangeStart()} and
+     * {@link TaskDateTime#rangeEnd()} use for a whole day.
      *
      * @param date the date the period starts from (its start of day).
-     * @param days how many days the period spans after date.
+     * @param days how many days the period spans after {@code date}.
      * @return a new read-only list of the matching tasks, in their original order.
      */
     public List<Task> getTasksDueWithin(LocalDate date, int days) {
@@ -193,13 +196,14 @@ public class TaskList {
     }
 
     /**
-     * Returns a new list of the first limit undone tasks in list order, for
-     * the "stats" command's "oldest not done" section. "Oldest" here means
-     * earliest added, not an explicit timestamp — tasks are appended by
-     * add() and never reordered, so list order already is add order.
+     * Returns a new list of the first {@code limit} undone tasks in list
+     * order, for the {@code stats} command's "oldest not done" section.
+     * "Oldest" here means earliest added, not an explicit timestamp: tasks
+     * are appended by {@link #add} and never reordered, so list order already
+     * is add order.
      *
      * @param limit the maximum number of tasks to return; never negative.
-     * @return a new read-only list of up to limit undone tasks, in their original order.
+     * @return a new read-only list of up to {@code limit} undone tasks, in their original order.
      */
     public List<Task> getOldestUndone(int limit) {
         // Stream.limit rejects a negative limit with its own exception; the
@@ -212,14 +216,12 @@ public class TaskList {
     }
 
     /**
-     * Returns a new read-only list of every task that satisfies condition,
-     * in task-number order. Shared by the query methods above, which differ
-     * only in the condition they test.
+     * Returns a new read-only list of every task that satisfies
+     * {@code condition}, in task-number order. Shared by the query methods
+     * above, which differ only in the condition they test.
      *
-     * Uses a stream: filter keeps the tasks the condition accepts, and
-     * toList collects them into a list that cannot be modified. A for loop
-     * adding matches to an ArrayList, as these methods used to repeat, does
-     * the same with more lines.
+     * Uses a stream: {@code filter} keeps the tasks the condition accepts,
+     * and {@code toList} collects them into a list that cannot be modified.
      *
      * @param condition the test a task must pass to be included.
      * @return a new read-only list of the matching tasks, in their original order.

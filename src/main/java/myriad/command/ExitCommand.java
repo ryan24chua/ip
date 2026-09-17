@@ -5,18 +5,19 @@ import myriad.task.TaskList;
 import myriad.ui.Ui;
 
 /**
- * Ends the session. Does nothing when executed — the farewell is printed
- * by Myriad.run() once the command loop has stopped, so that it happens
- * exactly once whether the user typed "bye" or the input simply ran out.
+ * Ends the session. Does nothing when executed: the farewell is shown by
+ * {@code Myriad} once the command loop has stopped, so that it happens
+ * exactly once whether the user typed {@code bye} or the input simply ran
+ * out.
  */
 public class ExitCommand extends Command {
 
-    /** Creates the command "bye" asks for; it takes no arguments. */
+    /** Creates the command {@code bye} asks for; it takes no arguments. */
     public ExitCommand() {
     }
 
     /**
-     * Does nothing: this command's whole effect is the isExit() below.
+     * Does nothing: this command's whole effect is {@link #isExit()}.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
@@ -24,7 +25,7 @@ public class ExitCommand extends Command {
     }
 
     /**
-     * Returns true, which is what stops Myriad's command loop.
+     * Returns true, which is what stops {@code Myriad}'s command loop.
      */
     @Override
     public boolean isExit() {

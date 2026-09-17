@@ -22,14 +22,14 @@ import myriad.task.ToDo;
 
 /**
  * Makes sense of what the user typed, turning a line of input into the
- * Command that carries it out. This is the one place that knows the
- * command language — the keywords, the "/by", "/from" and "/to" markers,
- * and which arguments each command requires — so nothing else has to
- * look at the raw line at all.
+ * {@link Command} that carries it out. This is the one place that knows the
+ * command language — the keywords, the {@code /by}, {@code /from} and
+ * {@code /to} markers, and which arguments each command requires — so
+ * nothing else has to look at the raw line at all.
  *
  * The methods are static because parsing a line depends only on that
- * line: there's nothing to remember between calls, so a Parser object
- * would carry no state and only add ceremony at every call site.
+ * line: there's nothing to remember between calls, so a {@code Parser}
+ * object would carry no state and only add ceremony at every call site.
  */
 public class Parser {
 
@@ -47,17 +47,18 @@ public class Parser {
     }
 
     /**
-     * Builds the Command a stripped input line asks for, with that line's
-     * arguments already interpreted. The first word is matched
-     * case-insensitively against the known command keywords. "list",
-     * "stats" and "bye" take no arguments, so they only match when they are
-     * the whole line. Throws MyriadException if the line names no known
-     * command, or if its arguments can't be made sense of — so a command
-     * object only ever exists if it can actually be attempted.
+     * Builds the {@link Command} a stripped input line asks for, with that
+     * line's arguments already interpreted. The first word is matched
+     * case-insensitively against the known command keywords. {@code list},
+     * {@code stats} and {@code bye} take no arguments, so they only match
+     * when they are the whole line. Throws {@link MyriadException} if the
+     * line names no known command, or if its arguments can't be made sense
+     * of — so a command object only ever exists if it can actually be
+     * attempted.
      *
      * @param strippedLine one line of user input, already whitespace-stripped
-     *                     by Ui.readCommand.
-     * @return the Command that line asks for.
+     *                     by whichever front end read it.
+     * @return the {@code Command} that line asks for.
      * @throws MyriadException if the line names no known command, or its
      *                         arguments are missing or unparseable.
      */
@@ -91,15 +92,16 @@ public class Parser {
     }
 
     /**
-     * Returns command if its keyword was the whole line, for the commands
-     * that take no arguments. Throws the same MyriadException as an unknown
-     * keyword otherwise, so that "bye now" is rejected outright rather than
-     * quietly ending the session with the "now" ignored.
+     * Returns {@code command} if its keyword was the whole line, for the
+     * commands that take no arguments. Throws the same
+     * {@link MyriadException} as an unknown keyword otherwise, so that
+     * {@code bye now} is rejected outright rather than quietly ending the
+     * session with the {@code now} ignored.
      *
      * @param args    the argument text after the keyword.
      * @param command the command the keyword names.
-     * @return command, if args is empty.
-     * @throws MyriadException if args is not empty.
+     * @return {@code command}, if {@code args} is empty.
+     * @throws MyriadException if {@code args} is not empty.
      */
     private static Command requireNoArguments(String args, Command command) throws MyriadException {
         if (!args.isEmpty()) {
@@ -122,19 +124,20 @@ public class Parser {
     }
 
     /**
-     * Parses the task number argument of a mark/unmark/delete command
-     * (e.g. the "2" in "mark 2") and returns it as typed, 1-based. Throws
-     * MyriadException if it is missing or isn't a whole number.
+     * Parses the task number argument of a {@code mark}, {@code unmark} or
+     * {@code delete} command (e.g. the {@code 2} in {@code mark 2}) and
+     * returns it as typed, 1-based. Throws {@link MyriadException} if it is
+     * missing or isn't a whole number.
      *
      * Deliberately stops there: whether that number actually exists
      * depends on how many tasks there are right now, which is the task
      * list's business, not the command language's — so the range check
      * happens later, when the command runs (see
-     * TaskNumberCommand.resolveIndex).
+     * {@code TaskNumberCommand.resolveIndex}).
      *
      * @param args the argument text after the keyword.
      * @return the number as typed, 1-based.
-     * @throws MyriadException if args is empty or isn't a whole number.
+     * @throws MyriadException if {@code args} is empty or isn't a whole number.
      */
     private static int parseTaskNumber(String args) throws MyriadException {
         if (args.isEmpty()) {
@@ -153,11 +156,12 @@ public class Parser {
     }
 
     /**
-     * Builds the ToDo described by a "todo" command's arguments. Throws
-     * MyriadException if the description is missing.
+     * Builds the {@link ToDo} described by a {@code todo} command's
+     * arguments. Throws {@link MyriadException} if the description is
+     * missing.
      *
-     * @param args the argument text after "todo".
-     * @return the new ToDo.
+     * @param args the argument text after {@code todo}.
+     * @return the new {@code ToDo}.
      * @throws MyriadException if the description is missing.
      */
     private static Task parseToDo(String args) throws MyriadException {
@@ -169,16 +173,17 @@ public class Parser {
     }
 
     /**
-     * Returns a pattern matching marker (e.g. "/by") case-insensitively,
-     * together with any whitespace around it, so that splitting on it also
-     * trims the text either side. This mirrors the case-insensitive
-     * matching used for command keywords (e.g. "deadline" itself).
+     * Returns a pattern matching {@code marker} (e.g. {@code /by})
+     * case-insensitively, together with any whitespace around it, so that
+     * splitting on it also trims the text either side. This mirrors the
+     * case-insensitive matching used for command keywords (e.g.
+     * {@code deadline} itself).
      *
      * The marker is quoted, so that its characters are matched literally
      * rather than read as regular expression syntax, and the pattern is
-     * compiled once here rather than again on every line parsed.
+     * compiled once, into a constant, rather than again on every line parsed.
      *
-     * @param marker the marker text, e.g. "/by".
+     * @param marker the marker text, e.g. {@code /by}.
      * @return the compiled pattern.
      */
     private static Pattern createMarkerPattern(String marker) {
@@ -186,12 +191,12 @@ public class Parser {
     }
 
     /**
-     * Splits text at the first match of marker. Returns a 1-element array
-     * holding all of the text if the marker isn't found, or a 2-element
-     * array of the text before/after the marker if it is.
+     * Splits {@code text} at the first match of {@code marker}. Returns a
+     * 1-element array holding all of the text if the marker isn't found, or
+     * a 2-element array of the text before/after the marker if it is.
      *
      * @param text   the text to split.
-     * @param marker the marker pattern to split on, e.g. MARKER_BY.
+     * @param marker the marker pattern to split on, e.g. {@link #MARKER_BY}.
      * @return a 1- or 2-element array, as described above.
      */
     private static String[] splitOnMarker(String text, Pattern marker) {
@@ -199,12 +204,13 @@ public class Parser {
     }
 
     /**
-     * Builds the Deadline described by a "deadline &lt;description&gt; /by
-     * &lt;date&gt;" command's arguments. Throws MyriadException if the
-     * description or the date is missing, or if the date doesn't parse.
+     * Builds the {@link Deadline} described by a
+     * {@code deadline <description> /by <date>} command's arguments. Throws
+     * {@link MyriadException} if the description or the date is missing, or
+     * if the date doesn't parse.
      *
-     * @param args the argument text after "deadline".
-     * @return the new Deadline.
+     * @param args the argument text after {@code deadline}.
+     * @return the new {@code Deadline}.
      * @throws MyriadException if the description or date is missing or
      *                         unparseable.
      */
@@ -225,13 +231,13 @@ public class Parser {
     }
 
     /**
-     * Builds the Event described by an "event &lt;description&gt; /from
-     * &lt;start&gt; /to &lt;end&gt;" command's arguments. Throws
-     * MyriadException if the description, start or end is missing, or if
-     * either date doesn't parse.
+     * Builds the {@link Event} described by an
+     * {@code event <description> /from <start> /to <end>} command's
+     * arguments. Throws {@link MyriadException} if the description, start or
+     * end is missing, or if either date doesn't parse.
      *
-     * @param args the argument text after "event".
-     * @return the new Event.
+     * @param args the argument text after {@code event}.
+     * @return the new {@code Event}.
      * @throws MyriadException if the description, start or end is missing or
      *                         unparseable.
      */
@@ -259,10 +265,10 @@ public class Parser {
     }
 
     /**
-     * Parses the date/time a "show" command asks about. Throws
-     * MyriadException if it is missing or doesn't parse.
+     * Parses the date/time a {@code show} command asks about. Throws
+     * {@link MyriadException} if it is missing or doesn't parse.
      *
-     * @param args the argument text after "show".
+     * @param args the argument text after {@code show}.
      * @return the date/time to search for.
      * @throws MyriadException if it is missing or unparseable.
      */
@@ -277,10 +283,10 @@ public class Parser {
     }
 
     /**
-     * Parses the keyword a "find" command searches for. Throws
-     * MyriadException if it is missing.
+     * Parses the keyword a {@code find} command searches for. Throws
+     * {@link MyriadException} if it is missing.
      *
-     * @param args the argument text after "find".
+     * @param args the argument text after {@code find}.
      * @return the keyword to search for, stripped of surrounding whitespace.
      * @throws MyriadException if the keyword is missing or blank.
      */

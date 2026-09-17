@@ -6,15 +6,17 @@ import myriad.ui.Ui;
 
 /**
  * Shows every task whose description contains a given keyword, ignoring
- * case (see TaskList.getTasksMatching and Task.descriptionContains). Reads
- * the list without changing it, so it never saves.
+ * case (see {@link TaskList#getTasksMatching} and
+ * {@link myriad.task.Task#descriptionContains}). Reads the list without
+ * changing it, so it never saves.
  */
 public class FindCommand extends Command {
 
     private final String keyword;
 
     /**
-     * Creates a command that reports the tasks whose descriptions contain keyword.
+     * Creates a command that reports the tasks whose descriptions contain
+     * {@code keyword}.
      *
      * @param keyword the text to search for in task descriptions.
      */

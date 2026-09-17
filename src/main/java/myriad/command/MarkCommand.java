@@ -15,7 +15,7 @@ public class MarkCommand extends TaskNumberCommand {
      *
      * @param taskNumber the task number as typed, 1-based and not yet
      *                   checked against the list (see
-     *                   TaskNumberCommand.resolveIndex).
+     *                   {@link TaskNumberCommand#resolveIndex}).
      */
     public MarkCommand(int taskNumber) {
         super(taskNumber);

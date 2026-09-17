@@ -5,23 +5,23 @@ package myriad;
  * task — either typed by the user (e.g. a missing task number, or a
  * missing task description/date), or read back from the saved data file
  * (e.g. a corrupted or unrecognized line). The message is the specific
- * reason only — callers displaying it to the user are responsible for
- * adding the "Error: " prefix, so the same message stays reusable
- * elsewhere (e.g. in a future log or test assertion) without carrying
- * that prefix.
+ * reason only: callers displaying it to the user add the {@code "Error: "}
+ * prefix themselves, so the same message also reads correctly anywhere
+ * else it is used, such as a test assertion.
  */
 public class MyriadException extends Exception {
     /**
-     * Version of this class's serialized form. Every Throwable is
-     * Serializable, and declaring this keeps the form fixed instead of
-     * letting it be recomputed, differently, whenever the class changes.
+     * Version of this class's serialized form. Every {@link Throwable} is
+     * {@link java.io.Serializable}, and declaring this keeps the form fixed
+     * instead of letting it be recomputed, differently, whenever the class
+     * changes.
      */
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates an exception carrying the specific reason something failed.
      *
-     * @param message the reason alone, without an "Error: " prefix.
+     * @param message the reason alone, without an {@code "Error: "} prefix.
      */
     public MyriadException(String message) {
         super(message);

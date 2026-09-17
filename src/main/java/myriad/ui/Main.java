@@ -11,7 +11,7 @@ import myriad.Myriad;
 
 /**
  * Displays the Myriad window. The layout itself lives in
- * view/MainWindow.fxml and the behaviour in MainWindow, so this class is
+ * {@code view/MainWindow.fxml} and the behaviour in {@link MainWindow}, so this class is
  * left with the wiring: load the layout, hand the controller a chatbot
  * session, and show the window.
  */

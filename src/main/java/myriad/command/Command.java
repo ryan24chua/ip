@@ -8,16 +8,16 @@ import myriad.task.TaskList;
 import myriad.ui.Ui;
 
 /**
- * One command the user asked for, ready to be carried out. The Parser
- * turns a line of input into the matching Command subclass, and
- * Myriad.executeLine() just calls execute() on whatever it gets back —
- * so Myriad doesn't need to know the list of commands at all, and
- * adding a command means adding a subclass here rather than editing a
- * switch in Myriad.
+ * One command the user asked for, ready to be carried out. The
+ * {@code Parser} turns a line of input into the matching {@code Command}
+ * subclass, and {@code Myriad} just calls {@link #execute} on whatever it
+ * gets back. {@code Myriad} therefore never needs to know the list of
+ * commands, and adding a command means adding a subclass here rather than
+ * editing a switch in {@code Myriad}.
  *
- * Each subclass holds whatever its own arguments were (a Task to add, a
- * task number, a date to search for), so by the time execute() runs there
- * is no input text left to interpret.
+ * Each subclass holds whatever its own arguments were (a task to add, a
+ * task number, a date to search for), so by the time {@link #execute}
+ * runs there is no input text left to interpret.
  */
 public abstract class Command {
 
@@ -30,10 +30,10 @@ public abstract class Command {
 
     /**
      * Carries out this command against the given task list, reporting
-     * whatever the user should see through ui and persisting any change
-     * through storage. Throws MyriadException if the command can't be
-     * carried out (e.g. it names a task that doesn't exist); executeLine()
-     * catches that and shows it as an error.
+     * whatever the user should see through {@code ui} and persisting any
+     * change through {@code storage}. Throws {@link MyriadException} if the
+     * command can't be carried out (e.g. it names a task that doesn't
+     * exist); {@code Myriad} catches that and shows it as an error.
      *
      * @param tasks   the session's task list, read and possibly changed.
      * @param ui      what to report the outcome through.
@@ -43,9 +43,9 @@ public abstract class Command {
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MyriadException;
 
     /**
-     * Returns whether the session should end after this command. False for every
-     * command except ExitCommand, which is why the default is here rather
-     * than repeated in each subclass.
+     * Returns whether the session should end after this command. False for
+     * every command except {@link ExitCommand}, which is why the default is
+     * here rather than repeated in each subclass.
      *
      * @return true only if the command loop should stop after this command.
      */
@@ -54,17 +54,18 @@ public abstract class Command {
     }
 
     /**
-     * Saves the task list's current state, wrapping any IOException (disk
-     * full, permission denied, etc.) into a MyriadException so it's shown
-     * like any other command error instead of crashing the program.
-     * Provided here, rather than in each subclass, so every mutating
-     * command (add/mark/unmark/delete) translates a save failure into the
-     * same user-facing message.
+     * Saves the task list's current state, wrapping any {@link IOException}
+     * (disk full, permission denied, etc.) into a {@link MyriadException} so
+     * it's shown like any other command error instead of crashing the
+     * program. Provided here, rather than in each subclass, so every
+     * mutating command ({@code add}, {@code mark}, {@code unmark},
+     * {@code delete}) translates a save failure into the same user-facing
+     * message.
      *
      * @param tasks   the list to write out in full.
      * @param storage where to write it.
-     * @throws MyriadException if the write fails, wrapping the IOException's
-     *                         message.
+     * @throws MyriadException if the write fails, wrapping the
+     *                         {@code IOException}'s message.
      */
     protected void save(TaskList tasks, Storage storage) throws MyriadException {
         try {

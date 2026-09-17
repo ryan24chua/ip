@@ -2,14 +2,15 @@ package myriad.task;
 
 /**
  * A task with a description and nothing else — no date of its own, so it
- * never matches the "show" or "stats" commands (Task.overlaps stays false).
+ * never matches the {@code show} or {@code stats} commands
+ * ({@link Task#overlaps} stays false).
  */
 public class ToDo extends Task {
 
     /**
-     * Creates a not-done ToDo with the given description.
+     * Creates a not-done {@code ToDo} with the given description.
      *
-     * @param description what the user typed after "todo".
+     * @param description what the user typed after {@code todo}.
      */
     public ToDo(String description) {
         super(description);
@@ -22,7 +23,7 @@ public class ToDo extends Task {
 
     /**
      * Returns this task's save-format line prefixed with its type code so it can
-     * be recognized as a ToDo when the data file is read back in.
+     * be recognized as a {@code ToDo} when the data file is read back in.
      */
     @Override
     public String toSaveFormat() {
@@ -30,8 +31,9 @@ public class ToDo extends Task {
     }
 
     /**
-     * Returns the display form, e.g. [T][ ] read book — the "[T]" tag marks
-     * it as a ToDo, the rest is Task's own status-and-description form.
+     * Returns the display form, e.g. {@code [T][ ] read book}: the
+     * {@code [T]} tag marks it as a {@code ToDo}, and the rest is
+     * {@link Task}'s own status-and-description form.
      */
     @Override
     public String toString() {
