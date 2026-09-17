@@ -106,6 +106,27 @@ public class TaskListTest {
     }
 
     // ---------------------------------------------------------------
+    // isEmpty
+    // ---------------------------------------------------------------
+
+    @Test
+    public void isEmpty_newList_true() {
+        assertTrue(new TaskList().isEmpty());
+    }
+
+    @Test
+    public void isEmpty_listWithTasks_false() {
+        assertFalse(threeToDos().isEmpty());
+    }
+
+    @Test
+    public void isEmpty_lastTaskRemoved_true() {
+        TaskList tasks = taskListOf("only task");
+        tasks.remove(0);
+        assertTrue(tasks.isEmpty());
+    }
+
+    // ---------------------------------------------------------------
     // isValidIndex -- the boundary check every task-number command uses
     // ---------------------------------------------------------------
 

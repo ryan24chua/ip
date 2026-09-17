@@ -74,6 +74,15 @@ public class TaskList {
     }
 
     /**
+     * Returns whether the list holds no tasks at all.
+     *
+     * @return true if there are no tasks.
+     */
+    public boolean isEmpty() {
+        return tasks.isEmpty();
+    }
+
+    /**
      * Returns whether index is a valid 0-based index into this list.
      *
      * @param index the index to check.

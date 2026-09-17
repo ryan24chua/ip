@@ -38,7 +38,7 @@ public abstract class TaskNumberCommand extends Command {
     protected int resolveIndex(TaskList tasks) throws MyriadException {
         int index = taskNumber - 1;
         if (!tasks.isValidIndex(index)) {
-            if (tasks.size() == 0) {
+            if (tasks.isEmpty()) {
                 // Special-cased so the message doesn't say "choose a number
                 // from 1 to 0", which the generic branch below would produce.
                 throw new MyriadException(
