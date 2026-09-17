@@ -1,4 +1,4 @@
-package myriad;
+package myriad.storage;
 
 import java.util.List;
 

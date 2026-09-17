@@ -1,4 +1,4 @@
-package myriad;
+package myriad.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import myriad.MyriadException;
 import myriad.task.Deadline;
 import myriad.task.Event;
 import myriad.task.Task;

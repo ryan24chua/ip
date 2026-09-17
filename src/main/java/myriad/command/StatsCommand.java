@@ -3,8 +3,8 @@ package myriad.command;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import myriad.Storage;
 import myriad.Ui;
+import myriad.storage.Storage;
 import myriad.task.Deadline;
 import myriad.task.Event;
 import myriad.task.Task;

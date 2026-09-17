@@ -1,7 +1,7 @@
 package myriad.command;
 
-import myriad.Storage;
 import myriad.Ui;
+import myriad.storage.Storage;
 import myriad.task.TaskList;
 
 /**

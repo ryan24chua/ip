@@ -1,4 +1,4 @@
-package myriad;
+package myriad.storage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import myriad.MyriadException;
 import myriad.task.Deadline;
 import myriad.task.Event;
 import myriad.task.Task;

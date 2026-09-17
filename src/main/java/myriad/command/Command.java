@@ -3,8 +3,8 @@ package myriad.command;
 import java.io.IOException;
 
 import myriad.MyriadException;
-import myriad.Storage;
 import myriad.Ui;
+import myriad.storage.Storage;
 import myriad.task.TaskList;
 
 /**
