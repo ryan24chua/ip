@@ -23,3 +23,19 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+
+## AI assistance
+
+This project was developed with the help of AI, as cited below.
+
+* **Tool:** [Claude Code](https://claude.com/claude-code), using Claude Opus models.
+* **Used by:** Ryan Chua.
+* **Extent of use:**
+  * Used throughout the project as a helper rather than as the main author: explaining concepts and errors,
+    suggesting designs and refactorings, reviewing code against the SE-EDU coding standard, and drafting
+    tests, Javadoc comments and commit messages. All suggestions were reviewed, and edited where needed,
+    before they were kept.
+  * Files mostly written with Claude Code say so in a comment at the top of the file (e.g. the JavaFX GUI
+    classes in `src/main/java/myriad/ui/`).
+  * The user guide, `docs/README.md`, was drafted with Claude Code and checked against the actual output
+    of the app.
