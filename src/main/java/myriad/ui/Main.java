@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import myriad.Myriad;
 
@@ -39,7 +40,13 @@ public class Main extends Application {
             MainWindow controller = fxmlLoader.getController();
 
             stage.setScene(new Scene(root));
-            stage.setTitle("Myriad");
+            stage.setTitle("Myriad - your task painter");
+            // The painted M doubles as the window's icon. Like the avatar,
+            // a missing picture only leaves the default icon in place.
+            Image icon = DialogBox.loadPicture("/images/DaMyriad.png");
+            if (icon != null) {
+                stage.getIcons().add(icon);
+            }
             stage.setMinHeight(MIN_WINDOW_HEIGHT);
             stage.setMinWidth(MIN_WINDOW_WIDTH);
 

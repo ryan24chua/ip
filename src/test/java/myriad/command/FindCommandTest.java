@@ -47,7 +47,7 @@ public class FindCommandTest {
 
     @Test
     public void execute_matchingTasks_listedInOrderAndRenumbered() {
-        assertEquals("Here are the matching tasks in your list:" + NEWLINE
+        assertEquals("Strokes matching your search:" + NEWLINE
                 + "1.[T][ ] read book" + NEWLINE
                 + "2.[T][ ] return Book",
                 findAndGetReply(taskListOf("read book", "join club", "return Book"), "book"));
@@ -55,13 +55,13 @@ public class FindCommandTest {
 
     @Test
     public void execute_noMatchingTasks_noneFoundMessageQuotesKeyword() {
-        assertEquals("No matching tasks found for \"exam\".",
+        assertEquals("No strokes match \"exam\".",
                 findAndGetReply(taskListOf("read book", "join club"), "exam"));
     }
 
     @Test
     public void execute_emptyList_noneFoundMessage() {
-        assertEquals("No matching tasks found for \"book\".", findAndGetReply(new TaskList(), "book"));
+        assertEquals("No strokes match \"book\".", findAndGetReply(new TaskList(), "book"));
     }
 
     @Test

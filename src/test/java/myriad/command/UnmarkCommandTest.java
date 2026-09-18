@@ -72,7 +72,7 @@ public class UnmarkCommandTest {
 
         new UnmarkCommand(1).execute(doneTaskListOf("read book"), ui, storageAtTempFile());
 
-        assertEquals("OK, I've marked this task as not done yet:" + NEWLINE
+        assertEquals("Back to a sketch. Marked as not done:" + NEWLINE
                 + "  [T][ ] read book",
                 ui.getResponse());
     }

@@ -62,19 +62,19 @@ public class ShowCommandTest {
     @Test
     public void execute_matchingTasks_listedAndRenumbered() {
         // The event is task 3 in the list but the only match, so it is shown as 1.
-        assertEquals("Here are the tasks occurring on Dec 05 2019:" + NEWLINE
+        assertEquals("Painted on Dec 05 2019:" + NEWLINE
                 + "1.[E][ ] party (from: Dec 05 2019 1400 to: Dec 05 2019 1600)",
                 showAndGetReply(mixedTasks(), "2019-12-05"));
     }
 
     @Test
     public void execute_noMatchingTasks_noneFoundMessage() {
-        assertEquals("No deadlines or events found on Dec 03 2019.", showAndGetReply(mixedTasks(), "2019-12-03"));
+        assertEquals("Nothing is painted on Dec 03 2019 yet.", showAndGetReply(mixedTasks(), "2019-12-03"));
     }
 
     @Test
     public void execute_emptyList_noneFoundMessage() {
-        assertEquals("No deadlines or events found on Dec 02 2019 1800.",
+        assertEquals("Nothing is painted on Dec 02 2019 1800 yet.",
                 showAndGetReply(new TaskList(), "2019-12-02 1800"));
     }
 

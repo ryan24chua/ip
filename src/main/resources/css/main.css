@@ -3,46 +3,84 @@
 
 /*
  * Window chrome: the ground the conversation sits on, the input row along the
- * bottom, and the scroll bar. The accent colours are taken from the Myriad
- * avatar, so the window and the picture in it read as one thing.
+ * bottom, and the scroll bar. Myriad is a task painter, so the window is its
+ * canvas: a warm cream ground, with accents in the four paints of the
+ * hand-painted M in its avatar (blue, yellow, green and red).
  *
- * The four names below are "looked-up colours": custom properties declared on
+ * The names below are "looked-up colours": custom properties declared on
  * .root that every rule underneath can refer to by name, so a colour is
- * written once here rather than repeated at each place it is used.
+ * written once here rather than repeated at each place it is used. The paints
+ * are a shade deeper than in the avatar where white text sits on them, so
+ * that the text stays readable.
  */
 .root {
-    myriad-blue: #4285f4;
-    myriad-blue-dark: #2b6cd4;
-    myriad-blue-darker: #1f4fa8;
-    myriad-ground: #f6f7f9;
-    myriad-line: #dfe3e8;
-    myriad-muted: #9aa1a9;
+    paint-blue: #24afeb;
+    paint-yellow: #fff42c;
+    paint-green: #3ebb63;
+    paint-red: #f1545a;
+    paint-blue-deep: #1a7fbf;
+    paint-green-deep: #2a8f4c;
+    paint-red-deep: #c93c43;
+    canvas-ground: #fbf7ee;
+    canvas-line: #e6dccb;
+    canvas-muted: #a89f90;
 
-    -fx-background-color: myriad-ground;
+    -fx-background-color: canvas-ground;
     -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* The header is the name plate above the canvas. */
+.header {
+    -fx-background-color: white;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b2622;
+}
+
+.header-tagline {
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #7a6f5f;
+}
+
+/*
+ * Four bands of paint, one per colour of the avatar's M, in the order they
+ * are painted. Each colour stop is repeated so that the bands meet in a hard
+ * edge instead of blending into one another.
+ */
+.paint-stripe {
+    -fx-background-color: linear-gradient(to right,
+            paint-blue 0%, paint-blue 25%,
+            paint-yellow 25%, paint-yellow 50%,
+            paint-green 50%, paint-green 75%,
+            paint-red 75%, paint-red 100%);
 }
 
 /* A thin rule separates the input row from the transcript scrolling above it. */
 .input-row {
     -fx-background-color: white;
-    -fx-border-color: myriad-line transparent transparent transparent;
+    -fx-border-color: canvas-line transparent transparent transparent;
     -fx-border-width: 1px 0 0 0;
 }
 
 .text-field {
     -fx-background-color: white;
-    -fx-border-color: myriad-line;
+    -fx-border-color: canvas-line;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
     -fx-font-size: 14px;
 }
 
 .text-field:focused {
-    -fx-border-color: myriad-blue;
+    -fx-border-color: paint-blue;
 }
 
+/* The button dips into a different paint as it is hovered and then pressed. */
 .button {
-    -fx-background-color: myriad-blue;
+    -fx-background-color: paint-blue-deep;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -51,17 +89,17 @@
 }
 
 .button:hover {
-    -fx-background-color: myriad-blue-dark;
+    -fx-background-color: paint-green-deep;
 }
 
 .button:pressed {
-    -fx-background-color: myriad-blue-darker;
+    -fx-background-color: paint-red-deep;
 }
 
 /* Both controls are disabled for a moment after "bye", so this state is seen. */
 .button:disabled {
-    -fx-background-color: myriad-line;
-    -fx-text-fill: myriad-muted;
+    -fx-background-color: canvas-line;
+    -fx-text-fill: canvas-muted;
 }
 
 /* Let the window's own background show through the transcript. */
@@ -81,12 +119,12 @@
 }
 
 .scroll-bar:vertical .thumb {
-    -fx-background-color: #c7cdd4;
+    -fx-background-color: #d9cfbd;
     -fx-background-radius: 1em;
 }
 
 .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #aab2bb;
+    -fx-background-color: #c4b8a3;
 }
 
 /* Hides the arrow buttons at each end of the scroll bar. */

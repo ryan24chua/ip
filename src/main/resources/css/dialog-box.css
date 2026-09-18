@@ -13,45 +13,47 @@
  * class deep, so it is the order here that decides which wins — .label has to
  * stay first.
  */
+/* A reply is a sheet of white paper on the cream canvas, written in ink. */
 .label {
     -fx-background-color: white;
-    -fx-text-fill: #22262b;
+    -fx-text-fill: #2b2622;
     -fx-font-size: 14px;
     /* A little extra room between lines keeps long task lists easy to scan. */
     -fx-line-spacing: 2px;
     -fx-padding: 6px 10px 6px 10px;
-    -fx-border-color: #dfe3e8;
+    -fx-border-color: #e6dccb;
     -fx-border-width: 1px;
     /* The blunt corner points at Myriad's picture, to the top left. */
     -fx-background-radius: 2px 12px 12px 12px;
     -fx-border-radius: 2px 12px 12px 12px;
 }
 
+/* The user's lines are in the avatar's blue paint, a shade deeper for contrast. */
 .user-label {
-    -fx-background-color: #4285f4;
+    -fx-background-color: #1a7fbf;
     -fx-text-fill: white;
-    -fx-border-color: #4285f4;
+    -fx-border-color: #1a7fbf;
     /* Mirrored: the user's side of the window is the right. */
     -fx-background-radius: 12px 2px 12px 12px;
     -fx-border-radius: 12px 2px 12px 12px;
 }
 
 /*
- * An error reply. Colour alone would be missed by some colour-blind users,
- * so the thick left edge marks an error too.
+ * An error reply, edged in the avatar's red paint. Colour alone would be
+ * missed by some colour-blind users, so the thick left edge marks an error too.
  */
 .error-label {
-    -fx-background-color: #fdeeee;
+    -fx-background-color: #fdeced;
     -fx-text-fill: #8a1c1c;
-    -fx-border-color: #e8b4b4 #e8b4b4 #e8b4b4 #d64545;
+    -fx-border-color: #f0bcbe #f0bcbe #f0bcbe #e0474e;
     -fx-border-width: 1px 1px 1px 4px;
 }
 
-/* A warning, such as saved data that failed to load: amber rather than red. */
+/* A warning, such as saved data that failed to load: the yellow paint, not red. */
 .warning-label {
-    -fx-background-color: #fff6e0;
-    -fx-text-fill: #6b4a00;
-    -fx-border-color: #ecd49a #ecd49a #ecd49a #e0a100;
+    -fx-background-color: #fffbd6;
+    -fx-text-fill: #5c4a00;
+    -fx-border-color: #eee08a #eee08a #eee08a #e0c400;
     -fx-border-width: 1px 1px 1px 4px;
 }
 

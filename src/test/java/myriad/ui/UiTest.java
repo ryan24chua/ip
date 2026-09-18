@@ -71,7 +71,7 @@ public class UiTest {
     public void getResponse_oneMessage_messageReturnedWithoutDividers() {
         Ui ui = guiUi();
         ui.showFarewell();
-        assertEquals("Bye. Hope to see you again soon!", ui.getResponse());
+        assertEquals("Putting the brushes away. Come paint again soon!", ui.getResponse());
     }
 
     @Test
@@ -79,26 +79,26 @@ public class UiTest {
         // A command that shows two things in a row must read as one reply,
         // not as two run together.
         Ui ui = guiUi();
-        ui.showError("Error: first");
-        ui.showError("Error: second");
-        assertEquals("Error: first" + NEWLINE + "Error: second", ui.getResponse());
+        ui.showError("first");
+        ui.showError("second");
+        assertEquals("Smudge! first" + NEWLINE + "Smudge! second", ui.getResponse());
     }
 
     @Test
     public void getResponse_afterStartResponse_earlierMessagesDiscarded() {
         // Without this the GUI would repeat every earlier reply in every bubble.
         Ui ui = guiUi();
-        ui.showError("Error: stale");
+        ui.showError("stale");
         ui.startResponse();
-        ui.showError("Error: fresh");
-        assertEquals("Error: fresh", ui.getResponse());
+        ui.showError("fresh");
+        assertEquals("Smudge! fresh", ui.getResponse());
     }
 
     @Test
     public void getResponse_calledTwice_replyNotConsumed() {
         // Reading the reply must not clear it; only startResponse does that.
         Ui ui = guiUi();
-        ui.showError("Error: kept");
+        ui.showError("kept");
         assertEquals(ui.getResponse(), ui.getResponse());
     }
 
@@ -112,21 +112,22 @@ public class UiTest {
         // console-only; a GUI gets the words alone.
         Ui ui = guiUi();
         ui.showGreeting();
-        assertEquals("Hello! I'm Myriad." + NEWLINE + "What can I do for you?", ui.getResponse());
+        assertEquals("Hello! I'm Myriad, your task painter." + NEWLINE
+                + "What shall we paint on today's canvas?", ui.getResponse());
     }
 
     @Test
     public void showList_emptyList_headerOnly() {
         Ui ui = guiUi();
         ui.showList(List.of());
-        assertEquals("Here are the tasks in your list:", ui.getResponse());
+        assertEquals("Here's your canvas so far:", ui.getResponse());
     }
 
     @Test
     public void showList_severalTasks_numberedFromOne() {
         Ui ui = guiUi();
         ui.showList(toDos("read book", "return book"));
-        assertEquals("Here are the tasks in your list:" + NEWLINE
+        assertEquals("Here's your canvas so far:" + NEWLINE
                 + "1.[T][ ] read book" + NEWLINE
                 + "2.[T][ ] return book", ui.getResponse());
     }
@@ -135,16 +136,34 @@ public class UiTest {
     public void showMatchingTasks_noMatches_keywordNamed() {
         Ui ui = guiUi();
         ui.showMatchingTasks(List.of(), "book");
-        assertEquals("No matching tasks found for \"book\".", ui.getResponse());
+        assertEquals("No strokes match \"book\".", ui.getResponse());
     }
 
     @Test
     public void showAddedTask_anyTask_countIncluded() {
         Ui ui = guiUi();
         ui.showAddedTask(new ToDo("read book"), 3);
-        assertEquals("Got it. I've added this task:" + NEWLINE
+        assertEquals("A fresh stroke on the canvas:" + NEWLINE
                 + "[T][ ] read book" + NEWLINE
-                + "Now you have 3 tasks in the list.", ui.getResponse());
+                + "Your canvas now holds 3 tasks.", ui.getResponse());
+    }
+
+    @Test
+    public void showDeleted_oneTaskLeft_singularCountShown() {
+        // The count line says "1 task", not "1 tasks".
+        Ui ui = guiUi();
+        ui.showDeleted(new ToDo("read book"), 1);
+        assertEquals("Painted over. I've removed this task:" + NEWLINE
+                + "  [T][ ] read book" + NEWLINE
+                + "Your canvas now holds 1 task.", ui.getResponse());
+    }
+
+    @Test
+    public void showDeleted_noTasksLeft_pluralCountShown() {
+        // Zero takes the plural, like every count other than one.
+        Ui ui = guiUi();
+        ui.showDeleted(new ToDo("read book"), 0);
+        assertTrue(ui.getResponse().endsWith("Your canvas now holds 0 tasks."), ui.getResponse());
     }
 
     @Test
@@ -164,7 +183,7 @@ public class UiTest {
         TaskStats stats = new TaskStats(toDos("read book", "walk dog"), List.of(), List.of(),
                 3, List.of(), toDos("read book"));
         ui.showStats(stats);
-        assertEquals("Here are your task statistics:" + NEWLINE
+        assertEquals("Stepping back to admire your canvas:" + NEWLINE
                 + "Total tasks: 2 (ToDo: 2, Deadline: 0, Event: 0)" + NEWLINE
                 + "Due in the next 3 days: none" + NEWLINE
                 + "Oldest not done:" + NEWLINE
@@ -179,14 +198,14 @@ public class UiTest {
     public void showError_echoingToConsole_framedByDividers() {
         // The scripted transcript checker asserts on these dividers, so the
         // framing has to survive any change to how messages are recorded.
-        String printed = capturePrinted(() -> new Ui(true).showError("Error: boom"));
-        assertEquals(DIVIDER + CONSOLE_NEWLINE + "Error: boom" + CONSOLE_NEWLINE + DIVIDER + CONSOLE_NEWLINE,
+        String printed = capturePrinted(() -> new Ui(true).showError("boom"));
+        assertEquals(DIVIDER + CONSOLE_NEWLINE + "Smudge! boom" + CONSOLE_NEWLINE + DIVIDER + CONSOLE_NEWLINE,
                 printed);
     }
 
     @Test
     public void showError_notEchoingToConsole_nothingPrinted() {
-        String printed = capturePrinted(() -> guiUi().showError("Error: boom"));
+        String printed = capturePrinted(() -> guiUi().showError("boom"));
         assertEquals("", printed);
     }
 
@@ -195,7 +214,7 @@ public class UiTest {
         // The banner is left out of the recorded reply but must still reach
         // the console, where it does line up.
         String printed = capturePrinted(() -> new Ui(true).showGreeting());
-        assertTrue(printed.contains("Hello! I'm Myriad."));
+        assertTrue(printed.contains("Hello! I'm Myriad, your task painter."));
         assertTrue(printed.contains("╚═╝"), "console output should include the ASCII banner");
     }
 }
