@@ -40,17 +40,20 @@ dependencies {
 
     // The platform-specific JavaFX jars are all declared so the project builds
     // and runs on any of the three, without needing a --module-path.
+    // For macOS, only Apple Silicon (mac-aarch64) is bundled: its native
+    // libraries share file names with the Intel (mac) ones, so a single fat
+    // JAR can hold just one of the two, and Intel Macs are now rare.
     implementation "org.openjfx:javafx-base:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-base:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-base:${javaFxVersion}:mac-aarch64"
     implementation "org.openjfx:javafx-base:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac-aarch64"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-fxml:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac-aarch64"
     implementation "org.openjfx:javafx-fxml:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac-aarch64"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
 
     // The BOM fixes one version for every JUnit artifact below, including the
