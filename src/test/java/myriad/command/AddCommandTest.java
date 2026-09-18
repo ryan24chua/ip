@@ -77,9 +77,9 @@ public class AddCommandTest {
 
         new AddCommand(new ToDo("read book")).execute(new TaskList(), ui, storageAtTempFile());
 
-        assertEquals("Got it. I've added this task:" + NEWLINE
+        assertEquals("A fresh stroke on the canvas:" + NEWLINE
                 + "[T][ ] read book" + NEWLINE
-                + "Now you have 1 tasks in the list.",
+                + "Your canvas now holds 1 task.",
                 ui.getResponse());
     }
 
@@ -107,7 +107,7 @@ public class AddCommandTest {
 
         assertTrue(e.getMessage().startsWith("Couldn't save your tasks to disk"), e.getMessage());
         assertEquals(1, tasks.size());
-        assertTrue(ui.getResponse().startsWith("Got it. I've added this task:"), ui.getResponse());
+        assertTrue(ui.getResponse().startsWith("A fresh stroke on the canvas:"), ui.getResponse());
     }
 
     @Test

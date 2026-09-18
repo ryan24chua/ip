@@ -65,7 +65,7 @@ public class StatsCommandTest {
 
     @Test
     public void execute_emptyList_everySectionEmpty() {
-        assertEquals("Here are your task statistics:" + NEWLINE
+        assertEquals("Stepping back to admire your canvas:" + NEWLINE
                 + "Total tasks: 0 (ToDo: 0, Deadline: 0, Event: 0)" + NEWLINE
                 + "Due in the next 7 days: none" + NEWLINE
                 + "Oldest not done: none",
@@ -79,7 +79,7 @@ public class StatsCommandTest {
         tasks.add(new Deadline("return book", at("2019-12-05")));
         tasks.add(new Event("conference", at("2020-01-10"), at("2020-01-12")));
 
-        assertEquals("Here are your task statistics:" + NEWLINE
+        assertEquals("Stepping back to admire your canvas:" + NEWLINE
                 + "Total tasks: 3 (ToDo: 1, Deadline: 1, Event: 1)" + NEWLINE
                 + "Due in the next 7 days:" + NEWLINE
                 + "1.[D][ ] return book (by: Dec 05 2019)" + NEWLINE

@@ -72,7 +72,7 @@ public class MarkCommandTest {
 
         new MarkCommand(1).execute(taskListOf("read book"), ui, storageAtTempFile());
 
-        assertEquals("Nice! I've marked this task as done:" + NEWLINE
+        assertEquals("Beautiful! That one's painted in:" + NEWLINE
                 + "  [T][X] read book",
                 ui.getResponse());
     }

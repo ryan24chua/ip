@@ -79,7 +79,7 @@ public class MyriadTest {
 
     @Test
     public void getGreeting_noSavedData_greetingOnly() {
-        assertEquals("Hello! I'm Myriad." + NEWLINE + "What can I do for you?",
+        assertEquals("Hello! I'm Myriad, your task painter." + NEWLINE + "What shall we paint on today's canvas?",
                 sessionAtTempFile().getGreeting());
     }
 
@@ -88,7 +88,7 @@ public class MyriadTest {
         // A load problem is reported after the greeting, never before it.
         writeDataFile("T | 0 | read book", "nonsense");
         String greeting = sessionAtTempFile().getGreeting();
-        assertTrue(greeting.startsWith("Hello! I'm Myriad."));
+        assertTrue(greeting.startsWith("Hello! I'm Myriad, your task painter."));
         assertTrue(greeting.contains("could not be loaded and were skipped"));
         assertTrue(greeting.contains("line 2"));
     }
@@ -99,7 +99,7 @@ public class MyriadTest {
         // on any OS, so the whole load fails rather than skipping lines.
         Files.createDirectory(dataFile());
         String greeting = sessionAtTempFile().getGreeting();
-        assertTrue(greeting.startsWith("Hello! I'm Myriad."));
+        assertTrue(greeting.startsWith("Hello! I'm Myriad, your task painter."));
         assertTrue(greeting.contains("couldn't read your saved tasks"));
         assertFalse(greeting.contains("were skipped"));
     }
@@ -107,13 +107,13 @@ public class MyriadTest {
     @Test
     public void getResponse_unreadableDataFile_sessionStartsEmpty() throws IOException {
         Files.createDirectory(dataFile());
-        assertEquals("Here are the tasks in your list:", sessionAtTempFile().getResponse("list"));
+        assertEquals("Here's your canvas so far:", sessionAtTempFile().getResponse("list"));
     }
 
     @Test
     public void getResponse_savedDataWithBadLine_validTasksStillLoaded() throws IOException {
         writeDataFile("T | 0 | read book", "nonsense", "T | 1 | walk dog");
-        assertEquals("Here are the tasks in your list:" + NEWLINE
+        assertEquals("Here's your canvas so far:" + NEWLINE
                 + "1.[T][ ] read book" + NEWLINE
                 + "2.[T][X] walk dog",
                 sessionAtTempFile().getResponse("list"));
@@ -156,9 +156,9 @@ public class MyriadTest {
 
     @Test
     public void getResponse_todoCommand_additionConfirmed() {
-        assertEquals("Got it. I've added this task:" + NEWLINE
+        assertEquals("A fresh stroke on the canvas:" + NEWLINE
                 + "[T][ ] read book" + NEWLINE
-                + "Now you have 1 tasks in the list.",
+                + "Your canvas now holds 1 task.",
                 sessionAtTempFile().getResponse("todo read book"));
     }
 
@@ -182,7 +182,7 @@ public class MyriadTest {
         // The console strips input as it reads it; a text field does not, so
         // getResponse strips on the GUI's behalf.
         assertTrue(sessionAtTempFile().getResponse("   list   ")
-                .startsWith("Here are the tasks in your list:"));
+                .startsWith("Here's your canvas so far:"));
     }
 
     @Test
@@ -190,8 +190,8 @@ public class MyriadTest {
         Myriad myriad = sessionAtTempFile();
         myriad.getResponse("todo read book");
         String second = myriad.getResponse("list");
-        assertFalse(second.contains("Got it."));
-        assertEquals("Here are the tasks in your list:" + NEWLINE + "1.[T][ ] read book", second);
+        assertFalse(second.contains("A fresh stroke"));
+        assertEquals("Here's your canvas so far:" + NEWLINE + "1.[T][ ] read book", second);
     }
 
     @Test
@@ -206,7 +206,7 @@ public class MyriadTest {
         Myriad myriad = sessionAtTempFile();
         myriad.getResponse("todo read book");
         myriad.getResponse("mark 1");
-        assertEquals("Here are the tasks in your list:" + NEWLINE + "1.[T][X] read book",
+        assertEquals("Here's your canvas so far:" + NEWLINE + "1.[T][X] read book",
                 myriad.getResponse("list"));
     }
 
@@ -231,7 +231,7 @@ public class MyriadTest {
     public void getResponse_byeCommand_farewellReturned() {
         // run() prints the farewell after its loop because ExitCommand does
         // nothing; with no loop, getResponse has to produce it.
-        assertEquals("Bye. Hope to see you again soon!", sessionAtTempFile().getResponse("bye"));
+        assertEquals("Putting the brushes away. Come paint again soon!", sessionAtTempFile().getResponse("bye"));
     }
 
     @Test
@@ -296,10 +296,10 @@ public class MyriadTest {
     public void run_commandsThenBye_eachAnsweredThenFarewell() {
         String printed = runConsoleSession("todo read book\nblah\nbye\n");
 
-        int greeting = printed.indexOf("Hello! I'm Myriad.");
-        int added = printed.indexOf("Got it. I've added this task:");
+        int greeting = printed.indexOf("Hello! I'm Myriad, your task painter.");
+        int added = printed.indexOf("A fresh stroke on the canvas:");
         int error = printed.indexOf("Error: I don't recognize that command.");
-        int farewell = printed.indexOf("Bye. Hope to see you again soon!");
+        int farewell = printed.indexOf("Putting the brushes away. Come paint again soon!");
         assertTrue(greeting >= 0 && greeting < added && added < error && error < farewell, printed);
     }
 
@@ -314,7 +314,7 @@ public class MyriadTest {
     public void run_inputEndsWithoutBye_farewellStillShown() {
         // Piped input can simply run out; that ends the session like "bye" does.
         String printed = runConsoleSession("list\n");
-        assertTrue(printed.endsWith("Bye. Hope to see you again soon!\n"
+        assertTrue(printed.endsWith("Putting the brushes away. Come paint again soon!\n"
                 + "____________________________________________________________\n"), printed);
     }
 
@@ -330,7 +330,7 @@ public class MyriadTest {
         writeDataFile("T | 0 | read book", "nonsense");
         String printed = runConsoleSession("bye\n");
 
-        int greeting = printed.indexOf("Hello! I'm Myriad.");
+        int greeting = printed.indexOf("Hello! I'm Myriad, your task painter.");
         int warning = printed.indexOf("could not be loaded and were skipped");
         assertTrue(greeting >= 0 && greeting < warning, printed);
     }

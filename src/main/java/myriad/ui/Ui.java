@@ -14,6 +14,9 @@ import myriad.task.TaskStats;
  * caller has to repeat it. There is one {@code show...} method per
  * user-facing interaction.
  *
+ * Every message is worded in Myriad's personality, a task painter who treats
+ * the task list as a canvas and each task as a stroke on it.
+ *
  * Each message is recorded into a buffer as well as (optionally) printed,
  * so the same {@code Ui} serves both front ends: the console session prints
  * as it goes, while the GUI calls {@link #startResponse()}, runs a command,
@@ -134,6 +137,18 @@ public class Ui {
     }
 
     /**
+     * Returns the line that tells the user how many tasks their list now
+     * holds, saying "1 task" rather than "1 tasks" when there is only one.
+     *
+     * @param totalCount how many tasks the list holds.
+     * @return the task-count line.
+     */
+    private static String formatTaskCount(int totalCount) {
+        String noun = (totalCount == 1) ? "task" : "tasks";
+        return String.format("Your canvas now holds %d %s.", totalCount, noun);
+    }
+
+    /**
      * Discards any recorded text, so that the messages shown from now on form
      * a fresh reply.
      */
@@ -184,8 +199,8 @@ public class Ui {
      */
     public void showGreeting() {
         String greeting = """
-                Hello! I'm Myriad.
-                What can I do for you?""";
+                Hello! I'm Myriad, your task painter.
+                What shall we paint on today's canvas?""";
         emitWithBanner(BANNER, greeting);
     }
 
@@ -193,7 +208,7 @@ public class Ui {
      * Shows a farewell message.
      */
     public void showFarewell() {
-        emit("Bye. Hope to see you again soon!");
+        emit("Putting the brushes away. Come paint again soon!");
     }
 
     /**
@@ -204,9 +219,9 @@ public class Ui {
      * @param totalCount how many tasks the list now holds.
      */
     public void showAddedTask(Task task, int totalCount) {
-        emit("Got it. I've added this task:",
+        emit("A fresh stroke on the canvas:",
                 task.toString(),
-                String.format("Now you have %d tasks in the list.", totalCount));
+                formatTaskCount(totalCount));
     }
 
     /**
@@ -215,7 +230,7 @@ public class Ui {
      * @param tasks the tasks to show, in task-number order.
      */
     public void showList(List<Task> tasks) {
-        emit("Here are the tasks in your list:" + formatNumberedTasks(tasks));
+        emit("Here's your canvas so far:" + formatNumberedTasks(tasks));
     }
 
     /**
@@ -228,9 +243,9 @@ public class Ui {
      */
     public void showTasksOn(List<Task> matches, TaskDateTime query) {
         if (matches.isEmpty()) {
-            emit(String.format("No deadlines or events found on %s.", query));
+            emit(String.format("Nothing is painted on %s yet.", query));
         } else {
-            emit(String.format("Here are the tasks occurring on %s:", query) + formatNumberedTasks(matches));
+            emit(String.format("Painted on %s:", query) + formatNumberedTasks(matches));
         }
     }
 
@@ -244,9 +259,9 @@ public class Ui {
      */
     public void showMatchingTasks(List<Task> matches, String keyword) {
         if (matches.isEmpty()) {
-            emit(String.format("No matching tasks found for \"%s\".", keyword));
+            emit(String.format("No strokes match \"%s\".", keyword));
         } else {
-            emit("Here are the matching tasks in your list:" + formatNumberedTasks(matches));
+            emit("Strokes matching your search:" + formatNumberedTasks(matches));
         }
     }
 
@@ -256,7 +271,7 @@ public class Ui {
      * @param task the task in its new, done state.
      */
     public void showMarked(Task task) {
-        emit("Nice! I've marked this task as done:", "  " + task);
+        emit("Beautiful! That one's painted in:", "  " + task);
     }
 
     /**
@@ -265,7 +280,7 @@ public class Ui {
      * @param task the task in its new, not-done state.
      */
     public void showUnmarked(Task task) {
-        emit("OK, I've marked this task as not done yet:", "  " + task);
+        emit("Back to a sketch. Marked as not done:", "  " + task);
     }
 
     /**
@@ -276,9 +291,9 @@ public class Ui {
      * @param totalCount how many tasks the list now holds.
      */
     public void showDeleted(Task task, int totalCount) {
-        emit("Noted. I've removed this task:",
+        emit("Painted over. I've removed this task:",
                 "  " + task,
-                String.format("Now you have %d tasks in the list.", totalCount));
+                formatTaskCount(totalCount));
     }
 
     /**
@@ -291,7 +306,7 @@ public class Ui {
      */
     public void showStats(TaskStats stats) {
         String dueSoonHeader = String.format("Due in the next %d days:", stats.dueSoonDays());
-        emit("Here are your task statistics:",
+        emit("Stepping back to admire your canvas:",
                 String.format("Total tasks: %d (ToDo: %d, Deadline: %d, Event: %d)",
                         stats.getTotalCount(), stats.toDos().size(),
                         stats.deadlines().size(), stats.events().size()),

@@ -42,7 +42,7 @@ public class ListCommandTest {
         tasks.add(new ToDo("join club"));
         tasks.markDone(1);
 
-        assertEquals("Here are the tasks in your list:" + NEWLINE
+        assertEquals("Here's your canvas so far:" + NEWLINE
                 + "1.[T][ ] read book" + NEWLINE
                 + "2.[T][X] join club",
                 listAndGetReply(tasks));
@@ -52,7 +52,7 @@ public class ListCommandTest {
     public void execute_emptyList_headerOnly() {
         // Known limitation: an empty list gets the same header as a full one,
         // with nothing under it, rather than a message saying it is empty.
-        assertEquals("Here are the tasks in your list:", listAndGetReply(new TaskList()));
+        assertEquals("Here's your canvas so far:", listAndGetReply(new TaskList()));
     }
 
     @Test

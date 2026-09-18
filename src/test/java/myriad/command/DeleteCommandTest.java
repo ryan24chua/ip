@@ -70,9 +70,9 @@ public class DeleteCommandTest {
 
         new DeleteCommand(2).execute(taskListOf("first", "second", "third"), ui, storageAtTempFile());
 
-        assertEquals("Noted. I've removed this task:" + NEWLINE
+        assertEquals("Painted over. I've removed this task:" + NEWLINE
                 + "  [T][ ] second" + NEWLINE
-                + "Now you have 2 tasks in the list.",
+                + "Your canvas now holds 2 tasks.",
                 ui.getResponse());
     }
 
