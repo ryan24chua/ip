@@ -15,7 +15,9 @@ import myriad.task.TaskStats;
  * user-facing interaction.
  *
  * Every message is worded in Myriad's personality, a task painter who treats
- * the task list as a canvas and each task as a stroke on it.
+ * the task list as a canvas and each task as a stroke on it. An error keeps
+ * the plain reason written where it was detected, and only gains a painter's
+ * exclamation in front, so that it still says exactly what went wrong.
  *
  * Each message is recorded into a buffer as well as (optionally) printed,
  * so the same {@code Ui} serves both front ends: the console session prints
@@ -25,6 +27,10 @@ import myriad.task.TaskStats;
 public class Ui {
     /** Rule printed above and below each console message to frame it. */
     private static final String DIVIDER = "____________________________________________________________";
+
+    /** Painter's exclamation shown in front of every error's reason. */
+    private static final String ERROR_PREFIX = "Smudge! ";
+
     private static final String BANNER = "███╗   ███╗██╗   ██╗██████╗ ██╗ █████╗ ██████╗ \n"
             + "████╗ ████║╚██╗ ██╔╝██╔══██╗██║██╔══██╗██╔══██╗\n"
             + "██╔████╔██║ ╚████╔╝ ██████╔╝██║███████║██║  ██║\n"
@@ -319,12 +325,13 @@ public class Ui {
     }
 
     /**
-     * Shows a single-line error/status message.
+     * Shows why a command failed, after Myriad's error exclamation. The
+     * reason is left plain, since it has to say exactly what went wrong.
      *
-     * @param message the message to show, prefix included.
+     * @param reason why the command failed, without any prefix.
      */
-    public void showError(String message) {
-        emit(message);
+    public void showError(String reason) {
+        emit(ERROR_PREFIX + reason);
     }
 
     /**

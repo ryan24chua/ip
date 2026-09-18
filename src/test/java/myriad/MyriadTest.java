@@ -167,14 +167,14 @@ public class MyriadTest {
         // A GUI has nowhere to catch a MyriadException, so getResponse must
         // turn it into text the same way the console loop does.
         String response = sessionAtTempFile().getResponse("blah");
-        assertEquals("Error: I don't recognize that command. Try: todo, deadline, event, list, "
+        assertEquals("Smudge! I don't recognize that command. Try: todo, deadline, event, list, "
                 + "mark, unmark, delete, show, find, stats, or bye.", response);
     }
 
     @Test
     public void getResponse_deleteFromEmptyList_errorReturned() {
         // Failures raised while executing, not parsing, take the same path.
-        assertTrue(sessionAtTempFile().getResponse("delete 1").startsWith("Error: "));
+        assertTrue(sessionAtTempFile().getResponse("delete 1").startsWith("Smudge! "));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class MyriadTest {
     public void getResponse_blankInput_errorReturned() {
         // The GUI filters blank lines before calling, but the seam itself
         // still has to answer rather than throw.
-        assertTrue(sessionAtTempFile().getResponse("   ").startsWith("Error: "));
+        assertTrue(sessionAtTempFile().getResponse("   ").startsWith("Smudge! "));
     }
 
     @Test
@@ -298,7 +298,7 @@ public class MyriadTest {
 
         int greeting = printed.indexOf("Hello! I'm Myriad, your task painter.");
         int added = printed.indexOf("A fresh stroke on the canvas:");
-        int error = printed.indexOf("Error: I don't recognize that command.");
+        int error = printed.indexOf("Smudge! I don't recognize that command.");
         int farewell = printed.indexOf("Putting the brushes away. Come paint again soon!");
         assertTrue(greeting >= 0 && greeting < added && added < error && error < farewell, printed);
     }

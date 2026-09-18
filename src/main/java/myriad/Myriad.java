@@ -218,8 +218,8 @@ public class Myriad {
      *
      * Both parsing and executing throw {@link MyriadException} instead of
      * showing an error themselves, so this is the single place that catches
-     * it and shows it, with the {@code "Error: "} prefix added here rather
-     * than repeated in every message. Save failures arrive as
+     * it and shows it; {@link Ui#showError} adds the error exclamation rather
+     * than every message repeating it. Save failures arrive as
      * {@code MyriadException} too, so they are reported like any other
      * command error instead of crashing the program.
      *
@@ -233,7 +233,7 @@ public class Myriad {
             command.execute(tasks, ui, storage);
             return command.isExit();
         } catch (MyriadException e) {
-            ui.showError("Error: " + e.getMessage());
+            ui.showError(e.getMessage());
             isLastResponseError = true;
             return false;
         }

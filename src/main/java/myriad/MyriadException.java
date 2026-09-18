@@ -5,9 +5,9 @@ package myriad;
  * task — either typed by the user (e.g. a missing task number, or a
  * missing task description/date), or read back from the saved data file
  * (e.g. a corrupted or unrecognized line). The message is the specific
- * reason only: callers displaying it to the user add the {@code "Error: "}
- * prefix themselves, so the same message also reads correctly anywhere
- * else it is used, such as a test assertion.
+ * reason only: {@code Ui.showError} adds Myriad's error exclamation when
+ * the message is shown to the user, so the same message also reads
+ * correctly anywhere else it is used, such as a test assertion.
  */
 public class MyriadException extends Exception {
     /**
@@ -21,7 +21,7 @@ public class MyriadException extends Exception {
     /**
      * Creates an exception carrying the specific reason something failed.
      *
-     * @param message the reason alone, without an {@code "Error: "} prefix.
+     * @param message the reason alone, without any error prefix.
      */
     public MyriadException(String message) {
         super(message);

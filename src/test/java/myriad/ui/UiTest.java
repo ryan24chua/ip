@@ -79,26 +79,26 @@ public class UiTest {
         // A command that shows two things in a row must read as one reply,
         // not as two run together.
         Ui ui = guiUi();
-        ui.showError("Error: first");
-        ui.showError("Error: second");
-        assertEquals("Error: first" + NEWLINE + "Error: second", ui.getResponse());
+        ui.showError("first");
+        ui.showError("second");
+        assertEquals("Smudge! first" + NEWLINE + "Smudge! second", ui.getResponse());
     }
 
     @Test
     public void getResponse_afterStartResponse_earlierMessagesDiscarded() {
         // Without this the GUI would repeat every earlier reply in every bubble.
         Ui ui = guiUi();
-        ui.showError("Error: stale");
+        ui.showError("stale");
         ui.startResponse();
-        ui.showError("Error: fresh");
-        assertEquals("Error: fresh", ui.getResponse());
+        ui.showError("fresh");
+        assertEquals("Smudge! fresh", ui.getResponse());
     }
 
     @Test
     public void getResponse_calledTwice_replyNotConsumed() {
         // Reading the reply must not clear it; only startResponse does that.
         Ui ui = guiUi();
-        ui.showError("Error: kept");
+        ui.showError("kept");
         assertEquals(ui.getResponse(), ui.getResponse());
     }
 
@@ -198,14 +198,14 @@ public class UiTest {
     public void showError_echoingToConsole_framedByDividers() {
         // The scripted transcript checker asserts on these dividers, so the
         // framing has to survive any change to how messages are recorded.
-        String printed = capturePrinted(() -> new Ui(true).showError("Error: boom"));
-        assertEquals(DIVIDER + CONSOLE_NEWLINE + "Error: boom" + CONSOLE_NEWLINE + DIVIDER + CONSOLE_NEWLINE,
+        String printed = capturePrinted(() -> new Ui(true).showError("boom"));
+        assertEquals(DIVIDER + CONSOLE_NEWLINE + "Smudge! boom" + CONSOLE_NEWLINE + DIVIDER + CONSOLE_NEWLINE,
                 printed);
     }
 
     @Test
     public void showError_notEchoingToConsole_nothingPrinted() {
-        String printed = capturePrinted(() -> guiUi().showError("Error: boom"));
+        String printed = capturePrinted(() -> guiUi().showError("boom"));
         assertEquals("", printed);
     }
 
