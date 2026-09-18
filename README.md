@@ -3,6 +3,10 @@
 Myriad is a chatbot that keeps track of your to-dos, deadlines and events. It runs as a JavaFX chat window,
 and also has a text-only console mode. Tasks are saved to disk after every change.
 
+Myriad has the personality of a *task painter*: it treats your task list as a canvas and each task as a stroke of
+paint, and its GUI takes its colours from the four paints of its hand-painted avatar. Its replies are worded in
+`Ui`, and its colours are set in the CSS files under `src/main/resources/css/`.
+
 **Using Myriad?** See the [User Guide](https://ryan24chua.github.io/ip/) for every command, with examples.
 This README is for developers: how to build, run and test the project, and how the code is organised.
 

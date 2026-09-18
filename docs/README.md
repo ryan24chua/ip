@@ -3,6 +3,8 @@
 **Myriad** is a chatbot that keeps track of your tasks. You type short commands into a chat window, and Myriad
 remembers your to-dos, deadlines and events for you, even after you close it.
 
+Myriad is a *task painter*. Your task list is its canvas, and every task you add is a fresh stroke of paint on it.
+
 If you can type quickly, Myriad lets you add and find tasks faster than clicking through a to-do app.
 
 - [Quick start](#quick-start)
@@ -33,8 +35,8 @@ If you can type quickly, Myriad lets you add and find tasks faster than clicking
    ```
    java -jar myriad.jar
    ```
-   A chat window opens and Myriad greets you.
-5. Type a command in the box at the bottom and press **Enter** (or click **Send**). Try these:
+   A chat window opens and Myriad greets you, ready to paint.
+5. Type a command in the box at the bottom and press **Enter** (or click **Paint**). Try these:
    - `todo read book` adds a to-do.
    - `list` shows all your tasks.
    - `mark 1` marks the first task as done.
@@ -84,9 +86,9 @@ Format: `todo DESCRIPTION`
 Example: `todo read book`
 
 ```
-Got it. I've added this task:
+A fresh stroke on the canvas:
 [T][ ] read book
-Now you have 1 tasks in the list.
+Your canvas now holds 1 task.
 ```
 
 ### Adding a deadline: `deadline`
@@ -98,9 +100,9 @@ Format: `deadline DESCRIPTION /by DATE`
 Example: `deadline return book /by 2019-12-02`
 
 ```
-Got it. I've added this task:
+A fresh stroke on the canvas:
 [D][ ] return book (by: Dec 02 2019)
-Now you have 2 tasks in the list.
+Your canvas now holds 2 tasks.
 ```
 
 ### Adding an event: `event`
@@ -114,9 +116,9 @@ Format: `event DESCRIPTION /from DATE /to DATE`
 Example: `event project meeting /from 2019-12-02 1400 /to 2019-12-02 1600`
 
 ```
-Got it. I've added this task:
+A fresh stroke on the canvas:
 [E][ ] project meeting (from: Dec 02 2019 1400 to: Dec 02 2019 1600)
-Now you have 3 tasks in the list.
+Your canvas now holds 3 tasks.
 ```
 
 ### Listing all tasks: `list`
@@ -126,7 +128,7 @@ Shows every task, numbered.
 Format: `list`
 
 ```
-Here are the tasks in your list:
+Here's your canvas so far:
 1.[T][ ] read book
 2.[D][ ] return book (by: Dec 02 2019)
 3.[E][ ] project meeting (from: Dec 02 2019 1400 to: Dec 02 2019 1600)
@@ -141,14 +143,14 @@ Format: `mark TASK_NUMBER`, `unmark TASK_NUMBER`
 Example: `mark 1`
 
 ```
-Nice! I've marked this task as done:
+Beautiful! That one's painted in:
   [T][X] read book
 ```
 
 Example: `unmark 1`
 
 ```
-OK, I've marked this task as not done yet:
+Back to a sketch. Marked as not done:
   [T][ ] read book
 ```
 
@@ -161,9 +163,9 @@ Format: `delete TASK_NUMBER`
 Example: `delete 1`
 
 ```
-Noted. I've removed this task:
+Painted over. I've removed this task:
   [T][ ] read book
-Now you have 2 tasks in the list.
+Your canvas now holds 2 tasks.
 ```
 
 ### Finding tasks by keyword: `find`
@@ -179,7 +181,7 @@ Format: `find KEYWORD`
 Example: `find book`
 
 ```
-Here are the matching tasks in your list:
+Strokes matching your search:
 1.[D][ ] return book (by: Dec 02 2019)
 ```
 
@@ -197,7 +199,7 @@ Format: `show DATE`
 Example: `show 2019-12-02`
 
 ```
-Here are the tasks occurring on Dec 02 2019:
+Painted on Dec 02 2019:
 1.[D][ ] return book (by: Dec 02 2019)
 2.[E][ ] project meeting (from: Dec 02 2019 1400 to: Dec 02 2019 1600)
 ```
@@ -213,7 +215,7 @@ Gives a quick overview of your tasks:
 Format: `stats`
 
 ```
-Here are your task statistics:
+Stepping back to admire your canvas:
 Total tasks: 2 (ToDo: 0, Deadline: 1, Event: 1)
 Due in the next 7 days: none
 Oldest not done:
@@ -233,7 +235,7 @@ Says goodbye and closes Myriad.
 Format: `bye`
 
 ```
-Bye. Hope to see you again soon!
+Putting the brushes away. Come paint again soon!
 ```
 
 ### Saving your data
@@ -252,9 +254,10 @@ Tasks are saved in `data/myriad.txt`, inside the folder you ran Myriad from.
 **Q: How do I move my tasks to another computer?**<br>
 A: Copy the `data` folder next to `myriad.jar` on the other computer.
 
-**Q: Myriad says it doesn't recognize my command. What went wrong?**<br>
-A: Check the spelling of the command word and that `list`, `stats` and `bye` have nothing after them.
-The message lists every command Myriad knows.
+**Q: Myriad says "Smudge!". What went wrong?**<br>
+A: "Smudge!" means Myriad could not carry out your command, and the rest of the message says why.
+If it says it doesn't recognize the command, check the spelling of the command word and that `list`, `stats` and
+`bye` have nothing after them. That message lists every command Myriad knows.
 
 ---
 
