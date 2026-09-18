@@ -7,6 +7,8 @@ Myriad is a *task painter*. Your task list is its canvas, and every task you add
 
 If you can type quickly, Myriad lets you add and find tasks faster than clicking through a to-do app.
 
+![Myriad chat window, showing a painted list of to-dos, deadlines and events](Ui.png)
+
 - [Quick start](#quick-start)
 - [Features](#features)
   - [Adding a to-do: `todo`](#adding-a-to-do-todo)
