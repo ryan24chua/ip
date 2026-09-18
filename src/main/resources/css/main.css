@@ -15,6 +15,9 @@
  */
 .root {
     paint-blue: #24afeb;
+    paint-yellow: #fff42c;
+    paint-green: #3ebb63;
+    paint-red: #f1545a;
     paint-blue-deep: #1a7fbf;
     paint-green-deep: #2a8f4c;
     paint-red-deep: #c93c43;
@@ -24,6 +27,36 @@
 
     -fx-background-color: canvas-ground;
     -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* The header is the name plate above the canvas. */
+.header {
+    -fx-background-color: white;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b2622;
+}
+
+.header-tagline {
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #7a6f5f;
+}
+
+/*
+ * Four bands of paint, one per colour of the avatar's M, in the order they
+ * are painted. Each colour stop is repeated so that the bands meet in a hard
+ * edge instead of blending into one another.
+ */
+.paint-stripe {
+    -fx-background-color: linear-gradient(to right,
+            paint-blue 0%, paint-blue 25%,
+            paint-yellow 25%, paint-yellow 50%,
+            paint-green 50%, paint-green 75%,
+            paint-red 75%, paint-red 100%);
 }
 
 /* A thin rule separates the input row from the transcript scrolling above it. */
